@@ -34,5 +34,6 @@ data/dumps/*
 !data/dumps/.gitkeep
 data/ops/*.flag
 !data/ops/.gitkeep
+!data/ops/G6_fill_calibrated.flag
 configs/.env.pmdata
 configs/generated/LIVE_READY.yaml
