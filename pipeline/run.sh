@@ -19,6 +19,7 @@ for f in \
   scripts/t6_daily_06dc.py \
   scripts/phase1_06dc_maker.py \
   scripts/size_gate.py \
+  scripts/replay_mobo.py \
   pipeline/patches/BID_BUCKET.md
 do
   if [ ! -f "$f" ]; then

@@ -1,7 +1,9 @@
-# Scaffold only. No live. No --run.
+# Validated on THEIR tape (replay_mobo.py). Not paper intends. No live.
 name: mobo
 live: false
-clip: 21
-pair_max: 0.96
+maker_only: true
+clip: 10
+pair_max: 0.90
 pair_max_cap: 0.97
-notes: GATE PASS. BID_BUCKET.md applied on 5m paper (measure-only). Do not bump clip. Do not add R7.
+tfs: [5m, 15m]
+notes: pair_max=0.90 maker_only clip=10. PASS if cover≥80% of their pair<0.90 two-leg 5m/15m. Do not treat paper_maker rest as PnL. Do not bump 5m/06dc clip.
