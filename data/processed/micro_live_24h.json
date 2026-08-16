@@ -1,12 +1,12 @@
 {
-  "generated": "2026-08-16 19:59 UTC",
+  "generated": "2026-08-16 20:03 UTC",
   "universe": "btc 5m only",
   "clip": 5.0,
   "auth_reason": "l2_ready",
   "sent": false,
   "n_rest_intent": 0,
   "still250_rate": null,
-  "still250_rate_paper_all_books": 0.7662921348314606,
+  "still250_rate_paper_all_books": 0.7670940170940171,
   "still250_logging_on_paper_maker": true,
   "real_fill_rate": null,
   "n_partial": 0,
@@ -15,11 +15,11 @@
   "hit_max_daily_loss": false,
   "pair_gt_1_trade": 0,
   "paper": {
-    "paper_rows_24h": 24517,
+    "paper_rows_24h": 25161,
     "n_rest_intent_btc5_paper": 0,
-    "n_rest_intent_paper_all_books": 1083,
+    "n_rest_intent_paper_all_books": 1106,
     "still250_rate_btc5_paper": null,
-    "still250_rate_paper_all_books": 0.7662921348314606,
+    "still250_rate_paper_all_books": 0.7670940170940171,
     "still250_field_on_all_paper_rests": true,
     "pair_gt_1_trade_paper": 0,
     "paper_real_fill_nonnull": 0
@@ -34,7 +34,13 @@
     "n_pair_gt_1_trade": 0,
     "net_pnl_usd": null
   },
-  "note": "real_fill_rate is null until an order is sent. Do not invent real_fill. micro trial \u2260 full live. No size bump.",
-  "sender_running": true,
-  "signature_type": 3
+  "signal_health": {
+    "verdict": "OK_rich_skips_only",
+    "live_cheap_intent": 0,
+    "live_order_id": 0,
+    "paper_btc5_rest": 0,
+    "hours_up": null,
+    "note": "long time + only rich/missing skips is not a fault. Hole seen and not posted is the fault."
+  },
+  "note": "real_fill_rate is null until an order is sent. Do not invent real_fill. micro trial \u2260 full live. No size bump."
 }

@@ -20,6 +20,34 @@ PROC = ROOT / "data" / "processed" / "micro_live_24h.json"
 
 TAKER_FEE_K = 0.07
 PAIR_MAX = 0.90
+SKIP_OK = {"rich_bid_sum", "missing_bid", "thin_bid", "hold", "gamma_error", "clob_error"}
+
+
+def signal_health(
+    *,
+    live_cheap_intent: int,
+    live_order_id: int,
+    paper_btc5_rest: int,
+    hours_up: float | None = None,
+) -> dict[str, Any]:
+    """Judge by signal, not clock. Silence + only rich skips is OK."""
+    if live_cheap_intent > 0 and live_order_id == 0:
+        verdict = "ALARM_intent_no_order_id"
+        note = "cheap intent logged + no order_id. Auth/API problem. Do not wait."
+    elif paper_btc5_rest >= 5 and live_cheap_intent == 0 and (hours_up or 0) >= 12:
+        verdict = "WATCH_paper_rest_live_zero_intent"
+        note = "paper BTC 5m rested a lot; live has zero cheap intent for many hours."
+    else:
+        verdict = "OK_rich_skips_only"
+        note = "long time + only rich/missing skips is not a fault. Hole seen and not posted is the fault."
+    return {
+        "verdict": verdict,
+        "live_cheap_intent": int(live_cheap_intent),
+        "live_order_id": int(live_order_id),
+        "paper_btc5_rest": int(paper_btc5_rest),
+        "hours_up": hours_up,
+        "note": note,
+    }
 
 
 def _parse_ts(value: Any) -> datetime | None:
@@ -192,6 +220,12 @@ def build_24h(
     if not sent:
         real_rate = None
     pnl = micro["net_pnl_usd"] if sent else None
+    health = signal_health(
+        live_cheap_intent=int(micro["n_rest_intent_micro"] or 0),
+        live_order_id=int(micro["n_real_orders"] or 0),
+        paper_btc5_rest=int(paper["n_rest_intent_btc5_paper"] or 0),
+        hours_up=None,
+    )
     return {
         "generated": now.strftime("%Y-%m-%d %H:%M UTC"),
         "universe": "btc 5m only",
@@ -210,6 +244,7 @@ def build_24h(
         "pair_gt_1_trade": pair_gt1,
         "paper": paper,
         "micro": micro,
+        "signal_health": health,
         "note": (
             "real_fill_rate is null until an order is sent. "
             "Do not invent real_fill. micro trial ≠ full live. No size bump."
@@ -247,11 +282,13 @@ def render_24h_md(payload: dict[str, Any]) -> str:
         f"| any pair>1 trade? | {fmt(payload.get('pair_gt_1_trade'))} |",
         f"| AUTH | {fmt(payload.get('auth_reason'))} |",
         f"| sent | {fmt(payload.get('sent'))} |",
+        f"| signal_health | {fmt((payload.get('signal_health') or {}).get('verdict'))} |",
         f"| clip | {fmt(payload.get('clip'))} |",
         "",
         f"- paper_maker still250 logging (all books, diagnostic): {fmt(payload.get('still250_logging_on_paper_maker'))}",
         f"- paper_maker still250_rate all books (not BTC-5m trial): {fmt(payload.get('still250_rate_paper_all_books'))}",
         "- BTC 5m still250_rate is null when n_rest_intent=0 (book has been rich).",
+        "- Judge by signal, not clock: 2–6h with only rich skips is OK. Alarm = cheap intent + no order_id.",
         "- real_fill is null unless an order_id was returned. Not invented.",
         "- micro trial ≠ full live; next step only if real_fill>0 and loss cap OK",
         "",
