@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Paper loop: log intended BUY FOKs on live 5m up/down CLOB books. No orders."""
+"""Paper loop: log intended BUY FOKs on live up/down CLOB books. No orders."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from whiskas.config import load_config, product_from_config
-from whiskas.paper import PAPER_ASSETS, load_jsonl, run_paper, summarize_paper
+from whiskas.paper import PAPER_ASSETS, PAPER_TFS, load_jsonl, run_paper, summarize_paper
 
 DEFAULT_OUT = ROOT / "data" / "paper" / "intended.jsonl"
 DEFAULT_SUMMARY = ROOT / "data" / "paper" / "overnight_summary.json"
@@ -31,41 +31,35 @@ def _parse_since(text: str | None) -> datetime | None:
     return dt.astimezone(timezone.utc)
 
 
-def write_paper_report(stats: dict, path: Path) -> None:
-    assets = stats.get("assets") or {}
+def write_paper_report(stats: dict, path: Path) -> str:
     lines = [
-        "# PHASE3 paper multi-asset",
+        "# PHASE3 paper (frozen)",
         "",
-        "Replay was not touched. Clip stays 21. No live orders. PR not merged.",
+        "Measure-only. No live. No maker. No pair>1. Clip 21. Repeat max 8. 4h = poll only.",
+        "Buckets are separate counters. Do not trade ask_sum>0.96.",
         "",
-        "| asset | polls | A_hits | A2_hits | repeat_hits | depth≥21 | still@250ms | max clips |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| asset | tf | bucket | polls | A_hits | A2_hits | repeat_hits | depth_ok | still250 |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
-    for asset in ("btc", "eth", "sol", "xrp"):
-        row = assets.get(asset) or {}
+    for row in stats.get("table") or []:
         lines.append(
-            f"| {asset} | {row.get('n_poll', 0)} | {row.get('n_a_hits', 0)} | "
-            f"{row.get('n_a2_hits', 0)} | {row.get('n_repeat_hits', 0)} | "
-            f"{row.get('n_le_096_depth_ge_clip', 0)} | {row.get('n_still_there_250ms', 0)} | "
-            f"{row.get('max_clips_on_hit', 0)} |"
+            f"| {row['asset']} | {row['tf']} | {row['bucket']} | {row['polls']} | "
+            f"{row['A_hits']} | {row['A2_hits']} | {row['repeat_hits']} | "
+            f"{row['depth_ok']} | {row['still250']} |"
         )
-    lines.append(
-        f"| **all** | {stats['n_poll']} | {stats.get('n_a_hits', 0)} | "
-        f"{stats.get('n_a2_hits', 0)} | {stats.get('n_repeat_hits', 0)} | "
-        f"{stats['n_le_096_depth_ge_clip']} | {stats.get('n_still_there_250ms', 0)} | "
-        f"{stats.get('max_clips_on_hit', 0)} |"
-    )
     lines.extend(
         [
             "",
-            f"Window: {stats['first_ts']} → {stats['last_ts']}",
+            f"Window: {stats.get('first_ts')} → {stats.get('last_ts')}",
             "",
-            f"{stats['note']}",
+            f"{stats.get('note', '')}",
             "",
         ]
     )
+    text = "\n".join(lines)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines), encoding="utf-8")
+    path.write_text(text, encoding="utf-8")
+    return text
 
 
 def main() -> int:
@@ -80,6 +74,7 @@ def main() -> int:
     parser.add_argument("--interval", type=float, default=5.0, help="seconds between poll cycles")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--assets", type=str, default=",".join(PAPER_ASSETS), help="comma list")
+    parser.add_argument("--tfs", type=str, default=",".join(PAPER_TFS), help="comma list: 5m,15m,4h")
     parser.add_argument("--summary", action="store_true", help="count intended.jsonl; do not poll")
     parser.add_argument("--since", type=str, default=None, help="ISO UTC; only count rows at/after this ts")
     parser.add_argument("--since-file", type=Path, default=None, help="file whose first line is --since")
@@ -88,6 +83,7 @@ def main() -> int:
     args = parser.parse_args()
     cfg = product_from_config(load_config(ROOT / "configs" / "whiskas.yaml"))
     assets = tuple(a.strip().lower() for a in args.assets.split(",") if a.strip())
+    tfs = tuple(t.strip().lower() for t in args.tfs.split(",") if t.strip())
     since = _parse_since(args.since)
     if args.since_file and args.since_file.is_file():
         since = _parse_since(args.since_file.read_text(encoding="utf-8").splitlines()[0])
@@ -98,10 +94,12 @@ def main() -> int:
             pair_max=cfg["pair_max"],
             clip=cfg["clip"],
             assets=assets,
+            tfs=tfs,
         )
         args.summary_out.parent.mkdir(parents=True, exist_ok=True)
         args.summary_out.write_text(json.dumps(stats, indent=2) + "\n", encoding="utf-8")
-        write_paper_report(stats, args.report)
+        report = write_paper_report(stats, args.report)
+        print(report)
         print(json.dumps(stats, indent=2))
         return 0
     once = bool(args.once)
@@ -116,12 +114,14 @@ def main() -> int:
         collect=not quiet,
         heartbeat_every=12 if quiet else 0,
         assets=assets,
+        tfs=tfs,
     )
     if not quiet:
         for rec in rows:
             print(json.dumps({
                 "ts": rec.get("ts"),
                 "asset": rec.get("asset"),
+                "tf": rec.get("tf"),
                 "slug": rec.get("slug"),
                 "ask_up": rec.get("ask_up"),
                 "ask_down": rec.get("ask_down"),
@@ -136,7 +136,7 @@ def main() -> int:
                 "still_there_250ms": rec.get("still_there_250ms"),
                 "live_order": rec.get("live_order"),
             }))
-    print(f"appended to {args.out} assets={','.join(assets)} (GET only, no orders)", flush=True)
+    print(f"appended to {args.out} assets={','.join(assets)} tfs={','.join(tfs)} (GET only, no orders)", flush=True)
     return 0
 
 

@@ -13,16 +13,43 @@ from whiskas.http import get_json
 from whiskas.policy import BookInventory, PolicyDecision, decide_a, decide_a2, decide_repeat
 
 PAPER_ASSETS = ("btc", "eth", "sol", "xrp")
+PAPER_TFS = ("5m", "15m", "4h")
+PAPER_BUCKETS = (0.90, 0.96)
+TF_SECONDS = {"5m": 300, "15m": 900, "4h": 14400}
 CONFIRM_DELAY_SEC = 0.25
 
 
-def current_t0(now: float | None = None) -> int:
+def normalize_tf(tf: str | None) -> str:
+    key = str(tf or "5m").strip().lower()
+    return key if key in TF_SECONDS else "5m"
+
+
+def is_poll_only_tf(tf: str | None) -> bool:
+    """4h is measure-only: poll the book, never A/A2/repeat."""
+    return normalize_tf(tf) == "4h"
+
+
+def current_t0(now: float | None = None, tf: str = "5m") -> int:
     ts = time.time() if now is None else float(now)
-    return int(ts // WINDOW_SECONDS) * WINDOW_SECONDS
+    sec = TF_SECONDS.get(normalize_tf(tf), WINDOW_SECONDS)
+    return int(ts // sec) * sec
 
 
-def asset_window_slug(asset: str, t0: int) -> str:
-    return f"{str(asset).strip().lower()}-updown-5m-{int(t0)}"
+def asset_window_slug(asset: str, t0: int, tf: str = "5m") -> str:
+    return f"{str(asset).strip().lower()}-updown-{normalize_tf(tf)}-{int(t0)}"
+
+
+def book_key(asset: str, tf: str = "5m") -> str:
+    return f"{str(asset).strip().lower()}:{normalize_tf(tf)}"
+
+
+def _set_buckets(rec: dict[str, Any]) -> None:
+    try:
+        s = float(rec["ask_sum"]) if rec.get("ask_sum") is not None else None
+    except (TypeError, ValueError):
+        s = None
+    rec["bucket_le_090"] = s is not None and s <= 0.90 + 1e-12
+    rec["bucket_le_096"] = s is not None and s <= 0.96 + 1e-12
 
 
 def _as_list(payload: Any) -> list[Any]:
@@ -184,25 +211,31 @@ def snapshot_window(
     tokens: dict[str, str] | None = None,
     books: dict[str, dict[str, Any]] | None = None,
     asset: str = "btc",
+    tf: str = "5m",
     inventory: BookInventory | None = None,
     filled_this_window: bool = False,
     clips_this_window: int = 0,
     max_clips: int = REPEAT_CLIP_MAX,
+    poll_only: bool | None = None,
 ) -> dict[str, Any]:
-    t0 = current_t0(now)
+    tf_key = normalize_tf(tf)
+    measure_only = is_poll_only_tf(tf_key) if poll_only is None else bool(poll_only)
+    t0 = current_t0(now, tf=tf_key)
     asset_key = str(asset).strip().lower()
-    slug = asset_window_slug(asset_key, t0)
+    slug = asset_window_slug(asset_key, t0, tf_key)
     ts = datetime.now(timezone.utc).isoformat()
     rec: dict[str, Any] = {
         "ts": ts,
         "t0": t0,
         "asset": asset_key,
+        "tf": tf_key,
         "slug": slug,
-        "market": f"{asset_key}-updown-5m",
+        "market": f"{asset_key}-updown-{tf_key}",
         "clip": float(clip),
         "pair_max": float(pair_max),
         "live_order": False,
         "maker_bid": False,
+        "poll_only": measure_only,
         "still_there_250ms": None,
         "a_intend": False,
         "a2_intend": False,
@@ -210,24 +243,20 @@ def snapshot_window(
         "clips_this_window": int(clips_this_window),
         "held_leg": None,
         "held_qty": 0.0,
+        "bucket_le_090": False,
+        "bucket_le_096": False,
     }
     try:
         tok = tokens if tokens is not None else discover_tokens(slug)
     except Exception as exc:
         rec["error"] = f"gamma:{exc}"
         rec["intend"] = False
-        rec["a_intend"] = False
-        rec["a2_intend"] = False
-        rec["repeat_intend"] = False
         rec["reason"] = "gamma_error"
         rec["orders"] = []
         return rec
     if "Up" not in tok or "Down" not in tok:
         rec["error"] = "missing_tokens"
         rec["intend"] = False
-        rec["a_intend"] = False
-        rec["a2_intend"] = False
-        rec["repeat_intend"] = False
         rec["reason"] = "missing_tokens"
         rec["orders"] = []
         return rec
@@ -243,9 +272,6 @@ def snapshot_window(
     except Exception as exc:
         rec["error"] = f"clob:{exc}"
         rec["intend"] = False
-        rec["a_intend"] = False
-        rec["a2_intend"] = False
-        rec["repeat_intend"] = False
         rec["reason"] = "clob_error"
         rec["orders"] = []
         return rec
@@ -266,6 +292,26 @@ def snapshot_window(
     rec["held_qty"] = inv.residual_qty()
     rec["avg_up"] = inv.avg("Up")
     rec["avg_down"] = inv.avg("Down")
+    if measure_only:
+        rec["ask_sum"] = (
+            float(ask_up) + float(ask_down) if ask_up is not None and ask_down is not None else None
+        )
+        _set_buckets(rec)
+        rec["intend"] = False
+        rec["a_intend"] = False
+        rec["a2_intend"] = False
+        rec["repeat_intend"] = False
+        rec["reason"] = "poll_only"
+        rec["a_reason"] = "poll_only"
+        rec["a2_reason"] = "poll_only"
+        rec["repeat_reason"] = "poll_only"
+        rec["a_orders"] = []
+        rec["a2_orders"] = []
+        rec["repeat_orders"] = []
+        rec["orders"] = []
+        rec["filled_this_window"] = bool(filled_this_window)
+        rec["clips_this_window"] = int(clips_this_window)
+        return rec
     a = decide_a(ask_up, ask_down, depth_up, depth_down, pair_max=pair_max, pair_max_cap=pair_max_cap, clip=clip)
     if filled_this_window and a.intend:
         a = PolicyDecision(False, "a_already_filled", a.ask_up, a.ask_down, a.ask_sum, a.clip)
@@ -280,6 +326,7 @@ def snapshot_window(
         clip=clip,
     )
     rec["ask_sum"] = a.ask_sum if a.ask_sum is not None else a2.ask_sum
+    _set_buckets(rec)
     rec["a_intend"] = bool(a.intend)
     rec["a2_intend"] = bool(a2.intend)
     rec["a_reason"] = a.reason
@@ -373,6 +420,20 @@ def _empty_asset_stats() -> dict[str, Any]:
     }
 
 
+def _empty_bucket_cell() -> dict[str, int]:
+    return {"polls": 0, "A_hits": 0, "A2_hits": 0, "repeat_hits": 0, "depth_ok": 0, "still250": 0}
+
+
+def _row_depth_ok(rec: dict[str, Any], clip: float) -> bool:
+    if rec.get("depth_ok") is True:
+        return True
+    if rec.get("depth_ok") is False:
+        return False
+    depth_up = float(rec.get("depth_up") or 0.0)
+    depth_down = float(rec.get("depth_down") or 0.0)
+    return min(depth_up, depth_down) + 1e-12 >= float(clip)
+
+
 def summarize_paper(
     rows: list[dict[str, Any]],
     *,
@@ -380,9 +441,15 @@ def summarize_paper(
     pair_max: float = PAIR_MAX,
     clip: float = CLIP,
     assets: Iterable[str] = PAPER_ASSETS,
+    tfs: Iterable[str] = PAPER_TFS,
 ) -> dict[str, Any]:
-    """Per-asset: polls, ask_sum≤0.96, depth≥21, still-there@250ms."""
+    """asset × tf × bucket: polls, A/A2/repeat hits, depth≥21, still@250ms."""
     wanted = [str(a).strip().lower() for a in assets]
+    wanted_tfs = [normalize_tf(t) for t in tfs]
+    polls: dict[tuple[str, str], int] = {(a, t): 0 for a in wanted for t in wanted_tfs}
+    cells: dict[tuple[str, str, float], dict[str, int]] = {
+        (a, t, b): _empty_bucket_cell() for a in wanted for t in wanted_tfs for b in PAPER_BUCKETS
+    }
     by_asset = {a: _empty_asset_stats() for a in wanted}
     first_ts = None
     last_ts = None
@@ -391,8 +458,14 @@ def summarize_paper(
         if since is not None and ts is not None and ts < since:
             continue
         asset = str(rec.get("asset") or "btc").strip().lower()
+        tf = normalize_tf(rec.get("tf"))
+        if (asset, tf) not in polls:
+            polls[(asset, tf)] = 0
+            for b in PAPER_BUCKETS:
+                cells[(asset, tf, b)] = _empty_bucket_cell()
         if asset not in by_asset:
             by_asset[asset] = _empty_asset_stats()
+        polls[(asset, tf)] += 1
         bucket = by_asset[asset]
         bucket["n_poll"] += 1
         if first_ts is None or (ts is not None and ts < first_ts):
@@ -401,9 +474,8 @@ def summarize_paper(
             last_ts = ts
         if rec.get("error") or rec.get("reason") in {"gamma_error", "clob_error", "poll_error"}:
             bucket["n_err"] += 1
-        ask_sum = rec.get("ask_sum")
         try:
-            s = float(ask_sum) if ask_sum is not None else None
+            s = float(rec["ask_sum"]) if rec.get("ask_sum") is not None else None
         except (TypeError, ValueError):
             s = None
         if rec.get("a_intend") or rec.get("intend"):
@@ -418,13 +490,53 @@ def summarize_paper(
                 bucket["max_clips_on_hit"] = clips
         if rec.get("still_there_250ms") is True:
             bucket["n_still_there_250ms"] += 1
+        depth_ok = _row_depth_ok(rec, clip)
+        for thresh in PAPER_BUCKETS:
+            if s is None or s > float(thresh) + 1e-12:
+                continue
+            cell = cells[(asset, tf, thresh)]
+            if rec.get("a_intend"):
+                cell["A_hits"] += 1
+            if rec.get("a2_intend"):
+                cell["A2_hits"] += 1
+            if rec.get("repeat_intend"):
+                cell["repeat_hits"] += 1
+            if depth_ok:
+                cell["depth_ok"] += 1
+            if rec.get("still_there_250ms") is True:
+                cell["still250"] += 1
         if s is None or s > float(pair_max) + 1e-12:
             continue
         bucket["n_le_096"] += 1
-        depth_up = float(rec.get("depth_up") or 0.0)
-        depth_down = float(rec.get("depth_down") or 0.0)
-        if min(depth_up, depth_down) + 1e-12 >= float(clip):
+        if depth_ok:
             bucket["n_le_096_depth_ge_clip"] += 1
+    assets_out = list(wanted)
+    for asset, tf in polls:
+        if asset not in assets_out:
+            assets_out.append(asset)
+    tfs_out = list(wanted_tfs)
+    for asset, tf in polls:
+        if tf not in tfs_out:
+            tfs_out.append(tf)
+    table: list[dict[str, Any]] = []
+    for asset in assets_out:
+        for tf in tfs_out:
+            n_poll = int(polls.get((asset, tf), 0))
+            for thresh in PAPER_BUCKETS:
+                cell = cells.get((asset, tf, thresh)) or _empty_bucket_cell()
+                table.append(
+                    {
+                        "asset": asset,
+                        "tf": tf,
+                        "bucket": f"{thresh:.2f}",
+                        "polls": n_poll,
+                        "A_hits": cell["A_hits"],
+                        "A2_hits": cell["A2_hits"],
+                        "repeat_hits": cell["repeat_hits"],
+                        "depth_ok": cell["depth_ok"],
+                        "still250": cell["still250"],
+                    }
+                )
     totals = _empty_asset_stats()
     for bucket in by_asset.values():
         for key in totals:
@@ -446,12 +558,13 @@ def summarize_paper(
         "clip": float(clip),
         "first_ts": first_ts.isoformat() if first_ts else None,
         "last_ts": last_ts.isoformat() if last_ts else None,
+        "table": table,
         "assets": by_asset,
         "paper_pass_if_zero_edge": totals["n_le_096"] == 0,
         "note": (
             "0 prints with ask_sum≤0.96 is a paper PASS: live book did not show the pair."
             if totals["n_le_096"] == 0
-            else "Live book printed ask_sum≤0.96 at least once. Still no orders."
+            else "Live book printed ask_sum≤0.96 at least once. Still no orders. 4h is poll-only."
         ),
     }
 
@@ -467,92 +580,125 @@ def run_paper(
     collect: bool = True,
     heartbeat_every: int = 60,
     assets: Iterable[str] = PAPER_ASSETS,
+    tfs: Iterable[str] = PAPER_TFS,
     confirm_delay: float = CONFIRM_DELAY_SEC,
 ) -> list[dict[str, Any]]:
-    """Poll live books for each asset. One jsonl line per asset per poll. Never send orders."""
+    """Poll live books per asset×tf. 4h is poll-only. Never send orders."""
     asset_list = [str(a).strip().lower() for a in assets]
+    tf_list = [normalize_tf(t) for t in tfs]
+    keys = [book_key(a, t) for a in asset_list for t in tf_list]
     forever = (not once) and float(seconds) <= 0
     deadline = None if forever else time.time() + max(0.0, float(seconds))
     rows: list[dict[str, Any]] = []
     token_cache: dict[str, dict[str, str]] = {}
-    inventories: dict[str, BookInventory] = {a: BookInventory() for a in asset_list}
-    clip_state: dict[str, dict[str, Any]] = {a: {"t0": None, "clips": 0, "filled": False} for a in asset_list}
+    inventories: dict[str, BookInventory] = {k: BookInventory() for k in keys}
+    clip_state: dict[str, dict[str, Any]] = {k: {"t0": None, "clips": 0, "filled": False} for k in keys}
     n_lines = 0
     n_cycles = 0
     next_tick = time.time()
     while True:
-        t0 = current_t0()
         cycle_sums: dict[str, Any] = {}
         for asset in asset_list:
-            inv = inventories.get(asset) or BookInventory()
-            st = clip_state.get(asset) or {"t0": None, "clips": 0, "filled": False}
-            if inv.t0 != t0:
-                inventories[asset] = BookInventory(t0=t0)
-                inv = inventories[asset]
-            if st.get("t0") != t0:
-                st = {"t0": t0, "clips": 0, "filled": False}
-                clip_state[asset] = st
-            slug = asset_window_slug(asset, t0)
-            tokens = token_cache.get(slug)
-            if tokens is None:
+            for tf in tf_list:
+                t0 = current_t0(tf=tf)
+                key = book_key(asset, tf)
+                inv = inventories.get(key) or BookInventory()
+                st = clip_state.get(key) or {"t0": None, "clips": 0, "filled": False}
+                if inv.t0 != t0:
+                    inventories[key] = BookInventory(t0=t0)
+                    inv = inventories[key]
+                if st.get("t0") != t0:
+                    st = {"t0": t0, "clips": 0, "filled": False}
+                    clip_state[key] = st
+                slug = asset_window_slug(asset, t0, tf)
+                tokens = token_cache.get(slug)
+                if tokens is None:
+                    try:
+                        tokens = discover_tokens(slug)
+                    except Exception:
+                        tokens = {}
+                    if tokens:
+                        stale = [k for k in token_cache if k.startswith(f"{asset}-updown-{tf}-") and k != slug]
+                        for old in stale:
+                            token_cache.pop(old, None)
+                        token_cache[slug] = tokens
                 try:
-                    tokens = discover_tokens(slug)
-                except Exception:
-                    tokens = {}
-                if tokens:
-                    stale = [k for k in token_cache if k.startswith(f"{asset}-updown-5m-") and k != slug]
-                    for key in stale:
-                        token_cache.pop(key, None)
-                    token_cache[slug] = tokens
-            try:
-                rec = snapshot_window(
-                    pair_max=pair_max,
-                    clip=clip,
-                    tokens=tokens or None,
-                    asset=asset,
-                    inventory=inv,
-                    filled_this_window=bool(st["filled"]),
-                    clips_this_window=int(st["clips"]),
-                )
-            except Exception as exc:
-                rec = {
-                    "ts": datetime.now(timezone.utc).isoformat(),
-                    "t0": t0,
-                    "asset": asset,
-                    "slug": slug,
-                    "clip": float(clip),
-                    "pair_max": float(pair_max),
-                    "live_order": False,
-                    "maker_bid": False,
-                    "intend": False,
-                    "a_intend": False,
-                    "a2_intend": False,
-                    "repeat_intend": False,
-                    "clips_this_window": int(st["clips"]),
-                    "reason": "poll_error",
-                    "error": str(exc),
-                    "orders": [],
-                    "still_there_250ms": None,
-                }
-            confirm_list = rec.get("a2_orders") or rec.get("a_orders") or rec.get("repeat_orders") or rec.get("orders") or []
-            if (rec.get("a_intend") or rec.get("a2_intend") or rec.get("repeat_intend")) and tokens and confirm_list:
-                time.sleep(max(0.0, float(confirm_delay)))
-                rec["still_there_250ms"] = confirm_orders(tokens, confirm_list)
-                rec["ts_250ms"] = datetime.now(timezone.utc).isoformat()
-            else:
-                rec["still_there_250ms"] = None
-            if rec.get("a2_intend") and rec.get("a2_orders"):
-                for order in rec["a2_orders"]:
-                    inv.apply_buy(str(order["outcome"]), float(order["size"]), float(order["price"]))
-            st["clips"] = int(rec.get("clips_this_window") or st["clips"])
-            st["filled"] = bool(rec.get("filled_this_window") or st["filled"])
-            clip_state[asset] = st
-            rec["live_order"] = False
-            append_jsonl(out_path, rec)
-            n_lines += 1
-            cycle_sums[asset] = rec.get("ask_sum")
-            if collect:
-                rows.append(rec)
+                    rec = snapshot_window(
+                        pair_max=pair_max,
+                        clip=clip,
+                        tokens=tokens or None,
+                        asset=asset,
+                        tf=tf,
+                        inventory=inv,
+                        filled_this_window=bool(st["filled"]),
+                        clips_this_window=int(st["clips"]),
+                    )
+                except Exception as exc:
+                    rec = {
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                        "t0": t0,
+                        "asset": asset,
+                        "tf": tf,
+                        "slug": slug,
+                        "market": f"{asset}-updown-{tf}",
+                        "clip": float(clip),
+                        "pair_max": float(pair_max),
+                        "live_order": False,
+                        "maker_bid": False,
+                        "poll_only": is_poll_only_tf(tf),
+                        "intend": False,
+                        "a_intend": False,
+                        "a2_intend": False,
+                        "repeat_intend": False,
+                        "clips_this_window": int(st["clips"]),
+                        "reason": "poll_error",
+                        "error": str(exc),
+                        "orders": [],
+                        "still_there_250ms": None,
+                        "bucket_le_090": False,
+                        "bucket_le_096": False,
+                    }
+                poll_only = bool(rec.get("poll_only") or is_poll_only_tf(tf))
+                confirm_list = rec.get("a2_orders") or rec.get("a_orders") or rec.get("repeat_orders") or rec.get("orders") or []
+                if (
+                    (not poll_only)
+                    and (rec.get("a_intend") or rec.get("a2_intend") or rec.get("repeat_intend"))
+                    and tokens
+                    and confirm_list
+                ):
+                    time.sleep(max(0.0, float(confirm_delay)))
+                    rec["still_there_250ms"] = confirm_orders(tokens, confirm_list)
+                    rec["ts_250ms"] = datetime.now(timezone.utc).isoformat()
+                elif (
+                    poll_only
+                    and tokens
+                    and rec.get("bucket_le_096")
+                    and rec.get("depth_ok")
+                    and rec.get("ask_up") is not None
+                    and rec.get("ask_down") is not None
+                ):
+                    time.sleep(max(0.0, float(confirm_delay)))
+                    rec["still_there_250ms"] = confirm_ask_exists(
+                        tokens,
+                        float(rec["ask_up"]),
+                        float(rec["ask_down"]),
+                        float(clip),
+                    )
+                    rec["ts_250ms"] = datetime.now(timezone.utc).isoformat()
+                else:
+                    rec["still_there_250ms"] = None
+                if (not poll_only) and rec.get("a2_intend") and rec.get("a2_orders"):
+                    for order in rec["a2_orders"]:
+                        inv.apply_buy(str(order["outcome"]), float(order["size"]), float(order["price"]))
+                st["clips"] = int(rec.get("clips_this_window") or st["clips"])
+                st["filled"] = bool(rec.get("filled_this_window") or st["filled"])
+                clip_state[key] = st
+                rec["live_order"] = False
+                append_jsonl(out_path, rec)
+                n_lines += 1
+                cycle_sums[key] = rec.get("ask_sum")
+                if collect:
+                    rows.append(rec)
         n_cycles += 1
         if heartbeat_every and n_cycles % int(heartbeat_every) == 0:
             print(
@@ -560,7 +706,7 @@ def run_paper(
                     {
                         "heartbeat_cycles": n_cycles,
                         "lines": n_lines,
-                        "t0": t0,
+                        "t0": {tf: current_t0(tf=tf) for tf in tf_list},
                         "ask_sum": cycle_sums,
                         "live_order": False,
                     }
