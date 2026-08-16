@@ -8,11 +8,12 @@ This repo is research + paper scaffolding. It is **not** a copy-trader and **not
 
 1. `scripts/dump_whiskas.py` — full Data API activity + closed positions (no keys).
 2. `scripts/build_windows.py` — parquet windows/fills + `data/reports/PHASE1.md`.
-3. `scripts/tieout_pnl.py` — official +$211k vs reconstructed books. Writes `data/reports/PHASE1_TIEOUT.md` inputs (`data/processed/tieout_stats.json`).
-4. `configs/whiskas.yaml` — quantile scratch, **not** a live go. `pair_max=0.9513` is p25 cargo-cult.
-5. Tests for slug parse, pair_cost / residual sign, kill-switch, fee/maker identity.
+3. `scripts/tieout_pnl.py` — official +$211k vs reconstructed books (`PHASE1_TIEOUT.md`).
+4. `scripts/analyze_maker.py` / `analyze_tape.py` / `analyze_cluster.py` — role split, Aug tape (T6–T9), proxy cluster.
+5. `configs/whiskas.yaml` — **pair_max default 0.96, cap 0.97, never 0.98**. Not live.
+6. Tests for slug parse, pair_cost / residual sign, kill-switch, fee/maker identity.
 
-**Read `data/reports/PHASE1_TIEOUT.md` before `PHASE1.md`.** PHASE1 `total_pnl=−$103k` is the broken register (taker fee applied to every BUY on top of `usdcSize`). Tie-out is green: `|payout − size×price − official| = $137`.
+**Read `PHASE1_TIEOUT.md` then `PHASE1_MAKER.md` / `TAPE.md` / `CLUSTER.md`.** PHASE1 `total_pnl=−$103k` is the broken register. Tie-out is green (`|$137|`). No bot / paper / live.
 
 Do **not** start a bot, paper loop, or replay from this tree.
 

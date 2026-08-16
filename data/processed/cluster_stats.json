@@ -1,0 +1,43 @@
+{
+  "proxy": "0x3048d65321be3497164cdfc2996f94f98a2e7537",
+  "implementation": "0x58ca52ebe0dadfdf531cde7062e76746de4db1eb",
+  "eoa": "0x07c187878ad505ac0a275cf8471b64670d01efae",
+  "eoa_code_prefix": "0xef010063c0c19a282a",
+  "eoa_is_contract": false,
+  "eoa_eip7702": true,
+  "eoa_nonce": "0x1",
+  "profile_on_eoa": {
+    "$schema": "https://gamma-api.polymarket.com/schemas/PublicProfileResponse.json",
+    "createdAt": "2026-06-08T20:21:03.756329Z",
+    "proxyWallet": "0x3048d65321be3497164cdfc2996f94f98a2e7537",
+    "profileImage": "https://polymarket-upload.s3.us-east-2.amazonaws.com/profile-image-8514165-de41d4be-9f14-4485-8933-a694dac4b7f3.png",
+    "displayUsernamePublic": true,
+    "bio": "Trading to pay for my cat\u2019s food.",
+    "pseudonym": "Flashy-Gold",
+    "name": "x-MoneyForWhiskas",
+    "users": [
+      {
+        "id": "8514165",
+        "creator": false,
+        "mod": false,
+        "communityMod": false
+      }
+    ],
+    "verifiedBadge": false,
+    "takerTier": 5,
+    "takerTierName": "Diamond",
+    "weightedVolume": 3010310.496101
+  },
+  "siblings": [],
+  "cluster": false,
+  "log_errors": [
+    "0xaB45c5A4B0c941a2F231C04C3f49182e1A254052: {'code': -32701, 'message': 'exceed maximum block range: 10000'}",
+    "0xaacFeEa03eb1561C4e67d661e40682Bd20E3541b: {'code': -32701, 'message': 'exceed maximum block range: 10000'}",
+    "0x7A18EDfe055488A3128f01F563e5B479D92ffc3a: {'code': -32701, 'message': 'exceed maximum block range: 10000'}"
+  ],
+  "notes": [
+    "owner() on the EIP-1967 deposit-wallet proxy returns the EOA.",
+    "Polymarket factory derives one CREATE2 proxy per EOA.",
+    "Gamma profile on the EOA points at the same proxy; EOA traded=0."
+  ]
+}

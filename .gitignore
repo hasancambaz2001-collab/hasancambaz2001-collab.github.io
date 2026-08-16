@@ -12,5 +12,7 @@ build/
 .env.*
 data/raw/*.jsonl
 data/raw/*.json
+data/raw/binance_btcusdt_1s/
 data/processed/whiskas_fills.parquet
+data/processed/whiskas_role_windows.parquet
 !data/raw/.gitkeep
