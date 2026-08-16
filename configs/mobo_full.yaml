@@ -1,0 +1,21 @@
+# FULL KASA. Their tape only. No live.
+live: false
+pair_gt_1_trade: false
+primary: paper_maker
+ask_fok_primary: false
+s1:
+  book: maker
+  pair_max: 0.90
+  tfs: [5m, 15m]
+s3:
+  book: taker
+  pair_max: 0.96
+  primary: false
+  note: Ask FOK measured only. Not the 5m signal.
+wallets:
+  - mo-money
+  - bosona
+  - 06dc
+size_ok: false
+clip_now: 10
+notes: paper_maker stays primary 5m signal. Do not bump clip. Do not trade pair>1.

@@ -20,6 +20,12 @@ for f in \
   scripts/phase1_06dc_maker.py \
   scripts/size_gate.py \
   scripts/replay_mobo.py \
+  scripts/kasa_attribution.py \
+  scripts/size_schedule.py \
+  scripts/replay_full.py \
+  configs/mobo_full.yaml \
+  configs/size_schedule.yaml \
+  pipeline/FULL_KASA.md \
   pipeline/patches/BID_BUCKET.md
 do
   if [ ! -f "$f" ]; then

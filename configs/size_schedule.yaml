@@ -1,0 +1,8 @@
+# Ladder only. size_ok stays false. No live. No clip bump.
+size_ok: false
+pair_gt_1_trade: false
+ladder:
+  now: 10
+  after_parity: null
+  target_p50: null
+notes: 10 -> after_parity -> target_p50 (~67). after_parity and target are recorded, not armed.
