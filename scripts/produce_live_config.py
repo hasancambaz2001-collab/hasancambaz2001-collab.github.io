@@ -121,7 +121,12 @@ def main() -> int:
         mark = "PASS" if cell["pass"] else "FAIL"
         extra = {k: v for k, v in cell.items() if k != "pass"}
         lines.append(f"| {label} | **{mark}** | {extra} |")
-    lines.extend(["", "No hand-edited LIVE_READY. No clip 67 day-one. No pair>1.", ""])
+    lines.extend([
+        "",
+        "No hand-edited LIVE_READY. No clip 67 day-one. No pair>1.",
+        "MICRO_LIVE_TRIAL.yaml is not LIVE_READY. Full LIVE_READY stays BLOCKED without G5+G6+G7.",
+        "",
+    ])
     report = "\n".join(lines)
     (REPORTS / "LIVE_CONFIG.md").write_text(report, encoding="utf-8")
     (REPORTS / "LIVE_GATE_REPORT.md").write_text(report.replace("# LIVE_CONFIG", "# LIVE_GATE_REPORT"), encoding="utf-8")

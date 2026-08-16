@@ -1,9 +1,16 @@
+from datetime import datetime, timezone
+
+import pandas as pd
+
 from whiskas.pmdata import (
+    bbo_timeline_full,
     chainlink_url,
     day_file_name,
     day_url,
     is_pmdata_slug,
     join_best,
+    parse_ts,
+    parse_updown_slug,
     regime_for_date,
     slug_url,
 )
@@ -44,3 +51,28 @@ def test_day_and_slug_urls_match_docs() -> None:
     src = __import__("pathlib").Path("whiskas/pmdata.py").read_text()
     assert "sk-" not in src
     assert "PMDATA_API_KEY" in src
+    assert parse_ts(1786713600).year == 2026
+    assert parse_ts("2026-08-14").tzinfo is not None
+    meta = parse_updown_slug("btc-updown-5m-1786869000")
+    assert meta is not None and meta["t0"] == 1786869000
+    slim = bbo_timeline_full(
+        pd.DataFrame(
+            [
+                {
+                    "market_slug": "btc-updown-5m-1",
+                    "timestamp": datetime(2026, 8, 14, tzinfo=timezone.utc),
+                    "event_type": "book",
+                    "bid_prices": [0.40],
+                    "bid_sizes": [12.0],
+                    "ask_prices": [0.42],
+                    "ask_sizes": [9.0],
+                    "best_bid": None,
+                    "best_ask": None,
+                    "pc_size": None,
+                    "pc_side": None,
+                }
+            ]
+        )
+    )
+    assert float(slim.iloc[0].best_bid) == 0.40
+    assert float(slim.iloc[0].bid_size) == 12.0

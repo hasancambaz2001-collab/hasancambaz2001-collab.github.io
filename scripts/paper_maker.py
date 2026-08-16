@@ -36,10 +36,12 @@ from whiskas.paper import (
 )
 
 CLIP_DEFAULT = 10.0
-INTERVAL_DEFAULT = 2.0
+INTERVAL_DEFAULT = 1.0
+PAPER_POLL_MAX = 1.0
 PAIR_MAX = 0.90
 CANCEL_ABOVE = 0.92
 REQUOTE_MAX = 2.0
+STILL_PROBE_SEC = 0.25
 REST_MAX = PAIR_MAX
 CANCEL_RICH = CANCEL_ABOVE
 MAX_AGE_SEC = 45.0
@@ -83,7 +85,8 @@ def load_maker_yaml() -> dict[str, Any]:
         "pair_max": float(paper.get("pair_max", paper.get("rest_max", PAIR_MAX))),
         "cancel_above": float(paper.get("cancel_above", paper.get("cancel_rich", CANCEL_ABOVE))),
         "clip": float(paper.get("clip", CLIP_DEFAULT)),
-        "requote": requote,
+        "requote": min(requote, PAPER_POLL_MAX),
+        "interval": min(requote, PAPER_POLL_MAX),
         "max_age_sec": float(paper.get("max_age_sec", MAX_AGE_SEC)),
         "assets": tuple(str(a).strip().lower() for a in assets),
         "tfs": tuple(str(t).strip().lower() for t in tfs if str(t).strip().lower() in {"5m", "15m"}),
@@ -180,7 +183,50 @@ def snapshot_maker(
     rec["pair_gt_1"] = False
     rec["pair_max"] = float(pair_max)
     rec["cancel_above"] = float(cancel_above)
+    rec["bid_sum"] = decision.get("bid_sum")
+    rec["asset"] = str(asset).strip().lower()
+    rec["tf"] = tf_key
+    if str(decision.get("reason") or "") == "rest":
+        rec["skip_reason"] = None
+        rec["still_there_250ms"] = _probe_still_there_250ms(
+            tokens=tok,
+            px_up=decision.get("bid_up"),
+            px_down=decision.get("bid_down"),
+            books=books,
+        )
+    else:
+        rec["skip_reason"] = decision.get("reason")
+        rec["still_there_250ms"] = None
     return rec, next_state
+
+
+def _probe_still_there_250ms(
+    *,
+    tokens: dict[str, str],
+    px_up: Any,
+    px_down: Any,
+    books: dict[str, dict[str, Any]] | None = None,
+) -> bool | None:
+    """Re-read both books after 250ms (or immediately when books injected). GET only."""
+    if px_up is None or px_down is None:
+        return None
+    if books is None:
+        time.sleep(STILL_PROBE_SEC)
+        try:
+            book_up = fetch_book(tokens["Up"])
+            book_down = fetch_book(tokens["Down"])
+        except Exception:
+            return None
+    else:
+        book_up = books.get("Up") or {}
+        book_down = books.get("Down") or {}
+    bid_up, _ = best_bid(book_up)
+    bid_down, _ = best_bid(book_down)
+    ask_up, _ = best_ask(book_up)
+    ask_down, _ = best_ask(book_down)
+    still_up = not level_eaten(float(px_up), bid_up, ask_up)
+    still_down = not level_eaten(float(px_down), bid_down, ask_down)
+    return bool(still_up and still_down)
 
 
 def _interesting(rec: dict[str, Any]) -> bool:
@@ -219,6 +265,8 @@ def print_line(rec: dict[str, Any]) -> None:
                 "fill_px": rec.get("fill_px"),
                 "opp_ask": rec.get("opp_ask"),
                 "complete_pair": rec.get("complete_pair"),
+                "skip_reason": rec.get("skip_reason"),
+                "still_there_250ms": rec.get("still_there_250ms"),
                 "live_order": False,
                 "pair_gt_1": False,
             }
@@ -374,7 +422,7 @@ def main() -> int:
     assets = tuple(a.strip().lower() for a in args.assets.split(",") if a.strip()) or cfg["assets"]
     tfs = tuple(normalize_tf(t) for t in args.tfs.split(",") if t.strip())
     tfs = tuple(t for t in tfs if t in {"5m", "15m"}) or cfg["tfs"]
-    interval = min(float(args.interval), float(cfg["requote"]), REQUOTE_MAX)
+    interval = min(float(args.interval), float(cfg["requote"]), REQUOTE_MAX, PAPER_POLL_MAX)
     clip = float(args.clip) if args.clip != CLIP_DEFAULT else float(cfg["clip"])
     since = _parse_since(args.since)
     if args.since_file and args.since_file.is_file():

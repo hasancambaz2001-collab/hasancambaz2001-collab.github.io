@@ -296,6 +296,9 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert rec["reason"] == "rest"
     assert rec["live_order"] is False
     assert rec["book"] == "maker"
+    assert rec["still_there_250ms"] is True
+    assert rec["skip_reason"] is None
+    assert rec["bid_sum"] is not None
     assert state is not None
     src = Path("scripts/paper_maker.py").read_text(encoding="utf-8")
     assert "create_order" not in src
@@ -315,7 +318,8 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert cfg["pair_max"] == 0.90
     assert cfg["cancel_above"] == 0.92
     assert cfg["clip"] == 10.0
-    assert cfg["requote"] <= 2.0
+    assert cfg["requote"] <= 1.0
+    assert cfg["interval"] <= 1.0
     assert cfg["assets"] == MAKER_ASSETS
     assert cfg["tfs"] == MAKER_TFS
     assert cfg["live_order"] is False

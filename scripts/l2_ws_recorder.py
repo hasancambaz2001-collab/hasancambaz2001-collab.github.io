@@ -28,12 +28,14 @@ DEFAULT_OUT = ROOT / "data" / "l2_ws"
 def main() -> int:
     parser = argparse.ArgumentParser(description="Optional WS-shaped L2 snapshot. Never posts.")
     parser.add_argument("--once", action="store_true")
+    parser.add_argument("--seconds", type=float, default=None)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--assets", default=",".join(ASSETS))
     parser.add_argument("--tfs", default=",".join(TFS))
     args = parser.parse_args()
-    if not args.once:
-        print(f"SCAFFOLD {Path(__file__).name} (pass --once). Not started. GET only.", flush=True)
+    one_pass = bool(args.once) or args.seconds is not None
+    if not one_pass:
+        print(f"SCAFFOLD {Path(__file__).name} (pass --once or --seconds). Not started. GET only.", flush=True)
         return 0
     assets = tuple(a.strip().lower() for a in args.assets.split(",") if a.strip())
     tfs = tuple(t.strip().lower() for t in args.tfs.split(",") if t.strip())

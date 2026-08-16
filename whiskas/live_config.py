@@ -147,6 +147,7 @@ def paper_only_payload() -> dict[str, Any]:
         "live_orders": False,
         "live": False,
         "clip": PAPER_CLIP,
+        "interval": 1.0,
         "pair_max": PAIR_MAX,
         "cancel_above": CANCEL_ABOVE,
         "assets": list(ASSETS),

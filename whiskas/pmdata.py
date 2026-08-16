@@ -187,30 +187,152 @@ download = download_slug
 read_parquet = pd.read_parquet
 
 
+def parse_ts(text: str | int | float) -> datetime:
+    """Accept YYYY-MM-DD, ISO, or unix seconds."""
+    if isinstance(text, (int, float)) or (isinstance(text, str) and str(text).strip().lstrip("-").isdigit()):
+        return datetime.fromtimestamp(float(text), tz=timezone.utc)
+    raw = str(text).strip().replace("Z", "+00:00")
+    if len(raw) == 10:
+        return datetime.fromisoformat(raw).replace(tzinfo=timezone.utc)
+    dt = datetime.fromisoformat(raw)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def parse_updown_slug(slug: str) -> dict[str, Any] | None:
+    """btc-updown-5m-{t0} → asset/tf/t0. None if not 5m/15m updown."""
+    text = str(slug or "").strip()
+    parts = text.split("-")
+    if len(parts) < 4 or parts[1] != "updown":
+        return None
+    tf = parts[2]
+    if tf not in {"5m", "15m"}:
+        return None
+    try:
+        t0 = int(parts[3])
+    except (TypeError, ValueError):
+        return None
+    return {"slug": text, "asset": parts[0].lower(), "tf": tf, "t0": t0}
+
+
+def _first_level(prices: Any, sizes: Any) -> tuple[float | None, float]:
+    try:
+        bids = list(prices) if prices is not None else []
+        szs = list(sizes) if sizes is not None else []
+    except TypeError:
+        return None, 0.0
+    if not bids:
+        return None, 0.0
+    try:
+        px = float(bids[0])
+    except (TypeError, ValueError):
+        return None, 0.0
+    try:
+        sz = float(szs[0]) if szs else 0.0
+    except (TypeError, ValueError):
+        sz = 0.0
+    if sz < 0:
+        sz = 0.0
+    return px, sz
+
+
+def _finite_cell(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except (TypeError, ValueError):
+        pass
+    try:
+        x = float(value)
+    except (TypeError, ValueError):
+        return None
+    if x != x or x in {float("inf"), float("-inf")}:
+        return None
+    return x
+
+
+def write_parquet(df: pd.DataFrame, path: Path) -> Path:
+    """Write via pyarrow. pandas to_parquet has written 0-byte files here."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    table = pa.Table.from_pandas(df, preserve_index=False)
+    tmp = path.with_suffix(path.suffix + ".part")
+    pq.write_table(table, tmp)
+    tmp.replace(path)
+    if path.stat().st_size <= 0:
+        raise RuntimeError(f"pyarrow wrote 0 bytes: {path}")
+    return path
+
+
 def bbo_timeline(l2: pd.DataFrame) -> pd.DataFrame:
     """Yes-token BBO from book snapshots + price_change. Single-token file — not both legs."""
-    rows: list[tuple[Any, float, float]] = []
+    full = bbo_timeline_full(l2)
+    if full.empty:
+        return pd.DataFrame(columns=["timestamp", "best_bid", "best_ask"])
+    return full[["timestamp", "best_bid", "best_ask"]].copy()
+
+
+def bbo_timeline_full(l2: pd.DataFrame) -> pd.DataFrame:
+    """Yes-token BBO + sizes + pc_size. Single-token file — not both legs. No complement Down."""
+    rows: list[dict[str, Any]] = []
+    last_bb: float | None = None
+    last_ba: float | None = None
+    last_bs = 0.0
+    last_as = 0.0
+    slug = ""
     for rec in l2.itertuples(index=False):
         et = str(getattr(rec, "event_type", "") or "")
         ts = getattr(rec, "timestamp", None)
+        slug = str(getattr(rec, "market_slug", None) or slug or "")
+        pc_size = _finite_cell(getattr(rec, "pc_size", None))
+        pc_side = getattr(rec, "pc_side", None)
+        pc_side_s = None if pc_side is None or (isinstance(pc_side, float) and pd.isna(pc_side)) else str(pc_side)
+        bb = last_bb
+        ba = last_ba
+        bs = last_bs
+        az = last_as
+        keep = False
         if et == "book":
-            bp = getattr(rec, "bid_prices", None)
-            ap = getattr(rec, "ask_prices", None)
-            try:
-                bids = list(bp) if bp is not None else []
-                asks = list(ap) if ap is not None else []
-            except TypeError:
+            bb, bs = _first_level(getattr(rec, "bid_prices", None), getattr(rec, "bid_sizes", None))
+            ba, az = _first_level(getattr(rec, "ask_prices", None), getattr(rec, "ask_sizes", None))
+            if bb is None or ba is None:
                 continue
-            if not bids or not asks:
-                continue
-            rows.append((ts, float(bids[0]), float(asks[0])))
+            keep = True
         elif et == "price_change":
-            bb = getattr(rec, "best_bid", None)
-            aa = getattr(rec, "best_ask", None)
-            if bb is None or aa is None or pd.isna(bb) or pd.isna(aa):
+            raw_bb = _finite_cell(getattr(rec, "best_bid", None))
+            raw_ba = _finite_cell(getattr(rec, "best_ask", None))
+            if raw_bb is None or raw_ba is None:
                 continue
-            rows.append((ts, float(bb), float(aa)))
-    out = pd.DataFrame(rows, columns=["timestamp", "best_bid", "best_ask"])
+            bb, ba = raw_bb, raw_ba
+            keep = (
+                last_bb is None
+                or abs(bb - float(last_bb)) > 1e-12
+                or abs(ba - float(last_ba)) > 1e-12
+                or (pc_size is not None and pc_size > 0)
+            )
+        if not keep:
+            continue
+        last_bb, last_ba, last_bs, last_as = bb, ba, bs, az
+        rows.append(
+            {
+                "timestamp": ts,
+                "market_slug": slug,
+                "best_bid": float(bb),
+                "best_ask": float(ba),
+                "bid_size": float(bs),
+                "ask_size": float(az),
+                "pc_size": pc_size,
+                "pc_side": pc_side_s,
+                "event_type": et,
+            }
+        )
+    out = pd.DataFrame(rows)
     if out.empty:
         return out
     return out.sort_values("timestamp").reset_index(drop=True)

@@ -25,8 +25,10 @@ if str(ROOT) not in sys.path:
 from whiskas.live_config import ensure_pmdata_env_file, load_pmdata_env
 from whiskas.pmdata import (
     api_key_name,
+    bbo_timeline_full,
     download_day,
     iter_day_parquets,
+    parse_ts,
     regime_for_date,
 )
 
@@ -36,14 +38,7 @@ REGIME_CUTOFF = datetime(2026, 8, 14, tzinfo=timezone.utc)
 
 
 def _parse_ts(text: str) -> datetime:
-    raw = text.strip().replace("Z", "+00:00")
-    if len(raw) == 10:
-        dt = datetime.fromisoformat(raw).replace(tzinfo=timezone.utc)
-    else:
-        dt = datetime.fromisoformat(raw)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+    return parse_ts(text)
 
 
 def _days(start: datetime, end: datetime) -> list[str]:
@@ -81,7 +76,11 @@ def main() -> int:
     skipped = []
     day_rows: dict[str, int] = {}
     day_members: dict[str, int] = {}
+    no_unlock = {"2026-08-16"}
     for day in _days(start, end):
+        if day in no_unlock and not args.unlock_new_days:
+            skipped.append(day)
+            continue
         cached = DAY_CACHE / f"{series}_{args.data_type}_{day}.zip"
         if not cached.is_file() and not args.unlock_new_days:
             skipped.append(day)
@@ -90,8 +89,15 @@ def main() -> int:
         for name, df in iter_day_parquets(path):
             if df is None or df.empty:
                 continue
-            tables.append(pa.Table.from_pandas(df, preserve_index=False))
-            day_rows[day] = day_rows.get(day, 0) + int(len(df))
+            if args.data_type == "l2":
+                slim = bbo_timeline_full(df)
+                if slim.empty:
+                    continue
+                tables.append(pa.Table.from_pandas(slim, preserve_index=False))
+                day_rows[day] = day_rows.get(day, 0) + int(len(slim))
+            else:
+                tables.append(pa.Table.from_pandas(df, preserve_index=False))
+                day_rows[day] = day_rows.get(day, 0) + int(len(df))
             day_members[day] = day_members.get(day, 0) + 1
         if day in day_rows:
             used.append({
@@ -107,6 +113,11 @@ def main() -> int:
         pq.write_table(table, dest)
         nbytes = dest.stat().st_size
         nrows = table.num_rows
+        if nbytes <= 0:
+            dest.unlink(missing_ok=True)
+            dest = None
+            nbytes = 0
+            nrows = 0
     else:
         dest.write_bytes(b"")
         nbytes = 0
