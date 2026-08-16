@@ -1,0 +1,79 @@
+{
+  "regime": "post_2026_08_14",
+  "dates": [
+    "2026-08-14",
+    "2026-08-15"
+  ],
+  "source": "day_api onchain_fills",
+  "n_zips": 20,
+  "n_parquet_files": 3840,
+  "l2_covers_06dc": false,
+  "size_ok": false,
+  "pair_gt_1_trade": false,
+  "wallets": {
+    "mo-money": {
+      "n_fills": 11381,
+      "as_maker": 8643,
+      "as_taker": 2738,
+      "maker_share": 0.7594236007380722,
+      "maker_buy": 8643,
+      "size_p50": 10.0,
+      "size_p90": 90.83654080000001,
+      "by_series": {
+        "btc-15m": 1141,
+        "btc-5m": 5340,
+        "doge-15m": 449,
+        "doge-5m": 278,
+        "eth-15m": 355,
+        "eth-5m": 1719,
+        "sol-15m": 953,
+        "sol-5m": 712,
+        "xrp-15m": 402,
+        "xrp-5m": 32
+      }
+    },
+    "bosona": {
+      "n_fills": 11186,
+      "as_maker": 8372,
+      "as_taker": 2814,
+      "maker_share": 0.7484355444305382,
+      "maker_buy": 8372,
+      "size_p50": 10.21052,
+      "size_p90": 100.0,
+      "by_series": {
+        "btc-15m": 1042,
+        "btc-5m": 5632,
+        "doge-15m": 351,
+        "doge-5m": 188,
+        "eth-15m": 379,
+        "eth-5m": 1561,
+        "sol-15m": 919,
+        "sol-5m": 727,
+        "xrp-15m": 360,
+        "xrp-5m": 27
+      }
+    },
+    "06dc": {
+      "n_fills": 0,
+      "as_maker": 0,
+      "as_taker": 0,
+      "maker_share": null,
+      "maker_buy": 0,
+      "size_p50": null,
+      "size_p90": null,
+      "by_series": {}
+    },
+    "whiskas": {
+      "n_fills": 38543,
+      "as_maker": 16312,
+      "as_taker": 22231,
+      "maker_share": 0.4232156292971486,
+      "maker_buy": 16312,
+      "size_p50": 17.241378,
+      "size_p90": 80.0,
+      "by_series": {
+        "btc-5m": 38543
+      }
+    }
+  }
+}

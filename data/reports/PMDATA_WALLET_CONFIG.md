@@ -1,30 +1,52 @@
 # PMDATA_WALLET_CONFIG
 
-Generated: 2026-08-16 18:03 UTC
+Generated: 2026-08-16 18:08 UTC
 Post-08-14 only. No Mar–May bulk. No live. size_ok=false. pair_gt_1_trade=false.
+Key from env (`PMDATA_API_KEY`). Never hardcoded.
 
-**Nautilus historical L2 = false** (orderbook-history dead). PMData is the L2 source.
-**PMData does NOT cover 06dc daily/monthly.** 06dc truth = dump + paper_06dc + T6.
-Whiskas official ledger locked — onchain counts only, no PHASE1 rewrite.
-PMData L2 is a single Yes-token book. bid_sum is from the dump, not reconstructed.
+## APIs (docs shape)
 
-slugs requested=10 onchain_ok=10 l2_ok=10
+Day:
 
-| wallet | n_fills | maker_share | size_p50 | join_best_yes | dump S1 n | dump pair p50 |
-|---|---:|---:|---:|---:|---:|---:|
-| mo-money | 403 | 0.526 | 10.14 | 0.324 | 7 | 0.582 |
-| bosona | 426 | 0.444 | 11.11 | 0.318 | 6 | 0.573 |
-| 06dc | 0 | — | — | — | — | — |
-| whiskas | 162 | 0.481 | 15.89 | 0.135 | — | — |
+```
+GET https://api.pmdata.dev/polymarket/{series}/{type}/{series}_{type}_{date}.zip
+headers={"api_key": <env>}
+```
 
-Hottest 10 BTC/SOL 5m/15m slugs only. Full-tape mo/bosona maker_share is ~90% (dump fee-match). This sample is more competitive — do not override 90% with ~50%.
-06dc n=0 here is expected: their books are daily/monthly/bracket, not PMData updown.
+Slug / curl:
+
+```
+GET https://api.pmdata.dev/download/{type}/{slug}.parquet
+pandas.read_parquet(url, storage_options={"api_key": <env>, "User-Agent": "Mozilla/5.0"})
+```
+
+`2026-08-01` in the vendor example is **pre-08-14 DEBUG**. Days used here: **2026-08-14** and **2026-08-15**.
+Nautilus historical L2 = false. Chainlink/TWAP Day streams exist (paid) and are **not** the S1 edge.
+PMData / Day API do **not** cover 06dc daily/monthly. 06dc truth = dump + paper_06dc + T6.
+
+## Day API onchain_fills (2026-08-14 + 2026-08-15)
+
+20 zips · 3840 market files · series btc/eth/sol/xrp/doge × 5m/15m.
+
+| wallet | n_fills | maker_share | size_p50 | size_p90 | notes |
+|---|---:|---:|---:|---:|---|
+| mo-money | 11381 | **0.759** | **10.00** | 90.84 | mostly btc-5m + eth-5m |
+| bosona | 11186 | **0.748** | **10.21** | 100.00 | same shape as mo |
+| 06dc | 0 | — | — | — | not on 5m/15m updown |
+| whiskas | 38543 | 0.423 | 17.24 | 80.00 | **btc-5m only**; official ledger locked |
+
+Hottest-10-slug sample earlier (~50% maker) was the most competitive books. Two full post-14 days → ~75% maker for mo/bosona. Full 4000-row dump fee-match remains ~90%. Do not invent a new mix rule.
 
 ## Inferred vs yaml (no new alpha)
 
-- pair_max **0.90** from dump S1 (not from PMData bid_sum)
-- cancel_above **0.92** (unobserved in fills)
-- paper_clip **10** (size gap vs their matched p50 on full tape)
+- pair_max **0.90** from dump S1 (PMData L2 is Yes-token only; do not reconstruct bid_sum)
+- cancel_above **0.92** (cancels not in onchain fills)
+- paper_clip **10** — Day API maker size p50 = 10.00 / 10.21
 - maker rest both; pair>1 trade=false
-- join-best is intended; low join% on short align = calibrate, not kill S1
+- primary = paper_maker 5m/15m
+- 06dc = dump + paper_06dc + T6
+- Whiskas 5m counts are ATTR only
 
+pre-08-14 parquet is DEBUG only
+S1 go/no-go = replay edge, NOT queue fill%
+size_ok=false live=false pair_gt1_trade=false
