@@ -6,25 +6,23 @@ import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
-from whiskas.constants import (
-    BTC_5M_PREFIX,
-    CLIP,
-    CLOB_API,
-    GAMMA_API,
-    PAIR_MAX,
-    PAIR_MAX_CAP,
-    WINDOW_SECONDS,
-)
+from whiskas.constants import CLIP, CLOB_API, GAMMA_API, PAIR_MAX, PAIR_MAX_CAP, WINDOW_SECONDS
 from whiskas.http import get_json
 from whiskas.policy import decide
-from whiskas.slug import window_slug
+
+PAPER_ASSETS = ("btc", "eth", "sol", "xrp")
+CONFIRM_DELAY_SEC = 0.25
 
 
 def current_t0(now: float | None = None) -> int:
     ts = time.time() if now is None else float(now)
     return int(ts // WINDOW_SECONDS) * WINDOW_SECONDS
+
+
+def asset_window_slug(asset: str, t0: int) -> str:
+    return f"{str(asset).strip().lower()}-updown-5m-{int(t0)}"
 
 
 def _as_list(payload: Any) -> list[Any]:
@@ -108,8 +106,50 @@ def best_ask(book: dict[str, Any] | None) -> tuple[float | None, float]:
     return best_p, best_sz
 
 
-def fetch_book(token_id: str) -> dict[str, Any]:
-    return get_json(f"{CLOB_API}/book", {"token_id": token_id}, timeout=20, retries=3, pause=0.08)
+def size_at_or_better(book: dict[str, Any] | None, limit_price: float) -> float:
+    """BUY FOK at limit_price: sum ask size with price ≤ limit."""
+    if not book or limit_price <= 0:
+        return 0.0
+    total = 0.0
+    for level in book.get("asks") or []:
+        try:
+            price = float(level.get("price"))
+            size = float(level.get("size") or 0.0)
+        except (TypeError, ValueError):
+            continue
+        if price <= 0 or size <= 0:
+            continue
+        if price <= float(limit_price) + 1e-12:
+            total += size
+    return total
+
+
+def fetch_book(token_id: str, *, pause: float = 0.08) -> dict[str, Any]:
+    return get_json(f"{CLOB_API}/book", {"token_id": token_id}, timeout=20, retries=3, pause=pause)
+
+
+def confirm_ask_exists(
+    tokens: dict[str, str],
+    ask_up: float,
+    ask_down: float,
+    clip: float,
+    *,
+    books: dict[str, dict[str, Any]] | None = None,
+) -> bool:
+    """True if both intended asks still have ≥ clip size at that price or better."""
+    try:
+        if books is not None:
+            book_up = books.get("Up") or {}
+            book_down = books.get("Down") or {}
+        else:
+            book_up = fetch_book(tokens["Up"], pause=0.0)
+            book_down = fetch_book(tokens["Down"], pause=0.0)
+    except Exception:
+        return False
+    return (
+        size_at_or_better(book_up, ask_up) + 1e-12 >= float(clip)
+        and size_at_or_better(book_down, ask_down) + 1e-12 >= float(clip)
+    )
 
 
 def snapshot_window(
@@ -120,19 +160,23 @@ def snapshot_window(
     clip: float = CLIP,
     tokens: dict[str, str] | None = None,
     books: dict[str, dict[str, Any]] | None = None,
+    asset: str = "btc",
 ) -> dict[str, Any]:
     t0 = current_t0(now)
-    slug = window_slug(t0)
+    asset_key = str(asset).strip().lower()
+    slug = asset_window_slug(asset_key, t0)
     ts = datetime.now(timezone.utc).isoformat()
     rec: dict[str, Any] = {
         "ts": ts,
         "t0": t0,
+        "asset": asset_key,
         "slug": slug,
-        "market": f"{BTC_5M_PREFIX.rstrip('-')}",
+        "market": f"{asset_key}-updown-5m",
         "clip": float(clip),
         "pair_max": float(pair_max),
         "live_order": False,
         "maker_bid": False,
+        "still_there_250ms": None,
     }
     try:
         tok = tokens if tokens is not None else discover_tokens(slug)
@@ -169,15 +213,24 @@ def snapshot_window(
     rec["ask_down"] = ask_down
     rec["depth_up"] = depth_up
     rec["depth_down"] = depth_down
+    rec["min_ask_size"] = min(depth_up, depth_down) if ask_up is not None and ask_down is not None else 0.0
     rec["depth_ok"] = (
         ask_up is not None
         and ask_down is not None
-        and depth_up + 1e-12 >= clip
-        and depth_down + 1e-12 >= clip
+        and rec["min_ask_size"] + 1e-12 >= float(clip)
     )
     decision = decide(ask_up, ask_down, pair_max=pair_max, pair_max_cap=pair_max_cap, clip=clip)
-    rec.update(decision.to_dict())
-    rec["depth_short"] = bool(decision.intend and not rec["depth_ok"])
+    rec["ask_sum"] = decision.ask_sum
+    if decision.intend and rec["depth_ok"]:
+        rec["intend"] = True
+        rec["reason"] = "complete_set_fok"
+        rec["orders"] = [o.to_dict() for o in decision.orders]
+        rec["depth_short"] = False
+    else:
+        rec["intend"] = False
+        rec["reason"] = decision.reason if not decision.intend else "depth_short"
+        rec["orders"] = []
+        rec["depth_short"] = bool(decision.intend and not rec["depth_ok"])
     return rec
 
 
@@ -218,31 +271,44 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _empty_asset_stats() -> dict[str, Any]:
+    return {
+        "n_poll": 0,
+        "n_le_096": 0,
+        "n_le_096_depth_ge_clip": 0,
+        "n_still_there_250ms": 0,
+        "n_err": 0,
+    }
+
+
 def summarize_paper(
     rows: list[dict[str, Any]],
     *,
     since: datetime | None = None,
     pair_max: float = PAIR_MAX,
     clip: float = CLIP,
+    assets: Iterable[str] = PAPER_ASSETS,
 ) -> dict[str, Any]:
-    """Morning counts: polls, ask_sum≤pair_max, and of those both depths ≥ clip."""
-    n_poll = 0
-    n_le = 0
-    n_le_depth = 0
-    n_err = 0
+    """Per-asset: polls, ask_sum≤0.96, depth≥21, still-there@250ms."""
+    wanted = [str(a).strip().lower() for a in assets]
+    by_asset = {a: _empty_asset_stats() for a in wanted}
     first_ts = None
     last_ts = None
     for rec in rows:
         ts = _parse_ts(rec.get("ts"))
         if since is not None and ts is not None and ts < since:
             continue
-        n_poll += 1
+        asset = str(rec.get("asset") or "btc").strip().lower()
+        if asset not in by_asset:
+            by_asset[asset] = _empty_asset_stats()
+        bucket = by_asset[asset]
+        bucket["n_poll"] += 1
         if first_ts is None or (ts is not None and ts < first_ts):
             first_ts = ts
         if last_ts is None or (ts is not None and ts > last_ts):
             last_ts = ts
         if rec.get("error") or rec.get("reason") in {"gamma_error", "clob_error", "poll_error"}:
-            n_err += 1
+            bucket["n_err"] += 1
         ask_sum = rec.get("ask_sum")
         try:
             s = float(ask_sum) if ask_sum is not None else None
@@ -250,26 +316,32 @@ def summarize_paper(
             s = None
         if s is None or s > float(pair_max) + 1e-12:
             continue
-        n_le += 1
+        bucket["n_le_096"] += 1
         depth_up = float(rec.get("depth_up") or 0.0)
         depth_down = float(rec.get("depth_down") or 0.0)
-        if depth_up + 1e-12 >= float(clip) and depth_down + 1e-12 >= float(clip):
-            n_le_depth += 1
-    paper_pass = n_le == 0
+        if min(depth_up, depth_down) + 1e-12 >= float(clip):
+            bucket["n_le_096_depth_ge_clip"] += 1
+        if rec.get("still_there_250ms") is True:
+            bucket["n_still_there_250ms"] += 1
+    totals = _empty_asset_stats()
+    for bucket in by_asset.values():
+        for key in totals:
+            totals[key] += bucket[key]
     return {
-        "n_poll": n_poll,
-        "n_le_096": n_le,
-        "n_le_096_depth_ge_clip": n_le_depth,
-        "n_err": n_err,
+        "n_poll": totals["n_poll"],
+        "n_le_096": totals["n_le_096"],
+        "n_le_096_depth_ge_clip": totals["n_le_096_depth_ge_clip"],
+        "n_still_there_250ms": totals["n_still_there_250ms"],
+        "n_err": totals["n_err"],
         "pair_max": float(pair_max),
         "clip": float(clip),
         "first_ts": first_ts.isoformat() if first_ts else None,
         "last_ts": last_ts.isoformat() if last_ts else None,
-        "paper_pass_if_zero_edge": paper_pass,
+        "assets": by_asset,
+        "paper_pass_if_zero_edge": totals["n_le_096"] == 0,
         "note": (
-            "0 prints with ask_sum≤0.96 is a paper PASS: live book did not show the pair. "
-            "Edge stays on their historical taker fills. Do not raise clip or reopen replay."
-            if paper_pass
+            "0 prints with ask_sum≤0.96 is a paper PASS: live book did not show the pair."
+            if totals["n_le_096"] == 0
             else "Live book printed ask_sum≤0.96 at least once. Still no orders."
         ),
     }
@@ -285,63 +357,89 @@ def run_paper(
     clip: float = CLIP,
     collect: bool = True,
     heartbeat_every: int = 60,
+    assets: Iterable[str] = PAPER_ASSETS,
+    confirm_delay: float = CONFIRM_DELAY_SEC,
 ) -> list[dict[str, Any]]:
-    """Poll live books. Log intended FOKs. Never send orders."""
-    deadline = time.time() + max(0.0, float(seconds))
+    """Poll live books for each asset. One jsonl line per asset per poll. Never send orders."""
+    asset_list = [str(a).strip().lower() for a in assets]
+    forever = (not once) and float(seconds) <= 0
+    deadline = None if forever else time.time() + max(0.0, float(seconds))
     rows: list[dict[str, Any]] = []
     token_cache: dict[str, dict[str, str]] = {}
-    n = 0
+    n_lines = 0
+    n_cycles = 0
     next_tick = time.time()
     while True:
         t0 = current_t0()
-        slug = window_slug(t0)
-        tokens = token_cache.get(slug)
-        if tokens is None:
+        cycle_sums: dict[str, Any] = {}
+        for asset in asset_list:
+            slug = asset_window_slug(asset, t0)
+            tokens = token_cache.get(slug)
+            if tokens is None:
+                try:
+                    tokens = discover_tokens(slug)
+                except Exception:
+                    tokens = {}
+                if tokens:
+                    stale = [k for k in token_cache if k.startswith(f"{asset}-updown-5m-") and k != slug]
+                    for key in stale:
+                        token_cache.pop(key, None)
+                    token_cache[slug] = tokens
             try:
-                tokens = discover_tokens(slug)
-            except Exception:
-                tokens = {}
-            if tokens:
-                token_cache.clear()
-                token_cache[slug] = tokens
-        try:
-            rec = snapshot_window(
-                pair_max=pair_max,
-                clip=clip,
-                tokens=tokens or None,
-            )
-        except Exception as exc:
-            rec = {
-                "ts": datetime.now(timezone.utc).isoformat(),
-                "t0": t0,
-                "slug": slug,
-                "clip": float(clip),
-                "pair_max": float(pair_max),
-                "live_order": False,
-                "maker_bid": False,
-                "intend": False,
-                "reason": "poll_error",
-                "error": str(exc),
-                "orders": [],
-            }
-        append_jsonl(out_path, rec)
-        n += 1
-        if collect:
-            rows.append(rec)
-        if heartbeat_every and n % int(heartbeat_every) == 0:
+                rec = snapshot_window(
+                    pair_max=pair_max,
+                    clip=clip,
+                    tokens=tokens or None,
+                    asset=asset,
+                )
+            except Exception as exc:
+                rec = {
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "t0": t0,
+                    "asset": asset,
+                    "slug": slug,
+                    "clip": float(clip),
+                    "pair_max": float(pair_max),
+                    "live_order": False,
+                    "maker_bid": False,
+                    "intend": False,
+                    "reason": "poll_error",
+                    "error": str(exc),
+                    "orders": [],
+                    "still_there_250ms": None,
+                }
+            if rec.get("intend") and tokens and rec.get("ask_up") is not None and rec.get("ask_down") is not None:
+                time.sleep(max(0.0, float(confirm_delay)))
+                rec["still_there_250ms"] = confirm_ask_exists(
+                    tokens,
+                    float(rec["ask_up"]),
+                    float(rec["ask_down"]),
+                    clip,
+                )
+                rec["ts_250ms"] = datetime.now(timezone.utc).isoformat()
+            else:
+                rec["still_there_250ms"] = None
+            rec["live_order"] = False
+            append_jsonl(out_path, rec)
+            n_lines += 1
+            cycle_sums[asset] = rec.get("ask_sum")
+            if collect:
+                rows.append(rec)
+        n_cycles += 1
+        if heartbeat_every and n_cycles % int(heartbeat_every) == 0:
             print(
                 json.dumps(
                     {
-                        "heartbeat": n,
-                        "slug": rec.get("slug"),
-                        "ask_sum": rec.get("ask_sum"),
-                        "intend": rec.get("intend"),
+                        "heartbeat_cycles": n_cycles,
+                        "lines": n_lines,
+                        "t0": t0,
+                        "ask_sum": cycle_sums,
                         "live_order": False,
                     }
                 ),
                 flush=True,
             )
-        if once or time.time() >= deadline:
+        if once or (deadline is not None and time.time() >= deadline):
             break
         next_tick += max(0.2, float(interval))
         sleep_for = next_tick - time.time()
