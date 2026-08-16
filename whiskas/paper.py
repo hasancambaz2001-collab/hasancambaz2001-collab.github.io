@@ -10,7 +10,7 @@ from typing import Any, Iterable
 
 from whiskas.constants import CLIP, CLOB_API, GAMMA_API, PAIR_MAX, PAIR_MAX_CAP, WINDOW_SECONDS
 from whiskas.http import get_json
-from whiskas.policy import decide
+from whiskas.policy import BookInventory, decide_a, decide_a2
 
 PAPER_ASSETS = ("btc", "eth", "sol", "xrp")
 CONFIRM_DELAY_SEC = 0.25
@@ -137,6 +137,20 @@ def confirm_ask_exists(
     books: dict[str, dict[str, Any]] | None = None,
 ) -> bool:
     """True if both intended asks still have ≥ clip size at that price or better."""
+    orders = (
+        {"outcome": "Up", "price": ask_up, "size": clip},
+        {"outcome": "Down", "price": ask_down, "size": clip},
+    )
+    return bool(confirm_orders(tokens, orders, books=books))
+
+
+def confirm_orders(
+    tokens: dict[str, str],
+    orders: Iterable[Any],
+    *,
+    books: dict[str, dict[str, Any]] | None = None,
+) -> bool:
+    """True if each intended BUY still has size at that price or better."""
     try:
         if books is not None:
             book_up = books.get("Up") or {}
@@ -146,10 +160,19 @@ def confirm_ask_exists(
             book_down = fetch_book(tokens["Down"], pause=0.0)
     except Exception:
         return False
-    return (
-        size_at_or_better(book_up, ask_up) + 1e-12 >= float(clip)
-        and size_at_or_better(book_down, ask_down) + 1e-12 >= float(clip)
-    )
+    ok = False
+    for order in orders:
+        if hasattr(order, "outcome"):
+            outcome, price, size = order.outcome, float(order.price), float(order.size)
+        else:
+            outcome = str(order.get("outcome"))
+            price = float(order.get("price"))
+            size = float(order.get("size"))
+        book = book_up if outcome == "Up" else book_down
+        if size_at_or_better(book, price) + 1e-12 < size:
+            return False
+        ok = True
+    return ok
 
 
 def snapshot_window(
@@ -161,6 +184,7 @@ def snapshot_window(
     tokens: dict[str, str] | None = None,
     books: dict[str, dict[str, Any]] | None = None,
     asset: str = "btc",
+    inventory: BookInventory | None = None,
 ) -> dict[str, Any]:
     t0 = current_t0(now)
     asset_key = str(asset).strip().lower()
@@ -177,18 +201,26 @@ def snapshot_window(
         "live_order": False,
         "maker_bid": False,
         "still_there_250ms": None,
+        "a_intend": False,
+        "a2_intend": False,
+        "held_leg": None,
+        "held_qty": 0.0,
     }
     try:
         tok = tokens if tokens is not None else discover_tokens(slug)
     except Exception as exc:
         rec["error"] = f"gamma:{exc}"
         rec["intend"] = False
+        rec["a_intend"] = False
+        rec["a2_intend"] = False
         rec["reason"] = "gamma_error"
         rec["orders"] = []
         return rec
     if "Up" not in tok or "Down" not in tok:
         rec["error"] = "missing_tokens"
         rec["intend"] = False
+        rec["a_intend"] = False
+        rec["a2_intend"] = False
         rec["reason"] = "missing_tokens"
         rec["orders"] = []
         return rec
@@ -204,6 +236,8 @@ def snapshot_window(
     except Exception as exc:
         rec["error"] = f"clob:{exc}"
         rec["intend"] = False
+        rec["a_intend"] = False
+        rec["a2_intend"] = False
         rec["reason"] = "clob_error"
         rec["orders"] = []
         return rec
@@ -219,18 +253,33 @@ def snapshot_window(
         and ask_down is not None
         and rec["min_ask_size"] + 1e-12 >= float(clip)
     )
-    decision = decide(ask_up, ask_down, pair_max=pair_max, pair_max_cap=pair_max_cap, clip=clip)
-    rec["ask_sum"] = decision.ask_sum
-    if decision.intend and rec["depth_ok"]:
-        rec["intend"] = True
-        rec["reason"] = "complete_set_fok"
-        rec["orders"] = [o.to_dict() for o in decision.orders]
-        rec["depth_short"] = False
-    else:
-        rec["intend"] = False
-        rec["reason"] = decision.reason if not decision.intend else "depth_short"
-        rec["orders"] = []
-        rec["depth_short"] = bool(decision.intend and not rec["depth_ok"])
+    inv = inventory if inventory is not None else BookInventory()
+    rec["held_leg"] = inv.residual_leg()
+    rec["held_qty"] = inv.residual_qty()
+    rec["avg_up"] = inv.avg("Up")
+    rec["avg_down"] = inv.avg("Down")
+    a = decide_a(ask_up, ask_down, depth_up, depth_down, pair_max=pair_max, pair_max_cap=pair_max_cap, clip=clip)
+    a2 = decide_a2(
+        ask_up,
+        ask_down,
+        depth_up,
+        depth_down,
+        inv,
+        pair_max=pair_max,
+        pair_max_cap=pair_max_cap,
+        clip=clip,
+    )
+    rec["ask_sum"] = a.ask_sum if a.ask_sum is not None else a2.ask_sum
+    rec["a_intend"] = bool(a.intend)
+    rec["a2_intend"] = bool(a2.intend)
+    rec["a_reason"] = a.reason
+    rec["a2_reason"] = a2.reason
+    rec["a_orders"] = [o.to_dict() for o in a.orders]
+    rec["a2_orders"] = [o.to_dict() for o in a2.orders]
+    rec["intend"] = rec["a_intend"]
+    rec["reason"] = a.reason if a.intend else (a2.reason if a2.intend else a.reason)
+    rec["orders"] = rec["a_orders"] if a.intend else rec["a2_orders"]
+    rec["depth_short"] = a.reason == "depth_short"
     return rec
 
 
@@ -275,6 +324,8 @@ def _empty_asset_stats() -> dict[str, Any]:
     return {
         "n_poll": 0,
         "n_le_096": 0,
+        "n_a_hits": 0,
+        "n_a2_hits": 0,
         "n_le_096_depth_ge_clip": 0,
         "n_still_there_250ms": 0,
         "n_err": 0,
@@ -314,6 +365,12 @@ def summarize_paper(
             s = float(ask_sum) if ask_sum is not None else None
         except (TypeError, ValueError):
             s = None
+        if rec.get("a_intend") or rec.get("intend"):
+            bucket["n_a_hits"] += 1
+        if rec.get("a2_intend"):
+            bucket["n_a2_hits"] += 1
+        if rec.get("still_there_250ms") is True:
+            bucket["n_still_there_250ms"] += 1
         if s is None or s > float(pair_max) + 1e-12:
             continue
         bucket["n_le_096"] += 1
@@ -321,8 +378,6 @@ def summarize_paper(
         depth_down = float(rec.get("depth_down") or 0.0)
         if min(depth_up, depth_down) + 1e-12 >= float(clip):
             bucket["n_le_096_depth_ge_clip"] += 1
-        if rec.get("still_there_250ms") is True:
-            bucket["n_still_there_250ms"] += 1
     totals = _empty_asset_stats()
     for bucket in by_asset.values():
         for key in totals:
@@ -330,6 +385,8 @@ def summarize_paper(
     return {
         "n_poll": totals["n_poll"],
         "n_le_096": totals["n_le_096"],
+        "n_a_hits": totals["n_a_hits"],
+        "n_a2_hits": totals["n_a2_hits"],
         "n_le_096_depth_ge_clip": totals["n_le_096_depth_ge_clip"],
         "n_still_there_250ms": totals["n_still_there_250ms"],
         "n_err": totals["n_err"],
@@ -366,6 +423,7 @@ def run_paper(
     deadline = None if forever else time.time() + max(0.0, float(seconds))
     rows: list[dict[str, Any]] = []
     token_cache: dict[str, dict[str, str]] = {}
+    inventories: dict[str, BookInventory] = {a: BookInventory() for a in asset_list}
     n_lines = 0
     n_cycles = 0
     next_tick = time.time()
@@ -373,6 +431,10 @@ def run_paper(
         t0 = current_t0()
         cycle_sums: dict[str, Any] = {}
         for asset in asset_list:
+            inv = inventories.get(asset) or BookInventory()
+            if inv.t0 != t0:
+                inventories[asset] = BookInventory(t0=t0)
+                inv = inventories[asset]
             slug = asset_window_slug(asset, t0)
             tokens = token_cache.get(slug)
             if tokens is None:
@@ -391,6 +453,7 @@ def run_paper(
                     clip=clip,
                     tokens=tokens or None,
                     asset=asset,
+                    inventory=inv,
                 )
             except Exception as exc:
                 rec = {
@@ -403,22 +466,23 @@ def run_paper(
                     "live_order": False,
                     "maker_bid": False,
                     "intend": False,
+                    "a_intend": False,
+                    "a2_intend": False,
                     "reason": "poll_error",
                     "error": str(exc),
                     "orders": [],
                     "still_there_250ms": None,
                 }
-            if rec.get("intend") and tokens and rec.get("ask_up") is not None and rec.get("ask_down") is not None:
+            confirm_list = rec.get("a2_orders") or rec.get("a_orders") or rec.get("orders") or []
+            if (rec.get("a_intend") or rec.get("a2_intend")) and tokens and confirm_list:
                 time.sleep(max(0.0, float(confirm_delay)))
-                rec["still_there_250ms"] = confirm_ask_exists(
-                    tokens,
-                    float(rec["ask_up"]),
-                    float(rec["ask_down"]),
-                    clip,
-                )
+                rec["still_there_250ms"] = confirm_orders(tokens, confirm_list)
                 rec["ts_250ms"] = datetime.now(timezone.utc).isoformat()
             else:
                 rec["still_there_250ms"] = None
+            if rec.get("a2_intend") and rec.get("a2_orders"):
+                for order in rec["a2_orders"]:
+                    inv.apply_buy(str(order["outcome"]), float(order["size"]), float(order["price"]))
             rec["live_order"] = False
             append_jsonl(out_path, rec)
             n_lines += 1

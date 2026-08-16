@@ -1,5 +1,13 @@
 from whiskas.fees import taker_fee_usdc
-from whiskas.policy import FORBIDDEN_PAIR_MAX, assert_pair_max_legal, complete_set_pnl, decide
+from whiskas.policy import (
+    FORBIDDEN_PAIR_MAX,
+    BookInventory,
+    assert_pair_max_legal,
+    complete_set_pnl,
+    decide,
+    decide_a,
+    decide_a2,
+)
 
 
 def test_intend_when_ask_sum_at_pair_max() -> None:
@@ -74,3 +82,51 @@ def test_pair_max_9513_forbidden() -> None:
         pass
     else:
         raise AssertionError("decide must reject 0.9513")
+
+
+def test_a_requires_depth() -> None:
+    d = decide_a(0.40, 0.55, 10, 40)
+    assert not d.intend
+    assert d.reason == "depth_short"
+    both = decide_a(0.40, 0.55, 21, 21)
+    assert both.intend
+    assert both.reason == "complete_set_fok"
+
+
+def test_a2_first_leg_only_on_valid_pair() -> None:
+    hit = decide_a2(0.40, 0.55, 10, 40)
+    assert hit.intend
+    assert hit.reason == "a2_first_leg"
+    assert len(hit.orders) == 1
+    assert hit.orders[0].outcome == "Up"
+    assert hit.orders[0].size == 10.0
+    lone = decide_a2(0.30, None, 50, 0)
+    assert not lone.intend
+    dear = decide_a2(0.30, 0.70, 50, 10)
+    assert not dear.intend
+    assert dear.reason == "ask_sum_above_pair_max"
+    not_cheap = decide_a2(0.46, 0.50, 10, 40)
+    assert not not_cheap.intend
+    assert not_cheap.reason == "a2_cheap_above_045"
+
+
+def test_a2_complete_and_never_above_pair_max() -> None:
+    inv = BookInventory()
+    inv.apply_buy("Down", 10, 0.40)
+    ok = decide_a2(0.50, 0.60, 30, 5, inv)
+    assert ok.intend
+    assert ok.reason == "a2_complete"
+    assert ok.orders[0].outcome == "Up"
+    assert ok.orders[0].size == 10.0
+    blocked = decide_a2(0.57, 0.60, 30, 5, inv)
+    assert not blocked.intend
+    assert blocked.reason == "a2_complete_above_pair_max"
+
+
+def test_inventory_not_netted_across_assets() -> None:
+    btc = BookInventory()
+    eth = BookInventory()
+    btc.apply_buy("Up", 21, 0.40)
+    assert btc.residual_leg() == "Up"
+    assert eth.is_flat()
+    assert eth.residual_qty() == 0.0

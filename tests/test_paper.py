@@ -41,6 +41,8 @@ def test_snapshot_intends_only_when_sum_le_096() -> None:
     }
     rec = snapshot_window(now=1786886400, tokens=tokens, books=books_cheap, asset="eth")
     assert rec["intend"] is True
+    assert rec["a_intend"] is True
+    assert rec["a2_intend"] is True
     assert rec["asset"] == "eth"
     assert rec["slug"] == "eth-updown-5m-1786886400"
     assert rec["live_order"] is False
@@ -68,9 +70,12 @@ def test_intend_requires_depth_ge_clip() -> None:
     }
     rec = snapshot_window(now=1786886400, tokens=tokens, books=thin, asset="xrp")
     assert rec["ask_sum"] is not None and rec["ask_sum"] < 0.96
+    assert rec["a_intend"] is False
     assert rec["intend"] is False
-    assert rec["reason"] == "depth_short"
-    assert rec["orders"] == []
+    assert rec["a2_intend"] is True
+    assert rec["a2_reason"] == "a2_first_leg"
+    assert rec["a2_orders"][0]["outcome"] == "Up"
+    assert rec["a2_orders"][0]["size"] == 10.0
 
 
 def test_asset_slugs_share_clock() -> None:
@@ -98,7 +103,7 @@ def test_confirm_ask_still_there() -> None:
 def test_summarize_counts_le096_and_depth() -> None:
     rows = [
         {"ts": "2026-08-16T20:00:00+00:00", "asset": "btc", "ask_sum": 1.01, "depth_up": 100, "depth_down": 100},
-        {"ts": "2026-08-16T21:00:00+00:00", "asset": "eth", "ask_sum": 0.95, "depth_up": 30, "depth_down": 30, "still_there_250ms": True},
+        {"ts": "2026-08-16T21:00:00+00:00", "asset": "eth", "ask_sum": 0.95, "depth_up": 30, "depth_down": 30, "still_there_250ms": True, "a_intend": True, "a2_intend": True},
         {"ts": "2026-08-16T22:00:00+00:00", "asset": "sol", "ask_sum": 0.94, "depth_up": 10, "depth_down": 40, "still_there_250ms": False},
         {"ts": "2026-08-16T12:00:00+00:00", "asset": "xrp", "ask_sum": 0.90, "depth_up": 50, "depth_down": 50},
     ]
@@ -106,6 +111,8 @@ def test_summarize_counts_le096_and_depth() -> None:
     stats = summarize_paper(rows, since=since, pair_max=0.96, clip=21)
     assert stats["n_poll"] == 3
     assert stats["n_le_096"] == 2
+    assert stats["n_a_hits"] == 1
+    assert stats["n_a2_hits"] == 1
     assert stats["n_le_096_depth_ge_clip"] == 1
     assert stats["n_still_there_250ms"] == 1
     assert stats["assets"]["eth"]["n_le_096"] == 1
