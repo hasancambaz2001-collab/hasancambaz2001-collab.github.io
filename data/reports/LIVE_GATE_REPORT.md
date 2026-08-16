@@ -1,6 +1,6 @@
 # LIVE_GATE_REPORT
 
-Generated: 2026-08-16 18:59 UTC
+Generated: 2026-08-16 19:02 UTC
 status: **LIVE_BLOCKED**
 PAPER: `/workspace/configs/generated/PAPER_ONLY.yaml`
 blocked file: `/workspace/configs/generated/LIVE_BLOCKED.yaml`

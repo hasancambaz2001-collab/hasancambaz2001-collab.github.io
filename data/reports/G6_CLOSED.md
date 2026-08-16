@@ -1,21 +1,25 @@
 # G6_CLOSED
 
-Generated: 2026-08-16 18:59 UTC
-Three columns. Never mix residual-sim, historical queue, and paper/live fills.
+Generated: 2026-08-16 19:02 UTC
+Revised G6: hours are not a gate; rest count is.
+Three layers stay unmixed: INTENT / still250 / REAL FILL. sim_fill is SIM only.
+Does not set G5. Does not write LIVE_READY. micro trial ≠ full solve.
 
-G6-fast is historical twin calibration, not live fill proof.
-Does not set G5 size_ok. Does not write LIVE_READY.
-Still recommend short live paper smoke after G6-fast before real size.
 
-| metric | g6_fast | paper_live | notes |
-|---|---|---|---|
-| n_rest | 169 | 718 | rest intents; columns not mixed |
-| fill_band | ra=0.10164835164835165 / prob=0.10714285714285714 | 0.1226 residual-sim | (a) residual-sim (b) hist queue (c) paper live — never mix |
-| still250 | n/a | 65/80=0.8125 | hist has no 250ms probe |
+| metric | value |
+|---|---|
+| n_rest | 729 |
+| skip_rest_ratio | 20.3265 |
+| still250_rate | 0.7912 |
+| sim_fill_rate | 0.1207 SIM |
+| real_fill_rate | null |
+| G6_PASS | YES |
 
-- G6 flag written? **YES**
-- G5 still **FAIL**
-- LIVE still **BLOCKED**
-- MICRO yaml is not LIVE_READY
-
-G6-fast replaces week-long wait for calibration evidence; micro live still needed before size
+- hours not a gate; rest count is
+- still250 preferred not hard-lock for micro
+- real_fill only after orders sent
+- micro trial ≠ full solve
+- pair_gt_1_trade: False
+- pair>1 measure (not trade): 431
+- G5 exists: False
+- LIVE_READY exists: False
