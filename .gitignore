@@ -20,3 +20,5 @@ data/paper/*
 !data/paper/.gitkeep
 data/paper06dc/*
 !data/paper06dc/.gitkeep
+data/paper_maker/*
+!data/paper_maker/.gitkeep
