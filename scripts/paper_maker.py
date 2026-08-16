@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from whiskas.config import load_config
+from whiskas.l2 import BookTick, PolicyMaker, decide_maker, level_eaten
 from whiskas.paper import (
     append_jsonl,
     asset_window_slug,
@@ -90,183 +91,6 @@ def _parse_since(text: str | None) -> datetime | None:
     return _parse_ts(text.strip())
 
 
-def level_eaten(rest_px: float | None, best_bid_px: float | None, best_ask_px: float | None) -> bool:
-    """True if our join-best bid was hit or the level disappeared below us."""
-    if rest_px is None:
-        return False
-    if best_ask_px is not None and float(best_ask_px) <= float(rest_px) + 1e-12:
-        return True
-    if best_bid_px is None:
-        return True
-    return float(best_bid_px) + 1e-12 < float(rest_px)
-
-
-def decide_maker(
-    *,
-    bid_up: float | None,
-    bid_down: float | None,
-    bid_sz_up: float,
-    bid_sz_down: float,
-    ask_up: float | None,
-    ask_down: float | None,
-    state: dict[str, Any] | None,
-    now: float,
-    t0: int,
-    clip: float = CLIP_DEFAULT,
-    rest_max: float = REST_MAX,
-    cancel_rich: float = CANCEL_RICH,
-    max_age: float = MAX_AGE_SEC,
-) -> tuple[dict[str, Any], dict[str, Any] | None]:
-    """Measure-only rest/requote/cancel. Never live. Never pair>1 complete."""
-    bid_sum = None if bid_up is None or bid_down is None else float(bid_up) + float(bid_down)
-    ask_sum = None if ask_up is None or ask_down is None else float(ask_up) + float(ask_down)
-    min_bid = min(float(bid_sz_up), float(bid_sz_down)) if bid_up is not None and bid_down is not None else 0.0
-    rec: dict[str, Any] = {
-        "book": "maker",
-        "live_order": False,
-        "pair_gt_1": False,
-        "clip": float(clip),
-        "bid_up": bid_up,
-        "bid_down": bid_down,
-        "bid_sum": bid_sum,
-        "bid_depth_up": float(bid_sz_up),
-        "bid_depth_down": float(bid_sz_down),
-        "min_bid_size": min_bid,
-        "ask_up": ask_up,
-        "ask_down": ask_down,
-        "ask_sum": ask_sum,
-        "rest": False,
-        "requote": False,
-        "cancel": False,
-        "complete": False,
-        "eaten_up": False,
-        "eaten_down": False,
-        "orders": [],
-        "reason": "watch",
-        "age_sec": None,
-    }
-
-    resting = None
-    if state and int(state.get("t0") or 0) == int(t0) and state.get("px_up") is not None:
-        resting = state
-
-    if state and int(state.get("t0") or 0) != int(t0) and state.get("px_up") is not None:
-        rec["cancel"] = True
-        rec["reason"] = "cancel_window"
-        rec["orders"] = []
-        resting = None
-
-    if resting is not None:
-        age = float(now) - float(resting.get("rest_ts") or now)
-        rec["age_sec"] = age
-        rec["rest_px_up"] = resting.get("px_up")
-        rec["rest_px_down"] = resting.get("px_down")
-        eaten_up = level_eaten(resting.get("px_up"), bid_up, ask_up)
-        eaten_down = level_eaten(resting.get("px_down"), bid_down, ask_down)
-        rec["eaten_up"] = eaten_up
-        rec["eaten_down"] = eaten_down
-
-        if age > float(max_age) + 1e-12:
-            rec["cancel"] = True
-            rec["reason"] = "cancel_age"
-            return rec, None
-
-        if bid_sum is not None and bid_sum > float(cancel_rich) + 1e-12:
-            rec["cancel"] = True
-            rec["reason"] = "rich_cancel"
-            return rec, None
-
-        if eaten_up and eaten_down:
-            rec["reason"] = "filled_both"
-            rec["fill_up"] = resting.get("px_up")
-            rec["fill_down"] = resting.get("px_down")
-            return rec, None
-
-        if eaten_up ^ eaten_down:
-            fill_px = float(resting["px_up"] if eaten_up else resting["px_down"])
-            opp = "Down" if eaten_up else "Up"
-            opp_ask = ask_down if eaten_up else ask_up
-            rec["fill_px"] = fill_px
-            rec["opp"] = opp
-            rec["opp_ask"] = opp_ask
-            pair = None if opp_ask is None else float(fill_px) + float(opp_ask)
-            rec["complete_pair"] = pair
-            if pair is not None and pair > 1.0 + 1e-12:
-                rec["cancel"] = True
-                rec["reason"] = "pair_gt_1"
-                rec["pair_gt_1"] = False
-                return rec, None
-            if pair is not None and pair <= float(rest_max) + 1e-12:
-                rec["complete"] = True
-                rec["reason"] = "complete"
-                rec["orders"] = [
-                    {
-                        "side": "BUY",
-                        "outcome": opp,
-                        "type": "FOK",
-                        "price": float(opp_ask),
-                        "size": float(clip),
-                        "complete": True,
-                    }
-                ]
-                return rec, None
-            rec["cancel"] = True
-            rec["reason"] = "rich_complete"
-            return rec, None
-
-        moved = (
-            bid_up is not None
-            and bid_down is not None
-            and (
-                abs(float(bid_up) - float(resting["px_up"])) > 1e-12
-                or abs(float(bid_down) - float(resting["px_down"])) > 1e-12
-            )
-        )
-        can_join = (
-            bid_sum is not None
-            and bid_sum <= float(rest_max) + 1e-12
-            and min_bid + 1e-12 >= float(clip)
-        )
-        if moved and can_join:
-            rec["requote"] = True
-            rec["rest"] = True
-            rec["reason"] = "requote"
-            rec["orders"] = _rest_orders(float(bid_up), float(bid_down), clip)
-            return rec, _new_state(t0, now, float(bid_up), float(bid_down), clip)
-        rec["reason"] = "hold"
-        rec["rest"] = True
-        return rec, resting
-
-    if bid_sum is None:
-        rec["reason"] = "missing_bid"
-        return rec, None
-    if bid_sum > 1.0 + 1e-12:
-        rec["reason"] = "rich_bid_sum"
-        rec["pair_gt_1"] = False
-        return rec, None
-    if bid_sum > float(rest_max) + 1e-12:
-        rec["reason"] = "rich_bid_sum"
-        return rec, None
-    if min_bid + 1e-12 < float(clip):
-        rec["reason"] = "thin_bid"
-        return rec, None
-    rec["rest"] = True
-    rec["reason"] = "rest"
-    rec["orders"] = _rest_orders(float(bid_up), float(bid_down), clip)
-    return rec, _new_state(t0, now, float(bid_up), float(bid_down), clip)
-
-
-def _rest_orders(px_up: float, px_down: float, clip: float) -> list[dict[str, Any]]:
-    return [
-        {"side": "BUY", "outcome": "Up", "type": "GTC", "price": float(px_up), "size": float(clip), "maker_bid": True},
-        {"side": "BUY", "outcome": "Down", "type": "GTC", "price": float(px_down), "size": float(clip), "maker_bid": True},
-    ]
-
-
-def _new_state(t0: int, now: float, px_up: float, px_down: float, clip: float) -> dict[str, Any]:
-    return {"t0": int(t0), "rest_ts": float(now), "px_up": float(px_up), "px_down": float(px_down), "clip": float(clip)}
-
-
 def snapshot_maker(
     *,
     asset: str,
@@ -321,28 +145,31 @@ def snapshot_maker(
         return rec, state
     bid_up, sz_up = best_bid(book_up)
     bid_down, sz_down = best_bid(book_down)
-    ask_up, _ = best_ask(book_up)
-    ask_down, _ = best_ask(book_down)
-    decision, new_state = decide_maker(
-        bid_up=bid_up,
-        bid_down=bid_down,
-        bid_sz_up=sz_up,
-        bid_sz_down=sz_down,
-        ask_up=ask_up,
-        ask_down=ask_down,
-        state=state,
-        now=ts_now,
+    ask_up, ask_sz_up = best_ask(book_up)
+    ask_down, ask_sz_down = best_ask(book_down)
+    tick = BookTick(
+        t=ts_now,
+        slug=slug,
+        asset=str(asset).strip().lower(),
+        tf=tf_key,
         t0=t0,
-        clip=clip,
-        rest_max=float(pair_max),
-        cancel_rich=float(cancel_above),
+        bu=bid_up,
+        bd=bid_down,
+        au=ask_up,
+        ad=ask_down,
+        su=sz_up,
+        sd=sz_down,
+        sau=ask_sz_up,
+        sad=ask_sz_down,
     )
+    policy = PolicyMaker(pair_max=float(pair_max), cancel_above=float(cancel_above), clip=float(clip), fill="residual")
+    decision, next_state = policy.step(tick, state)
     rec.update(decision)
     rec["live_order"] = False
     rec["pair_gt_1"] = False
     rec["pair_max"] = float(pair_max)
     rec["cancel_above"] = float(cancel_above)
-    return rec, new_state
+    return rec, next_state
 
 
 def _interesting(rec: dict[str, Any]) -> bool:

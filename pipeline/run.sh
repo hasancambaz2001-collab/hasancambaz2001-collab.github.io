@@ -26,6 +26,11 @@ for f in \
   configs/mobo_full.yaml \
   configs/size_schedule.yaml \
   pipeline/FULL_KASA.md \
+  pipeline/TWIN_L2.md \
+  configs/l2.yaml \
+  scripts/l2_recorder.py \
+  scripts/twin_l2.py \
+  whiskas/l2.py \
   pipeline/patches/BID_BUCKET.md
 do
   if [ ! -f "$f" ]; then
