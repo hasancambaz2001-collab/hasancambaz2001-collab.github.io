@@ -28,4 +28,4 @@ python3 scripts/replay_full.py --run
 python3 scripts/replay_full.py --run --clip 10
 ```
 
-Stop line: S1$, S3$, parity their-size, parity clip10, target_clip_p50.
+Stop line: S1$, S3$, parity their-size, parity clip10, usd_ratio=clip10/their-size (computed, not hardcoded), target_clip_p50.

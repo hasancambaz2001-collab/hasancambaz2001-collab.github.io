@@ -40,8 +40,10 @@ S1_cheap dominates. S3/pair>1 stay ATTR / trade=false.
 ## 6. Replay / cover / parity
 
 - cover GATE **PASS**: mo 84.7% (94/111), bosona 80.2% (85/106) ≥80%
-- parity their-size **14110.75**
-- parity clip10 **797.60** (~5.7% of S1$ — size gap, not rule gap)
+- parity their-size **14110.75** n=209
+- parity clip10 **797.60** n=209
+- usd_ratio = **0.056524** (clip10 / their-size, computed) · gap_usd **13313.15** · kind=size_gap
+- same 209 S1 windows/pairs; their matched p50=50 mean=298.16 (163/209 > clip 10)
 
 ## 7. Queue v2 fill_ratio (NOT go/no-go)
 

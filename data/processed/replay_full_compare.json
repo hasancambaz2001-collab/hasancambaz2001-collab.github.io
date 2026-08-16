@@ -1,0 +1,51 @@
+{
+  "parity_their_size": 14110.751797728497,
+  "parity_clip10": 797.5973991534728,
+  "n_their": 209,
+  "n_clip10": 209,
+  "same_n": true,
+  "usd_ratio": 0.0565240896152583,
+  "clip10_lt_their": true,
+  "gap_usd": 13313.154398575025,
+  "kind": "size_gap",
+  "note": "Same S1 windows and pairs; only size changes (paper clip vs their matched). usd_ratio = parity_clip10 / parity_their_size, computed, not hardcoded.",
+  "size_ok": false,
+  "pair_gt_1_trade": false,
+  "pnl_from_paper_intends": false,
+  "size": {
+    "n": 209,
+    "clip": 10.0,
+    "their_size_sum": 62315.664934,
+    "clip_size_sum": 2090.0,
+    "size_sum_ratio": 0.03353891837972953,
+    "their_size_mean": 298.16107623923443,
+    "their_size_min": 0.02,
+    "their_size_p25": 12.083332,
+    "their_size_p50": 50.0,
+    "their_size_p75": 182.84,
+    "their_size_p90": 380.4355922000004,
+    "their_size_max": 11773.616062000001,
+    "n_their_gt_clip": 163,
+    "n_their_le_clip": 46
+  },
+  "wallets": {
+    "mo-money": {
+      "n": 95,
+      "their_usd": 3024.440949822228,
+      "clip10_usd": 364.9722919415769,
+      "usd_ratio": 0.12067429915040312
+    },
+    "bosona": {
+      "n": 97,
+      "their_usd": 3307.477571598925,
+      "clip10_usd": 393.6392930754552,
+      "usd_ratio": 0.11901495461544709
+    },
+    "06dc": {
+      "n": 17,
+      "their_usd": 7778.833276307348,
+      "clip10_usd": 38.98581413644059,
+      "usd_ratio": 0.005011781683916917
+    }
+  }
+}
