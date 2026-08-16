@@ -23,7 +23,7 @@ def main() -> int:
         print(f"SCAFFOLD {Path(__file__).name} (pass --run)", flush=True)
         return 0
     dumped = dump_if_needed(ROOT)
-    print(json.dumps({"dumped": dumped}, flush=True))
+    print(json.dumps({"dumped": dumped}), flush=True)
     windows = load_all_windows(ROOT)
     s1 = [w for w in windows if is_s1(w)]
     s3 = [w for w in windows if is_s3(w)]
@@ -58,6 +58,7 @@ def main() -> int:
         "",
         f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
         "Their tape. Not paper intends. pair_gt_1_trade=false. paper_maker primary.",
+        "Two-leg by market slug (Yes+No same binary). 06dc ladders are not event-wide sets.",
         "",
         f"**S1$** (maker pair<0.90) = **{s1_usd:.2f}** n={len(s1)}",
         f"**S3$** (taker pair≤0.96, not primary) = **{s3_usd:.2f}** n={len(s3)}",

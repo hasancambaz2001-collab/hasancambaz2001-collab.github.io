@@ -1,0 +1,12 @@
+{
+  "size_ok": false,
+  "pair_gt_1_trade": false,
+  "ladder": {
+    "now": 10.0,
+    "after_parity": null,
+    "target_p50": 64.044764
+  },
+  "n_cheap": 232,
+  "armed": false,
+  "note": "10 -> after_parity -> target_p50. after_parity not armed. size_ok=false."
+}

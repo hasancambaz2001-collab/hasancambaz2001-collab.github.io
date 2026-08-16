@@ -5,6 +5,7 @@ No live. `pair_gt_1_trade=false`. paper_maker is the primary 5m signal. Ask FOK 
 ## Tape
 
 mo-money, bosona, 0x06dc. Dump ≤4000 newest `/activity` rows each. Not paper intends.
+Two-leg windows group by **market slug** (Yes+No on the same binary). 06dc ladders are not one event-wide set.
 
 ## Books
 

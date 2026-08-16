@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -54,9 +55,12 @@ def main() -> int:
     out_json.write_text(json.dumps(payload, indent=2) + "\n")
     md = REPORTS / "REPLAY_FULL.md"
     prev = md.read_text(encoding="utf-8") if md.is_file() else "# REPLAY_FULL\n\nTheir tape. S1 maker pair<0.90. pair_gt_1_trade=false.\n\n"
-    if f"parity {label}" not in prev:
-        prev = prev.rstrip() + f"\n\n- parity {label} = **{usd:.2f}** n={len(windows)} clip={clip} ({datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')})\n"
-        md.write_text(prev, encoding="utf-8")
+    line = f"- parity {label} = **{usd:.2f}** n={len(windows)} clip={clip} ({datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')})"
+    if re.search(rf"^- parity {re.escape(label)} =", prev, flags=re.M):
+        prev = re.sub(rf"^- parity {re.escape(label)} =.*$", line, prev, flags=re.M)
+    else:
+        prev = prev.rstrip() + "\n\n" + line + "\n"
+    md.write_text(prev, encoding="utf-8")
     print(json.dumps({"parity": label, "usd": round(usd, 2), "n": len(windows), "clip": clip, "pair_gt_1_trade": False}))
     return 0
 

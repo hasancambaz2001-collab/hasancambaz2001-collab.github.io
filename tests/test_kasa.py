@@ -53,6 +53,46 @@ def test_s3_taker_le_096_not_primary_pair_ge_1() -> None:
     assert is_s3(skipped[0]) is False
 
 
+def test_two_leg_groups_by_market_slug_not_event() -> None:
+    """06dc ladders: Yes+No on one strike is a set; mixed strikes are not."""
+    rows = [
+        {
+            "type": "TRADE",
+            "side": "BUY",
+            "eventSlug": "what-price-will-ethereum-hit-in-august-2026",
+            "slug": "will-ethereum-reach-2200-in-august-2026",
+            "outcome": "Yes",
+            "size": 100,
+            "price": 0.10,
+            "usdcSize": 10.0,
+        },
+        {
+            "type": "TRADE",
+            "side": "BUY",
+            "eventSlug": "what-price-will-ethereum-hit-in-august-2026",
+            "slug": "will-ethereum-reach-2200-in-august-2026",
+            "outcome": "No",
+            "size": 100,
+            "price": 0.70,
+            "usdcSize": 70.0,
+        },
+        {
+            "type": "TRADE",
+            "side": "BUY",
+            "eventSlug": "what-price-will-ethereum-hit-in-august-2026",
+            "slug": "will-ethereum-reach-3000-in-august-2026",
+            "outcome": "No",
+            "size": 100,
+            "price": 0.90,
+            "usdcSize": 90.0,
+        },
+    ]
+    wins = two_leg_windows(rows, tfs=None)
+    assert len(wins) == 1
+    assert wins[0]["slug"] == "will-ethereum-reach-2200-in-august-2026"
+    assert abs(wins[0]["pair"] - 0.80) < 1e-9
+
+
 def test_size_schedule_stays_disarmed() -> None:
     src = Path("configs/size_schedule.yaml").read_text(encoding="utf-8")
     assert "size_ok: false" in src

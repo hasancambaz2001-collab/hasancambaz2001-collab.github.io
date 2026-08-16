@@ -1,0 +1,35 @@
+{
+  "s1_usd": 14110.751797728497,
+  "s3_usd": 5078.571210230301,
+  "s1_n": 209,
+  "s3_n": 50,
+  "pair_gt_1_trade": false,
+  "primary": "paper_maker",
+  "ask_fok_primary": false,
+  "pnl_from_paper_intends": false,
+  "wallets": {
+    "mo-money": {
+      "s1_n": 95,
+      "s1_usd": 3024.440949822228,
+      "s3_n": 23,
+      "s3_usd": 700.5632612451009
+    },
+    "bosona": {
+      "s1_n": 97,
+      "s1_usd": 3307.477571598925,
+      "s3_n": 20,
+      "s3_usd": 412.9323974471027
+    },
+    "06dc": {
+      "s1_n": 17,
+      "s1_usd": 7778.833276307348,
+      "s3_n": 7,
+      "s3_usd": 3965.075551538098
+    }
+  },
+  "dumped": {
+    "mo-money": 4000,
+    "bosona": 4000,
+    "06dc": 4000
+  }
+}

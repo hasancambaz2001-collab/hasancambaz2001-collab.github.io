@@ -134,7 +134,8 @@ def two_leg_windows(rows: list[dict[str, Any]], *, tfs: tuple[str, ...] | None) 
         tf = classify_tf(row.get("eventSlug"), row.get("slug"))
         if tfs is not None and tf not in tfs:
             continue
-        slug = str(row.get("eventSlug") or row.get("slug") or "")
+        # Market slug, not eventSlug: 06dc ladders share an event across strikes.
+        slug = str(row.get("slug") or row.get("eventSlug") or "")
         if not slug:
             continue
         leg = _leg(row)
