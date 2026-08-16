@@ -346,9 +346,18 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
                     "order_id": o.get("order_id"),
                     "status": o.get("status"),
                     "filled_size": o.get("filled_size"),
+                    "trader_side": o.get("trader_side"),
+                    "fill_role": o.get("fill_role"),
                 }
                 for o in orders
             ],
             "real_fill_rate": rec.get("real_fill_rate"),
+            "lag_ms": rec.get("lag_ms"),
+            "adverse_action": rec.get("adverse_action", rec.get("adverse")),
+            "residual": rec.get("residual"),
+            "fill_role": rec.get("fill_role"),
+            "s1_edge": rec.get("s1_edge"),
+            "both_fill": rec.get("both_fill"),
+            "one_leg": rec.get("one_leg"),
         }
     return out

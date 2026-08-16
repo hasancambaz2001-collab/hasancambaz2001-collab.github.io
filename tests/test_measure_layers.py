@@ -1,4 +1,4 @@
-from whiskas.measure_layers import attach_layers, still250_ok
+from whiskas.measure_layers import attach_layers, guard_still250_send, still250_ok
 
 
 def test_still250_is_cheap_and_deep_not_level_eaten() -> None:
@@ -33,6 +33,11 @@ def test_layers_unmixed_on_rest() -> None:
     assert rec["real_fill_rate"] is None
     assert rec["pair_gt_1_trade"] is False
     assert rec["sim_fill"] is None
+    rec["still_there_250ms"] = True
+    rec["bid_sum_250"] = 0.87
+    assert guard_still250_send(rec) is None
+    rec["still_there_250ms"] = False
+    assert guard_still250_send(rec) == "still250_false"
 
 
 def test_skip_logs_skip_reason_and_null_real_fill() -> None:

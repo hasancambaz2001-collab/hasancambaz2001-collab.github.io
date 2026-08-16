@@ -22,7 +22,7 @@ if str(ROOT) not in sys.path:
 
 from whiskas.config import load_config
 from whiskas.l2 import BookTick, PolicyMaker, decide_maker, level_eaten
-from whiskas.measure_layers import attach_layers, still250_ok
+from whiskas.measure_layers import apply_still250_send_gate, attach_layers, still250_ok
 from whiskas.paper import (
     append_jsonl,
     asset_window_slug,
@@ -189,6 +189,7 @@ def snapshot_maker(
     rec["tf"] = tf_key
     still = None
     if str(decision.get("reason") or "") == "rest":
+        rec["t_intent"] = time.time()
         still = _probe_still250(
             tokens=tok,
             clip=float(clip),
@@ -208,6 +209,12 @@ def snapshot_maker(
             rec["still_there_250ms"] = False
             rec["still250"] = False
         rec["still250_absent"] = False
+        apply_still250_send_gate(rec, pair_max=float(pair_max))
+        if rec.get("send_blocked"):
+            next_state = None
+    else:
+        rec["would_send"] = False
+        rec.setdefault("send_blocked", None)
     return rec, next_state
 
 
@@ -231,14 +238,28 @@ def _probe_still250(
         book_down = books.get("Down") or {}
     bid_up, sz_up = best_bid(book_up)
     bid_down, sz_down = best_bid(book_down)
+    ask_up, _ask_sz_up = best_ask(book_up)
+    ask_down, _ask_sz_down = best_ask(book_down)
     if bid_up is None or bid_down is None:
-        return {"still_there_250ms": False, "bid_sum_250": None, "min_size_250": 0.0}
+        return {
+            "still_there_250ms": False,
+            "bid_sum_250": None,
+            "min_size_250": 0.0,
+            "bid_up_250": bid_up,
+            "bid_down_250": bid_down,
+            "ask_up_250": ask_up,
+            "ask_down_250": ask_down,
+        }
     bid_sum = float(bid_up) + float(bid_down)
     min_size = min(float(sz_up), float(sz_down))
     return {
         "still_there_250ms": still250_ok(bid_sum, min_size, clip=clip, pair_max=pair_max),
         "bid_sum_250": bid_sum,
         "min_size_250": min_size,
+        "bid_up_250": float(bid_up),
+        "bid_down_250": float(bid_down),
+        "ask_up_250": None if ask_up is None else float(ask_up),
+        "ask_down_250": None if ask_down is None else float(ask_down),
     }
 
 

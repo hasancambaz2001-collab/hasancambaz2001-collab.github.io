@@ -301,6 +301,8 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert isinstance(rec["still_there_250ms"], bool)
     assert rec["still250"] is True
     assert rec["intent"] is True
+    assert rec.get("send_blocked") is None
+    assert rec.get("would_send") is True
     assert rec["still250_absent"] is False
     assert rec["skip_reason"] is None
     assert rec["bid_sum"] is not None
@@ -350,6 +352,10 @@ def test_rest_intent_always_writes_still_there_250ms(monkeypatch) -> None:
     assert rec["reason"] == "rest"
     assert "still_there_250ms" in rec
     assert rec["still_there_250ms"] is False
+    assert rec.get("send_blocked") == "still250_false"
+    assert rec.get("would_send") is False
+    assert _state is None
     src = Path("scripts/paper_maker.py").read_text(encoding="utf-8")
     assert "still_there_250ms" in src
     assert "_probe_still250" in src
+    assert "apply_still250_send_gate" in src

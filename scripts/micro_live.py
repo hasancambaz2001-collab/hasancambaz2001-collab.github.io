@@ -33,14 +33,15 @@ from whiskas.clob_orders import (
     cancel_order,
     connect,
     create_fok_buy,
-    create_gtc_buy,
+    create_gtc_buy_pair,
     fetch_order,
     real_fill_rate,
     refuse_send,
+    stamp_trader_side,
 )
 from whiskas.config import load_config
 from whiskas.live_config import G5_FLAG, G6_FLAG, LIVE_READY
-from whiskas.measure_layers import attach_layers
+from whiskas.measure_layers import apply_still250_send_gate, attach_layers, guard_still250_send
 from whiskas.micro_report import (
     FILL_LOG,
     INTENT_LOG,
@@ -51,7 +52,7 @@ from whiskas.micro_report import (
     write_24h,
 )
 from whiskas.paper import append_jsonl, current_t0
-from scripts.paper_maker import _probe_still250, snapshot_maker
+from scripts.paper_maker import snapshot_maker
 
 MICRO = ROOT / "configs" / "generated" / "MICRO_LIVE_TRIAL.yaml"
 OUT = ROOT / "data" / "micro_live" / "intended.jsonl"
@@ -64,6 +65,8 @@ CLIP_WITH_G5 = 10.0
 MICRO_TRIAL_CLIP = 5.0
 MAX_DAILY_LOSS = 25.0
 MAX_OPEN = 2
+UNPAIRED_TIMEOUT_SEC = 45.0
+POST_ACK_SEC = 0.25
 ASSET = "btc"
 TF = "5m"
 
@@ -98,7 +101,16 @@ def print_preconditions() -> dict[str, Any]:
     paper_src = (ROOT / "scripts" / "paper_maker.py").read_text(encoding="utf-8")
     still_ok = "still_there_250ms" in paper_src and "_probe_still250" in paper_src
     clob_src = (ROOT / "scripts" / "micro_live.py").read_text(encoding="utf-8")
-    path_ok = all(s in clob_src for s in ("create_gtc_buy", "cancel_order", "fetch_order"))
+    path_ok = all(
+        s in clob_src
+        for s in (
+            "create_gtc_buy_pair",
+            "cancel_order",
+            "fetch_order",
+            "still250_false",
+            "guard_still250_send",
+        )
+    )
     pre = {
         "1_g6_flag": g6,
         "2_micro_yaml": yaml_ok,
@@ -206,6 +218,132 @@ def _guard_rest(rec: dict[str, Any], *, clip: float) -> str | None:
     return None
 
 
+def _best_bid_join_prices(rec: dict[str, Any]) -> tuple[float, float] | None:
+    """Join still250 / snapshot best bids only. Never post off-touch or through the ask."""
+    up = rec.get("bid_up_250", rec.get("bid_up"))
+    down = rec.get("bid_down_250", rec.get("bid_down"))
+    if up is None or down is None:
+        return None
+    if float(up) + float(down) > PAIR_MAX + 1e-12:
+        return None
+    return float(up), float(down)
+
+
+def inventory_flat(inv: dict[str, float] | None) -> bool:
+    if not inv:
+        return True
+    return abs(float(inv.get("Up") or 0.0) - float(inv.get("Down") or 0.0)) <= 1e-12
+
+
+def residual_of(orders: list[dict[str, Any]], *, clip: float) -> dict[str, float]:
+    out = {"Up": 0.0, "Down": 0.0}
+    for order in orders:
+        outcome = str(order.get("outcome") or "")
+        if outcome not in out:
+            continue
+        rested = float(order.get("rested_size") or order.get("size") or clip)
+        filled = float(order.get("filled_size") or 0.0)
+        out[outcome] += max(0.0, rested - filled)
+    return out
+
+
+def _inv_from_orders(orders: list[dict[str, Any]]) -> dict[str, float]:
+    inv = {"Up": 0.0, "Down": 0.0}
+    for order in orders:
+        outcome = str(order.get("outcome") or "")
+        if outcome in inv:
+            inv[outcome] += float(order.get("filled_size") or 0.0)
+    return inv
+
+
+def _block_send(rec: dict[str, Any], reason: str, *, clip: float) -> dict[str, Any]:
+    rec["send_blocked"] = reason
+    rec["would_send"] = False
+    rec["live_order"] = False
+    rec["real_fill"] = None
+    rec["real_fill_rate"] = None
+    rec["pair_gt_1_trade"] = False
+    rec.setdefault("lag_ms", None)
+    rec.setdefault("adverse_action", rec.get("adverse"))
+    rec.setdefault("residual", None)
+    rec.setdefault("fill_role", None)
+    rec.setdefault("s1_edge", rec.get("bid_sum") or rec.get("intent_bid_sum"))
+    return rec
+
+
+def _fill_px(order: dict[str, Any]) -> float | None:
+    for key in ("trade_price", "fill_px", "price"):
+        val = order.get(key)
+        if val is not None:
+            try:
+                return float(val)
+            except (TypeError, ValueError):
+                continue
+    return None
+
+
+def _buy_off_touch(px: Any, best_bid: Any) -> bool:
+    if px is None or best_bid is None:
+        return False
+    return float(px) + 1e-12 < float(best_bid)
+
+
+def _reread_book(rec: dict[str, Any]) -> dict[str, Any]:
+    from whiskas.paper import best_ask, best_bid, fetch_book
+
+    out: dict[str, Any] = {}
+    try:
+        if rec.get("token_up"):
+            book_up = fetch_book(str(rec["token_up"]))
+            bu, _ = best_bid(book_up)
+            au, _ = best_ask(book_up)
+            out["bid_up"] = bu
+            out["ask_up"] = au
+        if rec.get("token_down"):
+            book_down = fetch_book(str(rec["token_down"]))
+            bd, _ = best_bid(book_down)
+            ad, _ = best_ask(book_down)
+            out["bid_down"] = bd
+            out["ask_down"] = ad
+    except Exception:
+        return out
+    if out.get("bid_up") is not None and out.get("bid_down") is not None:
+        out["bid_sum"] = float(out["bid_up"]) + float(out["bid_down"])
+    return out
+
+
+def _refresh_orders(client: Any, orders: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    refreshed: list[dict[str, Any]] = []
+    for order in orders:
+        oid = order.get("order_id")
+        if not oid:
+            continue
+        try:
+            got = fetch_order(client, str(oid))
+            merged = {**order, **got}
+            if float(merged.get("filled_size") or 0.0) > 0:
+                try:
+                    stamp_trader_side(client, merged)
+                except Exception:
+                    pass
+            refreshed.append(merged)
+        except Exception:
+            refreshed.append(order)
+    return refreshed
+
+
+def _stamp_fill_fields(rec: dict[str, Any], orders: list[dict[str, Any]], *, clip: float) -> None:
+    rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
+    rec["residual"] = residual_of(orders, clip=clip)
+    roles = [o.get("trader_side") or o.get("fill_role") for o in orders if o.get("trader_side") or o.get("fill_role")]
+    rec["fill_role"] = roles[0] if len(set(roles)) == 1 else (roles or None)
+    rec["adverse_action"] = rec.get("adverse_action", rec.get("adverse"))
+    filled_n = sum(1 for o in orders if float(o.get("filled_size") or 0.0) > 0)
+    rec["both_fill"] = filled_n >= 2
+    rec["one_leg"] = filled_n == 1
+    rec["pair_gt_1_trade"] = False
+
+
 def send_rest_both(
     client: Any,
     rec: dict[str, Any],
@@ -213,33 +351,38 @@ def send_rest_both(
     *,
     clip: float,
 ) -> dict[str, Any]:
-    """GTC both legs. Cancel leftover if one posts and the other fails. No pair>1."""
-    guard = _guard_rest(rec, clip=clip)
+    """GTC both legs at best bid, one post_orders call. still250 false → no send. No pair>1."""
+    rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
+    still_block = guard_still250_send(rec)
+    book_block = _guard_rest(rec, clip=clip)
+    guard = still_block or book_block
     if guard:
-        rec["send_blocked"] = guard
-        attach_layers(rec, still=None, clip=clip)
-        rec["real_fill"] = None
-        rec["real_fill_rate"] = None
-        rec["live_order"] = False
-        return rec
+        return _block_send(rec, guard, clip=clip)
+    prices = _best_bid_join_prices(rec)
+    if prices is None:
+        return _block_send(rec, "not_best_bid", clip=clip)
+    px_up, px_down = prices
+    rec["join_bid_up"] = px_up
+    rec["join_bid_down"] = px_down
+    t_intent = rec.get("t_intent")
+    t0_send = time.time()
     posted: list[dict[str, Any]] = []
     try:
-        up = create_gtc_buy(client, token_id=tokens["Up"], price=float(rec["bid_up"]), size=float(clip))
-        posted.append({**up, "outcome": "Up"})
-        down = create_gtc_buy(client, token_id=tokens["Down"], price=float(rec["bid_down"]), size=float(clip))
-        posted.append({**down, "outcome": "Down"})
+        posted = create_gtc_buy_pair(
+            client,
+            token_up=tokens["Up"],
+            price_up=px_up,
+            token_down=tokens["Down"],
+            price_down=px_down,
+            size=float(clip),
+        )
     except AuthAbsent:
-        for prev in posted:
-            if prev.get("order_id"):
-                try:
-                    cancel_order(client, str(prev["order_id"]))
-                except Exception:
-                    pass
         rec["send_blocked"] = "AUTH_ABSENT"
-        attach_layers(rec, still=None, clip=clip)
+        rec["live_order"] = False
         rec["real_fill"] = None
         rec["real_fill_rate"] = None
-        rec["live_order"] = False
+        rec["would_send"] = False
+        rec["lag_ms"] = (time.time() - float(t_intent or t0_send)) * 1000.0
         return rec
     except Exception as exc:
         for prev in posted:
@@ -249,35 +392,33 @@ def send_rest_both(
                 except Exception:
                     pass
         rec["send_error"] = type(exc).__name__
-        attach_layers(rec, still=None, clip=clip)
+        rec["live_order"] = False
         rec["real_fill"] = None
         rec["real_fill_rate"] = None
-        rec["live_order"] = False
+        rec["would_send"] = False
+        rec["lag_ms"] = (time.time() - float(t_intent or t0_send)) * 1000.0
         return rec
-    refreshed = []
-    for order in posted:
-        oid = order.get("order_id")
-        if not oid:
-            continue
-        try:
-            refreshed.append({**order, **fetch_order(client, str(oid))})
-        except Exception:
-            refreshed.append(order)
+    rec["lag_ms"] = (time.time() - float(t_intent or t0_send)) * 1000.0
+    rec["post_ack_ms"] = (time.time() - t0_send) * 1000.0
+    refreshed = _refresh_orders(client, posted)
     if not refreshed:
         rec["real_fill"] = None
         rec["real_fill_rate"] = None
         rec["live_order"] = False
         rec["send_blocked"] = "no_order_id"
+        rec["would_send"] = False
         return rec
     rec["real_fill"] = {
         "orders": refreshed,
         "filled_size": sum(float(o.get("filled_size") or 0.0) for o in refreshed),
-        "rested_size": sum(float(o.get("rested_size") or 0.0) for o in refreshed),
+        "rested_size": sum(float(o.get("rested_size") or o.get("size") or 0.0) for o in refreshed),
     }
     rec["real_fill_rate"] = real_fill_rate(refreshed)
     rec["live_order"] = True
     rec["pair_gt_1_trade"] = False
     rec["intent"] = True
+    rec["would_send"] = True
+    _stamp_fill_fields(rec, refreshed, clip=clip)
     return rec
 
 
@@ -287,10 +428,14 @@ def cancel_open(client: Any, orders: list[dict[str, Any]], *, reason: str) -> li
         oid = order.get("order_id")
         if not oid:
             continue
+        if _filled(order, clip=float(order.get("rested_size") or order.get("size") or 0.0) or 5.0):
+            out.append({**order, "cancel_reason": reason})
+            continue
         try:
             cancelled = cancel_order(client, str(oid))
             cancelled["cancel_reason"] = reason
-            out.append(cancelled)
+            cancelled["outcome"] = order.get("outcome")
+            out.append({**order, **cancelled, "cancel_reason": reason})
         except Exception:
             out.append({**order, "cancel_reason": reason, "status": "cancel_failed"})
     return out
@@ -303,52 +448,143 @@ def _filled(order: dict[str, Any], *, clip: float) -> bool:
     return st == "filled" or (rested > 0 and filled + 1e-12 >= rested)
 
 
+def _unpaired_notional(orders: list[dict[str, Any]], *, clip: float) -> float:
+    filled = [o for o in orders if float(o.get("filled_size") or 0.0) > 0]
+    leftover = [o for o in orders if not _filled(o, clip=clip)]
+    if len(filled) != 1:
+        return 0.0
+    px = _fill_px(filled[0])
+    if px is None:
+        return 0.0
+    return float(px) * float(filled[0].get("filled_size") or 0.0)
+
+
 def manage_open(
     client: Any,
     rec: dict[str, Any],
     orders: list[dict[str, Any]],
     *,
     clip: float,
+    book_now: dict[str, Any] | None = None,
+    force_flatten: bool = False,
 ) -> tuple[list[dict[str, Any]], str | None]:
-    """Cancel if sum>0.92. Adverse: one fill → complete only if fill+opp<=0.90 else cancel leftover."""
-    bid_sum = rec.get("bid_sum")
-    if bid_sum is not None and float(bid_sum) > CANCEL_ABOVE + 1e-12:
-        return cancel_open(client, orders, reason="rich_cancel"), "rich_cancel"
-    refreshed: list[dict[str, Any]] = []
-    for order in orders:
-        oid = order.get("order_id")
-        if not oid:
-            continue
-        try:
-            refreshed.append({**order, **fetch_order(client, str(oid))})
-        except Exception:
-            refreshed.append(order)
+    """One-leg/adverse FIRST, then off-touch, then rich_cancel. Complete only if fill+opp<=0.90."""
+    refreshed = _refresh_orders(client, orders)
+    book = book_now if book_now is not None else _reread_book(rec)
+    if book.get("ask_up") is not None:
+        rec["ask_up"] = book.get("ask_up")
+    if book.get("ask_down") is not None:
+        rec["ask_down"] = book.get("ask_down")
+    if book.get("bid_up") is not None:
+        rec["live_bid_up"] = book.get("bid_up")
+    if book.get("bid_down") is not None:
+        rec["live_bid_down"] = book.get("bid_down")
     filled = [o for o in refreshed if _filled(o, clip=clip)]
     leftover = [o for o in refreshed if not _filled(o, clip=clip)]
     if len(filled) == 1 and leftover:
-        fill_px = filled[0].get("price")
+        fill_px = _fill_px(filled[0])
         outcome = filled[0].get("outcome")
-        opp_ask = rec.get("ask_down") if outcome == "Up" else rec.get("ask_up")
-        action = adverse_action(fill_px if fill_px is None else float(fill_px), None if opp_ask is None else float(opp_ask))
+        opp_ask = book.get("ask_down") if outcome == "Up" else book.get("ask_up")
+        if opp_ask is None:
+            opp_ask = rec.get("ask_down") if outcome == "Up" else rec.get("ask_up")
+        action = adverse_action(
+            fill_px if fill_px is None else float(fill_px),
+            None if opp_ask is None else float(opp_ask),
+        )
         rec["adverse"] = action
+        rec["adverse_action"] = action
         if action != "complete":
-            return cancel_open(client, leftover, reason=action), action
+            cancelled = cancel_open(client, leftover, reason=action)
+            _stamp_fill_fields(rec, filled + cancelled, clip=clip)
+            return filled + cancelled, action
         token = rec.get("token_down") if outcome == "Up" else rec.get("token_up")
         if not token or opp_ask is None:
-            return cancel_open(client, leftover, reason="cancel_missing_opp"), "cancel_missing_opp"
+            cancelled = cancel_open(client, leftover, reason="cancel_missing_opp")
+            _stamp_fill_fields(rec, filled + cancelled, clip=clip)
+            return filled + cancelled, "cancel_missing_opp"
         try:
             fok = create_fok_buy(client, token_id=str(token), price=float(opp_ask), size=float(clip))
-            leftover_ids = [o.get("order_id") for o in leftover if o.get("order_id")]
-            if leftover_ids:
+            if leftover:
                 cancel_open(client, leftover, reason="replaced_by_fok_complete")
-            refreshed = filled + [{**fok, "outcome": "Down" if outcome == "Up" else "Up"}]
+            refreshed = filled + [{**fok, "outcome": "Down" if outcome == "Up" else "Up", "fill_role": "fok_complete"}]
             rec["complete"] = True
+            rec["adverse_action"] = "complete"
+            _stamp_fill_fields(rec, refreshed, clip=clip)
             return refreshed, "complete"
         except AuthAbsent:
-            return cancel_open(client, leftover, reason="AUTH_ABSENT"), "AUTH_ABSENT"
+            cancelled = cancel_open(client, leftover, reason="AUTH_ABSENT")
+            return filled + cancelled, "AUTH_ABSENT"
         except Exception:
-            return cancel_open(client, leftover, reason="complete_failed"), "complete_failed"
+            cancelled = cancel_open(client, leftover, reason="complete_failed")
+            return filled + cancelled, "complete_failed"
+    if filled and not leftover:
+        rec["adverse_action"] = rec.get("adverse_action")
+        _stamp_fill_fields(rec, refreshed, clip=clip)
+        return refreshed, "filled_both"
+    if leftover and force_flatten:
+        cancelled = cancel_open(client, leftover, reason="unpaired_timeout")
+        rec["adverse_action"] = "unpaired_timeout"
+        _stamp_fill_fields(rec, filled + cancelled, clip=clip)
+        return filled + cancelled, "unpaired_timeout"
+    if leftover:
+        off = False
+        for order in leftover:
+            outcome = order.get("outcome")
+            best = book.get("bid_up") if outcome == "Up" else book.get("bid_down")
+            if best is None:
+                best = rec.get("bid_up") if outcome == "Up" else rec.get("bid_down")
+            if _buy_off_touch(order.get("price"), best):
+                off = True
+                break
+        if off:
+            cancelled = cancel_open(client, leftover, reason="off_touch")
+            rec["adverse_action"] = "off_touch"
+            _stamp_fill_fields(rec, filled + cancelled, clip=clip)
+            return filled + cancelled, "off_touch"
+    bid_sum = book.get("bid_sum", rec.get("bid_sum"))
+    if leftover and bid_sum is not None and float(bid_sum) > CANCEL_ABOVE + 1e-12:
+        cancelled = cancel_open(client, leftover, reason="rich_cancel")
+        rec["adverse_action"] = "rich_cancel"
+        _stamp_fill_fields(rec, filled + cancelled, clip=clip)
+        return filled + cancelled, "rich_cancel"
+    _stamp_fill_fields(rec, refreshed, clip=clip)
     return refreshed, None
+
+
+def _pop_reasons() -> set[str]:
+    return {
+        "rich_cancel",
+        "rich_complete",
+        "pair_gt_1_refused",
+        "cancel_missing_opp",
+        "daily_loss",
+        "complete",
+        "filled_both",
+        "off_touch",
+        "unpaired_timeout",
+        "AUTH_ABSENT",
+        "complete_failed",
+    }
+
+
+def after_send_manage(
+    client: Any,
+    rec: dict[str, Any],
+    orders: list[dict[str, Any]],
+    *,
+    clip: float,
+    sleep_s: float = POST_ACK_SEC,
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Immediate one-leg if MATCHED; then 200–500ms off-touch cancel both."""
+    why: str | None = None
+    filled_n = sum(1 for o in orders if float(o.get("filled_size") or 0.0) > 0)
+    if filled_n == 1:
+        orders, why = manage_open(client, rec, orders, clip=clip)
+        if why in _pop_reasons():
+            return orders, why
+    if sleep_s > 0:
+        time.sleep(min(0.5, max(0.2, float(sleep_s))))
+    return manage_open(client, rec, orders, clip=clip)
 
 
 def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
@@ -371,6 +607,9 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
         return payload
     deadline = time.time() + max(0.0, float(seconds))
     open_windows: dict[int, list[dict[str, Any]]] = {}
+    open_meta: dict[int, dict[str, Any]] = {}
+    inventory: dict[int, dict[str, float]] = {}
+    loss_charged: set[int] = set()
     daily_loss = 0.0
     n_sent = 0
     halted = False
@@ -387,32 +626,64 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
         rec["asset"] = ASSET
         rec["tf"] = TF
         t0 = int(rec.get("t0") or current_t0(tf=TF))
-        bid_sum = rec.get("bid_sum")
-        if t0 in open_windows:
-            orders, why = manage_open(client, rec, open_windows[t0], clip=clip)
-            if why in {"rich_cancel", "rich_complete", "pair_gt_1_refused", "cancel_missing_opp", "daily_loss"}:
-                open_windows.pop(t0, None)
-            elif why == "complete":
-                open_windows.pop(t0, None)
-            else:
-                open_windows[t0] = orders
-        if (
-            rec.get("reason") == "rest"
-            and t0 not in open_windows
-            and len(open_windows) < max_open
-        ):
-            still = _probe_still250(
-                tokens={"Up": rec.get("token_up") or "", "Down": rec.get("token_down") or ""},
+        rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
+        apply_still250_send_gate(rec)
+        for ot0 in list(open_windows):
+            meta = open_meta.get(ot0) or {}
+            age = time.time() - float(meta.get("rest_ts") or time.time())
+            ended = int(ot0) != int(t0)
+            force = ended or age > UNPAIRED_TIMEOUT_SEC + 1e-12
+            orders, why = manage_open(
+                client,
+                rec if int(ot0) == int(t0) else {**rec, "token_up": meta.get("token_up"), "token_down": meta.get("token_down")},
+                open_windows[ot0],
                 clip=clip,
-                pair_max=PAIR_MAX,
+                force_flatten=force,
             )
-            attach_layers(rec, still=still, clip=clip)
+            inventory[ot0] = _inv_from_orders(orders)
+            if why in {"rich_complete", "pair_gt_1_refused", "unpaired_timeout", "cancel_missing_opp"} and ot0 not in loss_charged:
+                daily_loss += _unpaired_notional(orders, clip=clip)
+                loss_charged.add(ot0)
+            if why in _pop_reasons():
+                open_windows.pop(ot0, None)
+                open_meta.pop(ot0, None)
+            else:
+                open_windows[ot0] = orders
+        can_rest = (
+            rec.get("reason") == "rest"
+            and rec.get("would_send") is True
+            and guard_still250_send(rec) is None
+            and t0 not in open_windows
+            and inventory_flat(inventory.get(t0))
+            and len(open_windows) < max_open
+        )
+        if can_rest:
             tokens = {"Up": rec["token_up"], "Down": rec["token_down"]}
             rec = send_rest_both(client, rec, tokens, clip=clip)
             if rec.get("live_order") and rec.get("real_fill"):
-                open_windows[t0] = list((rec["real_fill"] or {}).get("orders") or [])
+                orders = list((rec["real_fill"] or {}).get("orders") or [])
+                orders, why = after_send_manage(client, rec, orders, clip=clip)
+                rec["real_fill"] = {
+                    "orders": orders,
+                    "filled_size": sum(float(o.get("filled_size") or 0.0) for o in orders),
+                    "rested_size": sum(float(o.get("rested_size") or o.get("size") or 0.0) for o in orders),
+                }
+                rec["real_fill_rate"] = real_fill_rate(orders)
+                _stamp_fill_fields(rec, orders, clip=clip)
+                inventory[t0] = _inv_from_orders(orders)
+                if why in {"rich_complete", "pair_gt_1_refused", "unpaired_timeout", "cancel_missing_opp"} and t0 not in loss_charged:
+                    daily_loss += _unpaired_notional(orders, clip=clip)
+                    loss_charged.add(t0)
                 n_sent += 1
+                if why not in _pop_reasons():
+                    open_windows[t0] = orders
+                    open_meta[t0] = {
+                        "rest_ts": time.time(),
+                        "token_up": rec.get("token_up"),
+                        "token_down": rec.get("token_down"),
+                    }
         rec["pair_gt_1_trade"] = False
+        rec["daily_loss_usd"] = daily_loss
         log_layers(rec)
         time.sleep(max(0.5, float(interval)))
     payload = probe()

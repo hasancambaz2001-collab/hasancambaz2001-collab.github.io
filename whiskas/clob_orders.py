@@ -157,6 +157,76 @@ def create_gtc_buy(
     return _post_buy(client, token_id=token_id, price=price, size=size, order_type="GTC")
 
 
+def create_gtc_buy_pair(
+    client: Any,
+    *,
+    token_up: str,
+    price_up: float,
+    token_down: str,
+    price_down: float,
+    size: float,
+) -> list[dict[str, Any]]:
+    """Sign both GTCs then post_orders in one HTTP call. Fallback: sequential post."""
+    if client is None:
+        raise AuthAbsent("AUTH_ABSENT")
+    _ClobClient, _ApiCreds, OrderArgs, OrderType, _OrderPayload = _import_client()
+    args_up = OrderArgs(token_id=str(token_up), price=float(price_up), size=float(size), side="BUY")
+    args_down = OrderArgs(token_id=str(token_down), price=float(price_down), size=float(size), side="BUY")
+    posted: list[dict[str, Any]] = []
+    try:
+        signed_up = client.create_order(args_up)
+        signed_down = client.create_order(args_down)
+        from py_clob_client_v2.clob_types import PostOrdersV2Args
+
+        raw = client.post_orders(
+            [
+                PostOrdersV2Args(order=signed_up, orderType=OrderType.GTC),
+                PostOrdersV2Args(order=signed_down, orderType=OrderType.GTC),
+            ]
+        )
+        rows = raw if isinstance(raw, list) else [raw]
+        for row, outcome, px, tok in (
+            (rows[0] if rows else {}, "Up", price_up, token_up),
+            (rows[1] if len(rows) > 1 else {}, "Down", price_down, token_down),
+        ):
+            parsed = parse_order_status(row if isinstance(row, dict) else {})
+            parsed["sent"] = bool(parsed.get("order_id"))
+            parsed["side"] = "BUY"
+            parsed["type"] = "GTC"
+            parsed["price"] = float(px)
+            parsed["size"] = float(size)
+            parsed["token_id"] = str(tok)
+            parsed["outcome"] = outcome
+            parsed["maker_bid"] = True
+            posted.append(parsed)
+        if len(posted) == 2 and all(p.get("order_id") for p in posted):
+            return posted
+        for prev in posted:
+            if prev.get("order_id"):
+                try:
+                    cancel_order(client, str(prev["order_id"]))
+                except Exception:
+                    pass
+        posted = []
+    except AuthAbsent:
+        raise
+    except Exception:
+        posted = []
+    up = create_gtc_buy(client, token_id=token_up, price=price_up, size=size)
+    posted = [{**up, "outcome": "Up", "maker_bid": True}]
+    try:
+        down = create_gtc_buy(client, token_id=token_down, price=price_down, size=size)
+        posted.append({**down, "outcome": "Down", "maker_bid": True})
+    except Exception:
+        if posted and posted[0].get("order_id"):
+            try:
+                cancel_order(client, str(posted[0]["order_id"]))
+            except Exception:
+                pass
+        raise
+    return posted
+
+
 def create_fok_buy(
     client: Any,
     *,
@@ -187,7 +257,58 @@ def fetch_order(client: Any, order_id: str) -> dict[str, Any]:
     parsed = parse_order_status(resp if isinstance(resp, dict) else {})
     parsed["order_id"] = parsed.get("order_id") or str(order_id)
     parsed["sent"] = True
+    if isinstance(resp, dict):
+        parsed["associate_trades"] = resp.get("associate_trades") or []
+        parsed["created_at"] = resp.get("created_at")
+        if resp.get("price") is not None:
+            parsed["clob_price"] = resp.get("price")
     return parsed
+
+
+def stamp_trader_side(client: Any, order: dict[str, Any]) -> dict[str, Any]:
+    """CLOB trader_side maker|taker. Separate from S1 edge. No invented fill."""
+    oid = order.get("order_id")
+    if client is None or not oid:
+        return order
+    try:
+        from py_clob_client_v2.clob_types import TradeParams
+    except Exception:
+        return order
+    trade_ids = list(order.get("associate_trades") or [])
+    if not trade_ids:
+        try:
+            raw = client.get_order(str(oid))
+            if isinstance(raw, dict):
+                trade_ids = list(raw.get("associate_trades") or [])
+                order["associate_trades"] = trade_ids
+        except Exception:
+            return order
+    for tid in trade_ids[:4]:
+        try:
+            found = client.get_trades(TradeParams(id=str(tid)), only_first_page=True)
+        except Exception:
+            continue
+        rows = found if isinstance(found, list) else []
+        if not rows:
+            continue
+        trade = rows[0] if isinstance(rows[0], dict) else {}
+        side = str(trade.get("trader_side") or "").strip().lower()
+        if side not in {"maker", "taker"}:
+            if str(trade.get("taker_order_id") or "") == str(oid):
+                side = "taker"
+            else:
+                side = "maker"
+        order["trader_side"] = side
+        order["fill_role"] = side
+        try:
+            order["trade_price"] = float(trade["price"])
+        except (KeyError, TypeError, ValueError):
+            pass
+        return order
+    if float(order.get("filled_size") or 0.0) <= 0:
+        order.setdefault("trader_side", None)
+        order.setdefault("fill_role", None)
+    return order
 
 
 def refuse_send() -> dict[str, Any]:

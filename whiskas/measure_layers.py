@@ -81,10 +81,18 @@ def attach_layers(
         rec["still_there_250ms"] = None
         rec["bid_sum_250"] = None
         rec["min_size_250"] = None
+        rec["bid_up_250"] = None
+        rec["bid_down_250"] = None
+        rec["ask_up_250"] = None
+        rec["ask_down_250"] = None
         rec["still250_absent"] = True
     else:
         rec["bid_sum_250"] = still.get("bid_sum_250")
         rec["min_size_250"] = still.get("min_size_250")
+        rec["bid_up_250"] = still.get("bid_up_250")
+        rec["bid_down_250"] = still.get("bid_down_250")
+        rec["ask_up_250"] = still.get("ask_up_250")
+        rec["ask_down_250"] = still.get("ask_down_250")
         ok = still.get("still_there_250ms")
         if ok is None:
             ok = still250_ok(
@@ -98,4 +106,23 @@ def attach_layers(
         rec["still250_absent"] = False
     if reason in {"complete", "filled_both"}:
         rec["sim_fill"] = True
+    return rec
+
+
+def guard_still250_send(rec: dict[str, Any], *, pair_max: float = PAIR_MAX) -> str | None:
+    """SEND YOK unless still250 is true and bid_sum_250 <= pair_max. Shared by paper + live."""
+    if rec.get("still_there_250ms") is not True:
+        return "still250_false"
+    bid_250 = rec.get("bid_sum_250")
+    if bid_250 is None:
+        return "still250_false"
+    if float(bid_250) > float(pair_max) + 1e-12:
+        return "bid_sum_250_gt_pair_max"
+    return None
+
+
+def apply_still250_send_gate(rec: dict[str, Any], *, pair_max: float = PAIR_MAX) -> dict[str, Any]:
+    blocked = guard_still250_send(rec, pair_max=pair_max)
+    rec["send_blocked"] = blocked
+    rec["would_send"] = blocked is None and str(rec.get("reason") or "") == "rest"
     return rec
