@@ -18,3 +18,5 @@ data/processed/whiskas_role_windows.parquet
 !data/raw/.gitkeep
 data/paper/*
 !data/paper/.gitkeep
+data/paper06dc/*
+!data/paper06dc/.gitkeep
