@@ -4,4 +4,4 @@ live: false
 clip: 21
 pair_max: 0.96
 pair_max_cap: 0.97
-notes: Phase1 maker scaffold. Do not bump clip. Do not add R7. Do not apply BID_BUCKET.md.
+notes: GATE PASS. BID_BUCKET.md applied on 5m paper (measure-only). Do not bump clip. Do not add R7.

@@ -29,7 +29,7 @@ INTERVAL_DEFAULT = 60.0
 CONFIRM_DELAY_SEC = 0.25
 PAIR_TAKER_MAX = 0.96
 PAIR_HARD_CAP = 1.0
-R6_BID_MAX = 0.98
+R6_BID_MAX = 0.99
 DAYS = 5
 MONTHLY_HORIZON_D = 40
 
@@ -421,7 +421,7 @@ def decide_06dc(
     atm = yes_ask is not None and 0.35 - 1e-12 <= float(yes_ask) <= 0.65 + 1e-12
     r6_ok = kind == "daily_ud" or (kind == "bracket" and atm)
     bid_sum = rec["bid_sum"]
-    if r6_ok and yes_bid is not None and no_bid is not None and bid_sum is not None and bid_sum + 1e-12 <= R6_BID_MAX:
+    if r6_ok and yes_bid is not None and no_bid is not None and bid_sum is not None and bid_sum <= R6_BID_MAX + 1e-12:
         rec["maker_intend"] = True
         rec["r6"] = True
         rec["maker_orders"] = [
@@ -432,6 +432,8 @@ def decide_06dc(
             rec["rule"] = "R6"
             rec["reason"] = "r6_maker_both_bid"
 
+    # ATM is watch only. No directional taker (R4/R5 stay bracket+monthly).
+    # daily_ud ATM logs atm_watch even when R6 maker_intend fires.
     if atm and not rec["taker_intend"]:
         rec["atm_watch"] = True
         if rec["reason"] in {"watch", "pair_ge_1", "pair_gt_096_no_both_taker"} and not rec["maker_intend"]:

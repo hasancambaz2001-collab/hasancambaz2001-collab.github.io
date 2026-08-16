@@ -2,8 +2,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from whiskas.paper import (
+    BID_BUCKET_MAX,
+    PAPER_ASSETS,
     asset_window_slug,
     best_ask,
+    best_bid,
     confirm_ask_exists,
     current_t0,
     snapshot_window,
@@ -24,6 +27,20 @@ def test_best_ask_is_min_price_not_first_row() -> None:
     }
     price, size = best_ask(book)
     assert price == 0.51
+    assert size == 21.0
+
+
+def test_best_bid_is_max_price_not_first_row() -> None:
+    book = {
+        "bids": [
+            {"price": "0.40", "size": "10"},
+            {"price": "0.48", "size": "8"},
+            {"price": "0.48", "size": "13"},
+            {"price": "0.30", "size": "9"},
+        ]
+    }
+    price, size = best_bid(book)
+    assert price == 0.48
     assert size == 21.0
 
 
@@ -181,6 +198,58 @@ def test_4h_is_poll_only() -> None:
     assert rec["depth_ok"] is True
     assert rec["bucket_le_090"] is True
     assert rec["live_order"] is False
+    assert rec["maker_intend"] is False
+
+
+def test_bid_bucket_maker_intend_5m_15m_not_4h() -> None:
+    tokens = {"Up": "u", "Down": "d"}
+    cheap = {
+        "Up": {
+            "asks": [{"price": "0.50", "size": "30"}],
+            "bids": [{"price": "0.48", "size": "30"}],
+        },
+        "Down": {
+            "asks": [{"price": "0.52", "size": "30"}],
+            "bids": [{"price": "0.49", "size": "30"}],
+        },
+    }
+    rec = snapshot_window(now=1786886400, tokens=tokens, books=cheap, asset="doge", tf="5m")
+    assert rec["asset"] == "doge"
+    assert rec["bid_sum"] is not None and abs(rec["bid_sum"] - 0.97) < 1e-12
+    assert rec["maker_intend"] is True
+    assert rec["maker_bid"] is True
+    assert rec["live_order"] is False
+    assert rec["a_intend"] is False
+    assert len(rec["maker_orders"]) == 2
+    assert all(o["type"] == "GTC" and o["side"] == "BUY" for o in rec["maker_orders"])
+
+    rec15 = snapshot_window(now=1786886400, tokens=tokens, books=cheap, asset="doge", tf="15m")
+    assert rec15["maker_intend"] is True
+    assert rec15["live_order"] is False
+
+    rec4h = snapshot_window(now=1786886400, tokens=tokens, books=cheap, asset="doge", tf="4h")
+    assert rec4h["poll_only"] is True
+    assert rec4h["bid_sum"] is not None and abs(rec4h["bid_sum"] - 0.97) < 1e-12
+    assert rec4h["maker_intend"] is False
+    assert rec4h["maker_orders"] == []
+    assert rec4h["live_order"] is False
+
+    dear = {
+        "Up": {
+            "asks": [{"price": "0.51", "size": "30"}],
+            "bids": [{"price": "0.50", "size": "30"}],
+        },
+        "Down": {
+            "asks": [{"price": "0.51", "size": "30"}],
+            "bids": [{"price": "0.49", "size": "30"}],
+        },
+    }
+    skip = snapshot_window(now=1786886400, tokens=tokens, books=dear, asset="btc", tf="5m")
+    assert skip["bid_sum"] is not None and abs(skip["bid_sum"] - 0.99) < 1e-12
+    assert skip["bid_sum"] > BID_BUCKET_MAX
+    assert skip["maker_intend"] is False
+    assert skip["live_order"] is False
+    assert "doge" in PAPER_ASSETS
 
 
 def test_confirm_ask_still_there() -> None:

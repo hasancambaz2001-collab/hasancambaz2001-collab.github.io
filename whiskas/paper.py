@@ -12,9 +12,10 @@ from whiskas.constants import CLIP, CLOB_API, GAMMA_API, PAIR_MAX, PAIR_MAX_CAP,
 from whiskas.http import get_json
 from whiskas.policy import BookInventory, PolicyDecision, decide_a, decide_a2, decide_repeat
 
-PAPER_ASSETS = ("btc", "eth", "sol", "xrp")
+PAPER_ASSETS = ("btc", "eth", "sol", "xrp", "doge")
 PAPER_TFS = ("5m", "15m", "4h")
 PAPER_BUCKETS = (0.90, 0.96)
+BID_BUCKET_MAX = 0.98
 TF_SECONDS = {"5m": 300, "15m": 900, "4h": 14400}
 CONFIRM_DELAY_SEC = 0.25
 
@@ -133,6 +134,60 @@ def best_ask(book: dict[str, Any] | None) -> tuple[float | None, float]:
     return best_p, best_sz
 
 
+def best_bid(book: dict[str, Any] | None) -> tuple[float | None, float]:
+    """Max bid price. Size is at that price only. Measure-only; never posts."""
+    if not book:
+        return None, 0.0
+    best_p: float | None = None
+    best_sz = 0.0
+    for level in book.get("bids") or []:
+        try:
+            price = float(level.get("price"))
+            size = float(level.get("size") or 0.0)
+        except (TypeError, ValueError):
+            continue
+        if price <= 0 or size < 0:
+            continue
+        if best_p is None or price > best_p:
+            best_p = price
+            best_sz = size
+        elif price == best_p:
+            best_sz += size
+    return best_p, best_sz
+
+
+def _set_bids(rec: dict[str, Any], book_up: dict[str, Any] | None, book_down: dict[str, Any] | None) -> None:
+    bid_up, depth_up = best_bid(book_up)
+    bid_down, depth_down = best_bid(book_down)
+    rec["bid_up"] = bid_up
+    rec["bid_down"] = bid_down
+    rec["bid_depth_up"] = depth_up
+    rec["bid_depth_down"] = depth_down
+    rec["bid_sum"] = (
+        float(bid_up) + float(bid_down) if bid_up is not None and bid_down is not None else None
+    )
+
+
+def _maybe_maker_intend(rec: dict[str, Any], *, measure_only: bool, clip: float) -> None:
+    """Measure-only bid bucket. 5m/15m only. Never live. Never pair>1 taker."""
+    rec["maker_intend"] = False
+    rec["maker_orders"] = []
+    if measure_only:
+        return
+    bid_sum = rec.get("bid_sum")
+    bid_up = rec.get("bid_up")
+    bid_down = rec.get("bid_down")
+    if bid_sum is None or bid_up is None or bid_down is None:
+        return
+    if float(bid_sum) <= BID_BUCKET_MAX + 1e-12:
+        rec["maker_intend"] = True
+        rec["maker_bid"] = True
+        rec["maker_orders"] = [
+            {"side": "BUY", "outcome": "Up", "type": "GTC", "price": float(bid_up), "size": float(clip), "maker_bid": True},
+            {"side": "BUY", "outcome": "Down", "type": "GTC", "price": float(bid_down), "size": float(clip), "maker_bid": True},
+        ]
+
+
 def size_at_or_better(book: dict[str, Any] | None, limit_price: float) -> float:
     """BUY FOK at limit_price: sum ask size with price ≤ limit."""
     if not book or limit_price <= 0:
@@ -245,6 +300,11 @@ def snapshot_window(
         "held_qty": 0.0,
         "bucket_le_090": False,
         "bucket_le_096": False,
+        "bid_up": None,
+        "bid_down": None,
+        "bid_sum": None,
+        "maker_intend": False,
+        "maker_orders": [],
     }
     try:
         tok = tokens if tokens is not None else discover_tokens(slug)
@@ -281,6 +341,7 @@ def snapshot_window(
     rec["ask_down"] = ask_down
     rec["depth_up"] = depth_up
     rec["depth_down"] = depth_down
+    _set_bids(rec, book_up, book_down)
     rec["min_ask_size"] = min(depth_up, depth_down) if ask_up is not None and ask_down is not None else 0.0
     rec["depth_ok"] = (
         ask_up is not None
@@ -311,6 +372,7 @@ def snapshot_window(
         rec["orders"] = []
         rec["filled_this_window"] = bool(filled_this_window)
         rec["clips_this_window"] = int(clips_this_window)
+        _maybe_maker_intend(rec, measure_only=True, clip=clip)
         return rec
     a = decide_a(ask_up, ask_down, depth_up, depth_down, pair_max=pair_max, pair_max_cap=pair_max_cap, clip=clip)
     if filled_this_window and a.intend:
@@ -366,6 +428,7 @@ def snapshot_window(
             clips += 1
     rec["clips_this_window"] = clips
     rec["filled_this_window"] = filled
+    _maybe_maker_intend(rec, measure_only=False, clip=clip)
     return rec
 
 
@@ -417,6 +480,8 @@ def _empty_asset_stats() -> dict[str, Any]:
         "n_le_096_depth_ge_clip": 0,
         "n_still_there_250ms": 0,
         "n_err": 0,
+        "n_maker_intend": 0,
+        "n_bid_le_098": 0,
     }
 
 
@@ -490,6 +555,14 @@ def summarize_paper(
                 bucket["max_clips_on_hit"] = clips
         if rec.get("still_there_250ms") is True:
             bucket["n_still_there_250ms"] += 1
+        if rec.get("maker_intend"):
+            bucket["n_maker_intend"] += 1
+        try:
+            bid_sum = float(rec["bid_sum"]) if rec.get("bid_sum") is not None else None
+        except (TypeError, ValueError):
+            bid_sum = None
+        if bid_sum is not None and bid_sum <= BID_BUCKET_MAX + 1e-12:
+            bucket["n_bid_le_098"] += 1
         depth_ok = _row_depth_ok(rec, clip)
         for thresh in PAPER_BUCKETS:
             if s is None or s > float(thresh) + 1e-12:
@@ -554,6 +627,8 @@ def summarize_paper(
         "n_le_096_depth_ge_clip": totals["n_le_096_depth_ge_clip"],
         "n_still_there_250ms": totals["n_still_there_250ms"],
         "n_err": totals["n_err"],
+        "n_maker_intend": totals["n_maker_intend"],
+        "n_bid_le_098": totals["n_bid_le_098"],
         "pair_max": float(pair_max),
         "clip": float(clip),
         "first_ts": first_ts.isoformat() if first_ts else None,
@@ -598,6 +673,7 @@ def run_paper(
     next_tick = time.time()
     while True:
         cycle_sums: dict[str, Any] = {}
+        cycle_bids: dict[str, Any] = {}
         for asset in asset_list:
             for tf in tf_list:
                 t0 = current_t0(tf=tf)
@@ -657,6 +733,11 @@ def run_paper(
                         "still_there_250ms": None,
                         "bucket_le_090": False,
                         "bucket_le_096": False,
+                        "bid_up": None,
+                        "bid_down": None,
+                        "bid_sum": None,
+                        "maker_intend": False,
+                        "maker_orders": [],
                     }
                 poll_only = bool(rec.get("poll_only") or is_poll_only_tf(tf))
                 confirm_list = rec.get("a2_orders") or rec.get("a_orders") or rec.get("repeat_orders") or rec.get("orders") or []
@@ -697,6 +778,7 @@ def run_paper(
                 append_jsonl(out_path, rec)
                 n_lines += 1
                 cycle_sums[key] = rec.get("ask_sum")
+                cycle_bids[key] = rec.get("bid_sum")
                 if collect:
                     rows.append(rec)
         n_cycles += 1
@@ -708,6 +790,7 @@ def run_paper(
                         "lines": n_lines,
                         "t0": {tf: current_t0(tf=tf) for tf in tf_list},
                         "ask_sum": cycle_sums,
+                        "bid_sum": cycle_bids,
                         "live_order": False,
                     }
                 ),

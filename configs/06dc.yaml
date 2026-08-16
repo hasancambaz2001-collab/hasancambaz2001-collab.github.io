@@ -4,7 +4,7 @@ live: false
 clip: 20
 pair_taker_max: 0.96
 pair_hard_cap: 1.00
-r6_bid_max: 0.98
+r6_bid_max: 0.99
 rules: [R1, R3, R4, R5, R6]
 r7: false
-notes: Do not bump clip. Do not add R7. Do not apply BID_BUCKET.md. Do not restart paper_06dc.
+notes: R6 bid_sum ≤0.99. daily_ud ATM = atm_watch, no directional taker. No R7. No pair>1 taker. No clip bump.

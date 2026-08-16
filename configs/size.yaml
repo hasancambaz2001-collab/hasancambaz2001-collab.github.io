@@ -2,4 +2,4 @@
 whiskas_clip: 21
 dc06_clip: 20
 bump: false
-notes: size_gate scaffold. Do not bump clip. Do not apply BID_BUCKET.md.
+notes: size_gate scaffold. Do not bump clip. BID_BUCKET is measure-only on 5m paper, not a size bump.

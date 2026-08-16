@@ -18,7 +18,8 @@ for f in \
   scripts/phase1_maker_mobo.py \
   scripts/t6_daily_06dc.py \
   scripts/phase1_06dc_maker.py \
-  scripts/size_gate.py
+  scripts/size_gate.py \
+  pipeline/patches/BID_BUCKET.md
 do
   if [ ! -f "$f" ]; then
     echo "missing $f" >&2

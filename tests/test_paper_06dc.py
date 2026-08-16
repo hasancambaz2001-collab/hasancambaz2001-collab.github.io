@@ -5,6 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.paper_06dc import (
+    R6_BID_MAX,
     daily_slug,
     decide_06dc,
     in_rule_band,
@@ -73,6 +74,25 @@ def test_r1_r3_r4_r5_r6_and_locks() -> None:
     assert monthly_atm["atm_watch"] is True
     assert monthly_atm["taker_intend"] is False
 
+    daily_atm_099 = decide_06dc(
+        kind="daily_ud", yes_ask=0.50, no_ask=0.51, yes_bid=0.50, no_bid=0.49, depth_yes=20, depth_no=20
+    )
+    assert daily_atm_099["ask_sum"] is not None and daily_atm_099["ask_sum"] > 0.96
+    assert daily_atm_099["bid_sum"] is not None and abs(daily_atm_099["bid_sum"] - 0.99) < 1e-12
+    assert daily_atm_099["r6"] is True and daily_atm_099["maker_intend"] is True
+    assert daily_atm_099["atm_watch"] is True
+    assert daily_atm_099["taker_intend"] is False
+    assert daily_atm_099["r4"] is False and daily_atm_099["r5"] is False
+
+    daily_atm_100 = decide_06dc(
+        kind="daily_ud", yes_ask=0.50, no_ask=0.51, yes_bid=0.50, no_bid=0.50, depth_yes=20, depth_no=20
+    )
+    assert daily_atm_100["r6"] is False
+    assert daily_atm_100["maker_intend"] is False
+    assert daily_atm_100["atm_watch"] is True
+    assert daily_atm_100["taker_intend"] is False
+    assert daily_atm_100["reason"] == "atm_watch"
+
 
 def test_snapshot_no_live_and_injected_books() -> None:
     target = {
@@ -119,3 +139,6 @@ def test_in_band_and_summary() -> None:
     assert "create_order" not in src
     assert "post_order" not in src
     assert "data/paper/intended.jsonl" in src
+    assert R6_BID_MAX == 0.99
+    assert "R6_BID_MAX = 0.99" in src
+    assert "R7" not in src or "no R7" in src.lower() or "Do not add R7" in Path("configs/06dc.yaml").read_text()

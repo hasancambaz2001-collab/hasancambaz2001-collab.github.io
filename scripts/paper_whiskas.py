@@ -35,8 +35,8 @@ def write_paper_report(stats: dict, path: Path) -> str:
     lines = [
         "# PHASE3 paper (frozen)",
         "",
-        "Measure-only. No live. No maker. No pair>1. Clip 21. Repeat max 8. 4h = poll only.",
-        "Buckets are separate counters. Do not trade ask_sum>0.96.",
+        "Measure-only. No live. No pair>1. Clip 21. Repeat max 8. 4h = poll only.",
+        "Ask buckets 0.90 / 0.96 unchanged. Bid bucket: log bid_sum; maker_intend when bid_sum≤0.98 on 5m/15m only.",
         "",
         "| asset | tf | bucket | polls | A_hits | A2_hits | repeat_hits | depth_ok | still250 |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|",
@@ -53,6 +53,8 @@ def write_paper_report(stats: dict, path: Path) -> str:
             f"Window: {stats.get('first_ts')} → {stats.get('last_ts')}",
             "",
             f"{stats.get('note', '')}",
+            "",
+            f"maker_intend={stats.get('n_maker_intend', 0)} bid_sum≤0.98={stats.get('n_bid_le_098', 0)} (measure only, no live)",
             "",
         ]
     )
@@ -126,6 +128,10 @@ def main() -> int:
                 "ask_up": rec.get("ask_up"),
                 "ask_down": rec.get("ask_down"),
                 "ask_sum": rec.get("ask_sum"),
+                "bid_up": rec.get("bid_up"),
+                "bid_down": rec.get("bid_down"),
+                "bid_sum": rec.get("bid_sum"),
+                "maker_intend": rec.get("maker_intend"),
                 "intend": rec.get("intend"),
                 "a_intend": rec.get("a_intend"),
                 "a2_intend": rec.get("a2_intend"),
