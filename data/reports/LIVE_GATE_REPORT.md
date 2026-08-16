@@ -1,4 +1,4 @@
-# LIVE_CONFIG
+# LIVE_GATE_REPORT
 
 Generated: 2026-08-16 18:35 UTC
 status: **LIVE_BLOCKED**

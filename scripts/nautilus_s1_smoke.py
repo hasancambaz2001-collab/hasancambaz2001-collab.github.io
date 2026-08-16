@@ -44,31 +44,31 @@ def _probe_venue_fee() -> dict[str, Any]:
     except Exception as exc:
         out["venue_error"] = type(exc).__name__
     try:
-        import nautilus_trader.adapters.polymarket.common.fee as fee_mod
+        from nautilus_trader.adapters.polymarket.fee_model import (
+            PolymarketFeeModel,
+            _CRYPTO_MAKER_REBATE_RATE,
+            infer_maker_rebate_rate,
+        )
+        from decimal import Decimal
 
-        out["fee_module"] = fee_mod.__name__
-        rate = getattr(fee_mod, "POLYMARKET_TAKER_FEE_RATE", None) or getattr(
-            fee_mod, "TAKER_FEE_RATE", None
+        out["fee_module"] = "nautilus_trader.adapters.polymarket.fee_model"
+        out["fee_model_class"] = PolymarketFeeModel.__name__
+        out["maker_rebate_crypto"] = float(_CRYPTO_MAKER_REBATE_RATE)
+        out["taker_rate"] = 0.07
+        out["nautilus_crypto_fee_rate_fallback"] = 0.072
+        out["inferred_crypto_rebate"] = float(
+            infer_maker_rebate_rate({"category": "crypto"}, Decimal("0.072"))
         )
-        rebate = getattr(fee_mod, "POLYMARKET_MAKER_REBATE_RATE", None) or getattr(
-            fee_mod, "MAKER_REBATE_RATE", None
-        )
-        out["taker_rate"] = rate
-        out["maker_rebate_crypto"] = rebate if rebate is not None else 0.20
         out["fee_model"] = "PASS"
-    except Exception:
-        try:
-            import nautilus_trader.adapters.polymarket.fee_model as fee_mod  # type: ignore
-
-            out["fee_module"] = fee_mod.__name__
-            out["maker_rebate_crypto"] = 0.20
-            out["taker_rate"] = 0.07
-            out["fee_model"] = "PASS"
-        except Exception as exc:
-            out["fee_model"] = "FAIL"
-            out["fee_error"] = type(exc).__name__
-            out["maker_rebate_crypto"] = 0.20
-            out["taker_rate"] = 0.07
+        out["fee_note"] = (
+            "Nautilus credits crypto maker rebate 0.20 of fee-equivalent. "
+            "We do not assume we collect it. Our stack stays maker fee0 / taker 0.07*p*(1-p)."
+        )
+    except Exception as exc:
+        out["fee_model"] = "FAIL"
+        out["fee_error"] = type(exc).__name__
+        out["maker_rebate_crypto"] = 0.20
+        out["taker_rate"] = 0.07
     try:
         from nautilus_trader.adapters.polymarket.providers import PolymarketInstrumentProvider  # noqa: F401
 

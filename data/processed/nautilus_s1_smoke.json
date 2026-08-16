@@ -1,0 +1,40 @@
+{
+  "generated": "2026-08-16 18:35 UTC",
+  "nautilus": {
+    "installed": true,
+    "version": "1.231.0",
+    "polymarket_extra": false,
+    "historical_l2": false,
+    "live": false,
+    "note": "core QuoteTick only. No execution client. No historical L2."
+  },
+  "venue": "POLYMARKET",
+  "venue_import": "PASS",
+  "fee_model": "PASS",
+  "maker_rebate_crypto": 0.2,
+  "taker_rate": 0.07,
+  "catalog": "BLOCKED_ON_CATALOG",
+  "historical_l2": "FAIL",
+  "exec_client_enabled": false,
+  "fee_module": "nautilus_trader.adapters.polymarket.fee_model",
+  "fee_model_class": "PolymarketFeeModel",
+  "nautilus_crypto_fee_rate_fallback": 0.072,
+  "inferred_crypto_rebate": 0.2,
+  "fee_note": "Nautilus credits crypto maker rebate 0.20 of fee-equivalent. We do not assume we collect it. Our stack stays maker fee0 / taker 0.07*p*(1-p).",
+  "catalog_note": "provider importable; no live catalog load",
+  "historical_l2_note": "orderbook-history dead. PMData/recorder remain the L2 plane.",
+  "engine": "PASS",
+  "engine_detail": {
+    "n_ticks": 1,
+    "n_quotes": 2,
+    "n_rest": 1,
+    "live_orders": false,
+    "size_ok": false,
+    "g5_g6_unlocked": false
+  },
+  "g5_flag_exists": false,
+  "g6_flag_exists": false,
+  "live_ready_exists": false,
+  "live": false,
+  "note": "Nautilus experiment does not unlock live"
+}

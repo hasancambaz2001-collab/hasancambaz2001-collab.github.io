@@ -79,6 +79,8 @@ def main() -> int:
     tables = []
     used = []
     skipped = []
+    day_rows: dict[str, int] = {}
+    day_members: dict[str, int] = {}
     for day in _days(start, end):
         cached = DAY_CACHE / f"{series}_{args.data_type}_{day}.zip"
         if not cached.is_file() and not args.unlock_new_days:
@@ -89,7 +91,15 @@ def main() -> int:
             if df is None or df.empty:
                 continue
             tables.append(pa.Table.from_pandas(df, preserve_index=False))
-            used.append({"day": day, "member": name, "rows": int(len(df)), "regime": regime_for_date(day)})
+            day_rows[day] = day_rows.get(day, 0) + int(len(df))
+            day_members[day] = day_members.get(day, 0) + 1
+        if day in day_rows:
+            used.append({
+                "day": day,
+                "n_members": day_members[day],
+                "rows": day_rows[day],
+                "regime": regime_for_date(day),
+            })
     OUT.mkdir(parents=True, exist_ok=True)
     dest = OUT / f"{series}_{args.data_type}_{start.date()}_{end.date()}.parquet"
     if tables:
@@ -103,7 +113,7 @@ def main() -> int:
         nrows = 0
         dest.unlink(missing_ok=True)
         dest = None
-    print(json.dumps({
+    summary = {
         "ok": dest is not None and nbytes > 0,
         "series": series,
         "type": args.data_type,
@@ -116,7 +126,11 @@ def main() -> int:
         "days_skipped_no_unlock": skipped,
         "key_env": api_key_name(),
         "wrote_via": "pyarrow",
-    }))
+        "new_days_unlocked": False,
+    }
+    (ROOT / "data" / "processed").mkdir(parents=True, exist_ok=True)
+    (ROOT / "data" / "processed" / "pmdata_client.json").write_text(json.dumps(summary, indent=2) + "\n")
+    print(json.dumps(summary))
     return 0 if dest is not None and nbytes > 0 else 1
 
 

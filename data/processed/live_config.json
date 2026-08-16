@@ -1,9 +1,10 @@
 {
-  "generated": "2026-08-16 18:15 UTC",
+  "generated": "2026-08-16 18:35 UTC",
   "status": "LIVE_BLOCKED",
   "paper_only": "/workspace/configs/generated/PAPER_ONLY.yaml",
+  "live_blocked": true,
   "live_ready": null,
-  "accept_risk": true,
+  "accept_risk": false,
   "pair_gt_1_trade": false,
   "live_orders": false,
   "size_ok": false,
@@ -35,11 +36,15 @@
     "G6_fill_calibration": {
       "pass": false,
       "flag": "/workspace/data/ops/G6_fill_calibrated.flag",
-      "note": "FAIL until paper fill% logged vs sim"
+      "note": "FAIL until paper fill% logged vs sim + human flag"
+    },
+    "G7_accept_risk": {
+      "pass": false,
+      "note": "FAIL until --i-accept-risk"
     }
   },
   "all_selection": true,
   "g5_g6": false,
-  "live_blocked": true,
+  "g7": false,
   "cover_min": 0.8
 }

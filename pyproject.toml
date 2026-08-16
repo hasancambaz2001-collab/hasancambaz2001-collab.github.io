@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8", "mypy>=1.10"]
 nautilus = ["nautilus_trader==1.231.0"]
+# py-clob-client-v2 is for the fee/venue probe only. Live exec stays disabled.
 
 [tool.setuptools.packages.find]
 include = ["whiskas*"]
