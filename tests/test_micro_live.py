@@ -117,6 +117,8 @@ def test_clip_cap_without_g5() -> None:
     assert "post_ack_ms" in src
     assert "t_intent" in src
     assert "token_cache" in src
+    assert 'if str(rec.get("reason") or "") == "rest":' in src
+    assert src.index('if str(rec.get("reason") or "") == "rest":') < src.index("apply_still250_send_gate(rec)")
     clob = Path("whiskas/clob_orders.py").read_text()
     assert "post_orders" in clob
     assert "trader_side" in clob

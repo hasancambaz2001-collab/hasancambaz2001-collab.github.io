@@ -642,7 +642,8 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
         rec["tf"] = TF
         t0 = int(rec.get("t0") or current_t0(tf=TF))
         rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
-        apply_still250_send_gate(rec)
+        if str(rec.get("reason") or "") == "rest":
+            apply_still250_send_gate(rec)
         for ot0 in list(open_windows):
             meta = open_meta.get(ot0) or {}
             age = time.time() - float(meta.get("rest_ts") or time.time())
