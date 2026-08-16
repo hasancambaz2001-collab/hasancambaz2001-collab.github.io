@@ -72,7 +72,8 @@ def attach_layers(
         rec["intent_slug"] = rec.get("slug")
         rec["intent_asset"] = rec.get("asset")
         rec["intent_tf"] = rec.get("tf")
-        rec["intent_ts"] = rec.get("ts")
+        if not rec.get("intent_ts"):
+            rec["intent_ts"] = rec.get("ts")
     else:
         rec["intent"] = False
         rec["skip_reason"] = reason or rec.get("skip_reason")

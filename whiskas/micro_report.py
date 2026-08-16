@@ -328,6 +328,7 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "still_ms": rec.get("still_ms"),
         "send_blocked": rec.get("send_blocked"),
         "would_send": rec.get("would_send"),
+        "latency_variant": rec.get("latency_variant"),
     }
     still = {
         **base,
@@ -337,6 +338,10 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "bid_sum_250": rec.get("bid_sum_250"),
         "min_size_250": rec.get("min_size_250"),
         "still_ms": rec.get("still_ms"),
+        "still250_source": rec.get("still250_source"),
+        "book_age_up_ms": rec.get("book_age_up_ms"),
+        "book_age_down_ms": rec.get("book_age_down_ms"),
+        "latency_variant": rec.get("latency_variant"),
     }
     out: dict[str, dict[str, Any]] = {"INTENT": intent, "still_there_250ms": still}
     rf = rec.get("real_fill")

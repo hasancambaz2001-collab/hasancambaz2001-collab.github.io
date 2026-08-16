@@ -51,6 +51,7 @@ from whiskas.micro_report import (
     layer_records,
     write_24h,
 )
+from whiskas.latency_grid import V2, BookAgeCache, current_variant
 from whiskas.paper import append_jsonl, current_t0, fetch_books_parallel
 from scripts.paper_maker import snapshot_maker
 
@@ -620,26 +621,68 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
         print("AUTH_ABSENT")
         return payload
     deadline = time.time() + max(0.0, float(seconds))
+    token_cache: dict[str, dict[str, str]] = {}
+    variant = current_variant()
+    book_cache = None
+    if variant == V2:
+        book_cache = BookAgeCache()
+        book_cache.start()
+    max_loss = float(micro.get("max_daily_loss_usd") or MAX_DAILY_LOSS)
+    max_open = int(micro.get("max_open_windows") or MAX_OPEN)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        return _run_send_loop(
+            client=client,
+            clip=clip,
+            deadline=deadline,
+            interval=interval,
+            token_cache=token_cache,
+            variant=variant,
+            book_cache=book_cache,
+            max_loss=max_loss,
+            max_open=max_open,
+        )
+    finally:
+        if book_cache is not None:
+            book_cache.stop()
+
+
+def _run_send_loop(
+    *,
+    client: Any,
+    clip: float,
+    deadline: float,
+    interval: float,
+    token_cache: dict[str, dict[str, str]],
+    variant: str,
+    book_cache: Any,
+    max_loss: float,
+    max_open: int,
+) -> dict[str, Any]:
     open_windows: dict[int, list[dict[str, Any]]] = {}
     open_meta: dict[int, dict[str, Any]] = {}
     inventory: dict[int, dict[str, float]] = {}
-    token_cache: dict[str, dict[str, str]] = {}
     loss_charged: set[int] = set()
     daily_loss = 0.0
     n_sent = 0
     halted = False
-    max_loss = float(micro.get("max_daily_loss_usd") or MAX_DAILY_LOSS)
-    max_open = int(micro.get("max_open_windows") or MAX_OPEN)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
     while time.time() < deadline:
         if daily_loss + 1e-12 >= max_loss:
             for orders in list(open_windows.values()):
                 cancel_open(client, orders, reason="daily_loss")
             halted = True
             break
-        rec, _state = snapshot_maker(asset=ASSET, tf=TF, clip=clip, token_cache=token_cache)
+        rec, _state = snapshot_maker(
+            asset=ASSET,
+            tf=TF,
+            clip=clip,
+            token_cache=token_cache,
+            latency_variant=variant,
+            book_cache=book_cache,
+        )
         rec["asset"] = ASSET
         rec["tf"] = TF
+        rec["latency_variant"] = variant
         t0 = int(rec.get("t0") or current_t0(tf=TF))
         rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
         if str(rec.get("reason") or "") == "rest":

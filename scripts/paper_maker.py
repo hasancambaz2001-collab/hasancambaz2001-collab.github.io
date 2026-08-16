@@ -118,6 +118,8 @@ def snapshot_maker(
     pair_max: float = PAIR_MAX,
     cancel_above: float = CANCEL_ABOVE,
     token_cache: dict[str, dict[str, str]] | None = None,
+    latency_variant: str | None = None,
+    book_cache: Any = None,
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
     tf_key = normalize_tf(tf)
     ts_now = time.time() if now is None else float(now)
@@ -139,6 +141,9 @@ def snapshot_maker(
         "post_ack_ms": None,
         "lag_ms": None,
         "token_cache_hit": None,
+        "latency_variant": latency_variant,
+        "still250_source": None,
+        "book_get_ms": None,
     }
     try:
         if tokens is not None:
@@ -166,7 +171,11 @@ def snapshot_maker(
             book_up = books.get("Up") or {}
             book_down = books.get("Down") or {}
         else:
+            t_books = time.time()
             book_up, book_down = fetch_books_parallel(tok["Up"], tok["Down"])
+            rec["book_get_ms"] = (time.time() - t_books) * 1000.0
+            if book_cache is not None and hasattr(book_cache, "set_tokens"):
+                book_cache.set_tokens(tok["Up"], tok["Down"])
     except Exception as exc:
         rec["error"] = f"clob:{exc}"
         rec["reason"] = "clob_error"
@@ -213,6 +222,8 @@ def snapshot_maker(
             clip=float(clip),
             pair_max=float(pair_max),
             books=books,
+            latency_variant=latency_variant,
+            book_cache=book_cache,
         )
         rec["still_ms"] = (time.time() - t_still) * 1000.0
         if still is None:
@@ -224,6 +235,9 @@ def snapshot_maker(
             }
         elif still.get("still_ms") is not None:
             rec["still_ms"] = still.get("still_ms")
+        rec["still250_source"] = (still or {}).get("still250_source")
+        rec["book_age_up_ms"] = (still or {}).get("book_age_up_ms")
+        rec["book_age_down_ms"] = (still or {}).get("book_age_down_ms")
     attach_layers(rec, still=still, clip=float(clip), pair_max=float(pair_max))
     if str(rec.get("reason") or "") == "rest":
         if rec.get("still_there_250ms") is None:
@@ -245,18 +259,41 @@ def _probe_still250(
     clip: float,
     pair_max: float,
     books: dict[str, dict[str, Any]] | None = None,
+    latency_variant: str | None = None,
+    book_cache: Any = None,
 ) -> dict[str, Any] | None:
-    """Re-read both books after 250ms. still250 = bid_sum<=pair_max and min_size>=clip."""
+    """still250 = bid_sum<=pair_max and min_size>=clip. v2 may use WS age ≤250ms."""
+    from whiskas.latency_grid import V2
+
     t0 = time.time()
-    if books is None:
+    source = "rest_sleep"
+    extra: dict[str, Any] = {}
+    if books is not None:
+        book_up = books.get("Up") or {}
+        book_down = books.get("Down") or {}
+        source = "injected"
+    elif latency_variant == V2 and book_cache is not None:
+        fresh = book_cache.fresh_books(tokens["Up"], tokens["Down"], max_age_sec=STILL_PROBE_SEC)
+        if fresh:
+            book_up = fresh["Up"]
+            book_down = fresh["Down"]
+            source = "ws_age"
+            extra["book_age_up_ms"] = fresh.get("age_up_ms")
+            extra["book_age_down_ms"] = fresh.get("age_down_ms")
+        else:
+            time.sleep(STILL_PROBE_SEC)
+            try:
+                book_up, book_down = fetch_books_parallel(tokens["Up"], tokens["Down"])
+            except Exception:
+                return None
+            source = "rest_sleep_fallback"
+    else:
         time.sleep(STILL_PROBE_SEC)
         try:
             book_up, book_down = fetch_books_parallel(tokens["Up"], tokens["Down"])
         except Exception:
             return None
-    else:
-        book_up = books.get("Up") or {}
-        book_down = books.get("Down") or {}
+        source = "rest_sleep"
     still_ms = (time.time() - t0) * 1000.0
     bid_up, sz_up = best_bid(book_up)
     bid_down, sz_down = best_bid(book_down)
@@ -272,6 +309,8 @@ def _probe_still250(
             "ask_up_250": ask_up,
             "ask_down_250": ask_down,
             "still_ms": still_ms,
+            "still250_source": source,
+            **extra,
         }
     bid_sum = float(bid_up) + float(bid_down)
     min_size = min(float(sz_up), float(sz_down))
@@ -284,6 +323,8 @@ def _probe_still250(
         "ask_up_250": None if ask_up is None else float(ask_up),
         "ask_down_250": None if ask_down is None else float(ask_down),
         "still_ms": still_ms,
+        "still250_source": source,
+        **extra,
     }
 
 
@@ -396,6 +437,13 @@ def run_loop(
     keys = [book_key(a, t) for a in assets for t in tfs]
     states: dict[str, dict[str, Any] | None] = {k: None for k in keys}
     token_cache: dict[str, dict[str, str]] = {}
+    from whiskas.latency_grid import V2, BookAgeCache, current_variant
+
+    variant = current_variant()
+    book_cache = None
+    if variant == V2:
+        book_cache = BookAgeCache()
+        book_cache.start()
     rows: list[dict[str, Any]] = []
     n_cycles = 0
     n_lines = 0
@@ -413,6 +461,8 @@ def run_loop(
                     pair_max=pair_max,
                     cancel_above=cancel_above,
                     token_cache=token_cache,
+                    latency_variant=variant,
+                    book_cache=book_cache,
                 )
                 rec["live_order"] = False
                 states[key] = new_state
@@ -439,6 +489,8 @@ def run_loop(
                 flush=True,
             )
         if once or printed_stop or (deadline is not None and time.time() >= deadline):
+            if book_cache is not None:
+                book_cache.stop()
             break
         next_tick += max(0.2, float(interval))
         sleep_for = next_tick - time.time()
