@@ -29,6 +29,7 @@ Recorder is 5m/15m only. Does **not** cover 06dc daily/monthly. 06dc truth = dum
 
 ## PMData
 
-- no PMDATA_API_KEY (or PM_DATA_API_KEY). HF parquet covers pre-08-14 DEBUG. No paid Mar–May pull.
+- key in env (not committed). Post-08-14 slug pulls only — see `PMDATA_WALLET_CONFIG.md`.
+- No Mar–May bulk. Nautilus has no historical L2. PMData does not cover 06dc daily/monthly.
 
 pre-08-14 parquet is DEBUG only; live parity needs post-08-14 L2
