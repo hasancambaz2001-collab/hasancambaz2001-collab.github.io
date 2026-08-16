@@ -1,0 +1,20 @@
+live_orders: false
+live: false
+clip: 10.0
+pair_max: 0.9
+cancel_above: 0.92
+assets:
+- btc
+- eth
+- sol
+- xrp
+- doge
+tfs:
+- 5m
+- 15m
+pair_gt_1_trade: false
+size_ok: false
+primary: paper_maker
+smart_copy:
+  shadow_only: true
+notes: PAPER only. do not live without G5 G6. No clip 67 day-one.

@@ -28,3 +28,7 @@ data/parquet/*
 !data/parquet/.gitkeep
 data/dumps/*
 !data/dumps/.gitkeep
+data/ops/*.flag
+!data/ops/.gitkeep
+configs/.env.pmdata
+configs/generated/LIVE_READY.yaml

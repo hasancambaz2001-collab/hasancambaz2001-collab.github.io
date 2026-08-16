@@ -1,0 +1,45 @@
+{
+  "generated": "2026-08-16 18:15 UTC",
+  "status": "LIVE_BLOCKED",
+  "paper_only": "/workspace/configs/generated/PAPER_ONLY.yaml",
+  "live_ready": null,
+  "accept_risk": true,
+  "pair_gt_1_trade": false,
+  "live_orders": false,
+  "size_ok": false,
+  "note": "do not live without G5 G6",
+  "gates": {
+    "G1_bosona_cover": {
+      "pass": true,
+      "cover": 0.8018867924528302,
+      "min": 0.8
+    },
+    "G2_mo_cover": {
+      "pass": true,
+      "cover": 0.8468468468468469,
+      "min": 0.8
+    },
+    "G3_pair_gt1_trade": {
+      "pass": true,
+      "pair_gt_1_trade": false
+    },
+    "G4_shadow_path": {
+      "pass": true,
+      "shadow_only": true
+    },
+    "G5_size_ok": {
+      "pass": false,
+      "flag": "/workspace/data/ops/G5_size_ok.flag",
+      "note": "FAIL until human size_ok flag"
+    },
+    "G6_fill_calibration": {
+      "pass": false,
+      "flag": "/workspace/data/ops/G6_fill_calibrated.flag",
+      "note": "FAIL until paper fill% logged vs sim"
+    }
+  },
+  "all_selection": true,
+  "g5_g6": false,
+  "live_blocked": true,
+  "cover_min": 0.8
+}

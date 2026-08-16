@@ -64,24 +64,35 @@ def _parse_ts(value: Any) -> datetime | None:
     return dt.astimezone(timezone.utc)
 
 
+PAPER_ONLY_YAML = ROOT / "configs" / "generated" / "PAPER_ONLY.yaml"
+
+
 def load_maker_yaml() -> dict[str, Any]:
-    """Formal keys from configs/maker.yaml. Same rest/cancel policy. No new strategy."""
-    cfg = load_config(ROOT / "configs" / "maker.yaml")
-    assets = cfg.get("assets") or list(MAKER_ASSETS)
-    tfs = cfg.get("tfs") or list(MAKER_TFS)
-    requote = float(cfg.get("requote", cfg.get("interval", INTERVAL_DEFAULT)))
+    """Read PAPER_ONLY.yaml when present, else maker.yaml. Never live. No pair>1."""
+    path = PAPER_ONLY_YAML if PAPER_ONLY_YAML.is_file() else (ROOT / "configs" / "maker.yaml")
+    cfg = load_config(path)
+    paper = cfg
+    assets = paper.get("assets") or list(MAKER_ASSETS)
+    tfs = paper.get("tfs") or list(MAKER_TFS)
+    requote = float(paper.get("requote", paper.get("interval", INTERVAL_DEFAULT)))
     if requote > REQUOTE_MAX + 1e-12:
         requote = REQUOTE_MAX
+    smart = paper.get("smart_copy") or {}
     return {
-        "pair_max": float(cfg.get("pair_max", cfg.get("rest_max", PAIR_MAX))),
-        "cancel_above": float(cfg.get("cancel_above", cfg.get("cancel_rich", CANCEL_ABOVE))),
-        "clip": float(cfg.get("clip", CLIP_DEFAULT)),
+        "path": str(path),
+        "pair_max": float(paper.get("pair_max", paper.get("rest_max", PAIR_MAX))),
+        "cancel_above": float(paper.get("cancel_above", paper.get("cancel_rich", CANCEL_ABOVE))),
+        "clip": float(paper.get("clip", CLIP_DEFAULT)),
         "requote": requote,
-        "max_age_sec": float(cfg.get("max_age_sec", MAX_AGE_SEC)),
+        "max_age_sec": float(paper.get("max_age_sec", MAX_AGE_SEC)),
         "assets": tuple(str(a).strip().lower() for a in assets),
         "tfs": tuple(str(t).strip().lower() for t in tfs if str(t).strip().lower() in {"5m", "15m"}),
         "live_order": False,
+        "live_orders": False,
         "pair_gt_1": False,
+        "pair_gt_1_trade": False,
+        "size_ok": False,
+        "shadow_only": bool(smart.get("shadow_only", True)),
     }
 
 

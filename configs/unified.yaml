@@ -1,0 +1,25 @@
+# Unified validation + paper path. No live. No pair>1. No clip 67 day-one.
+live: false
+live_orders: false
+pair_gt_1_trade: false
+size_ok: false
+cover_min: 0.80
+paper:
+  path: configs/generated/PAPER_ONLY.yaml
+  clip: 10
+  pair_max: 0.90
+  cancel_above: 0.92
+  assets: [btc, eth, sol, xrp, doge]
+  tfs: [5m, 15m]
+smart_copy:
+  shadow_only: true
+leaders:
+  bosona: 0xc2ad03f79ca3f3c17d8c7de2612ce0c89b7d40ed
+  mo-money: 0x32ed2e546b187ca15e2841edc82b22c713cf8ec3
+pmdata:
+  env_file: configs/.env.pmdata
+  print_key: false
+ops:
+  g5_flag: data/ops/G5_size_ok.flag
+  g6_flag: data/ops/G6_fill_calibrated.flag
+notes: PAPER_ONLY is the only runnable config. do not live without G5 G6.
