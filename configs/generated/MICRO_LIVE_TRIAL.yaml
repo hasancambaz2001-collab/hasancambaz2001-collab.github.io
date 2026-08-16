@@ -1,5 +1,5 @@
 status: MICRO_LIVE_TRIAL
-generated: 2026-08-16 19:02 UTC
+generated: 2026-08-16 19:05 UTC
 live_orders: true
 live: false
 full_live_ready: false
@@ -31,6 +31,10 @@ executor:
   stop_if_daily_loss_usd: 25.0
   pair_gt_1_trade: false
   bundle_sends_orders: false
+  clob_path: scripts/micro_live.py
+  auth_from: env or configs/.env.clob
+  print_keys: false
 notes: "MICRO trial permit only. Bundle does not send orders. Not LIVE_READY. Not\
   \ full ladder. No clip 67. pair_gt_1_trade=false. clip 5 without G5, clip 10 with\
-  \ G5. micro trial \u2260 full solve. real_fill only after orders sent."
+  \ G5. micro trial \u2260 full solve. real_fill only after orders sent. CLOB path:\
+  \ scripts/micro_live.py. AUTH_ABSENT => no send, no fake real_fill."

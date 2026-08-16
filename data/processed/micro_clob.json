@@ -1,0 +1,23 @@
+{
+  "generated": "2026-08-16 19:05 UTC",
+  "micro_yaml": true,
+  "micro_path": "/workspace/configs/generated/MICRO_LIVE_TRIAL.yaml",
+  "auth_available": false,
+  "auth_reason": "AUTH_ABSENT",
+  "private_key_env": null,
+  "api_key_env": null,
+  "sent": false,
+  "real_fill": null,
+  "real_fill_rate": null,
+  "live_order": false,
+  "pair_gt_1_trade": false,
+  "g5": false,
+  "g6": true,
+  "live_ready_exists": false,
+  "still250_note": "paper_maker still250 continues; real_fill=null until an order is sent",
+  "clip_cap": 5.0,
+  "note": "AUTH_ABSENT => do not send, do not fake real_fill. micro trial \u2260 full solve.",
+  "ok": true,
+  "block": "AUTH_ABSENT",
+  "reason": "AUTH_ABSENT"
+}

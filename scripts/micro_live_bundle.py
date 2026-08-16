@@ -60,12 +60,16 @@ def micro_payload(*, clip: float, g5: bool, g6: bool) -> dict[str, Any]:
             "stop_if_daily_loss_usd": MAX_DAILY_LOSS,
             "pair_gt_1_trade": False,
             "bundle_sends_orders": False,
+            "clob_path": "scripts/micro_live.py",
+            "auth_from": "env or configs/.env.clob",
+            "print_keys": False,
         },
         "notes": (
             "MICRO trial permit only. Bundle does not send orders. "
             "Not LIVE_READY. Not full ladder. No clip 67. pair_gt_1_trade=false. "
             "clip 5 without G5, clip 10 with G5. micro trial ≠ full solve. "
-            "real_fill only after orders sent."
+            "real_fill only after orders sent. "
+            "CLOB path: scripts/micro_live.py. AUTH_ABSENT => no send, no fake real_fill."
         ),
     }
 

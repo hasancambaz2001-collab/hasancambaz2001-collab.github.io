@@ -47,9 +47,16 @@ def attach_layers(
     still: dict[str, Any] | None = None,
     clip: float = CLIP_DEFAULT,
     pair_max: float = PAIR_MAX,
+    real_fill: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Stamp INTENT / still250 / real_fill=null. Never writes a merged fill rate."""
+    """Stamp INTENT / still250 / real_fill. Never writes a merged fill rate."""
     stamp_null_real_fill(rec)
+    if real_fill is not None:
+        rec["real_fill"] = real_fill
+        rested = float(real_fill.get("rested_size") or 0.0)
+        filled = float(real_fill.get("filled_size") or 0.0)
+        rec["real_fill_rate"] = (filled / rested) if rested > 0 else None
+        rec["live_order"] = True
     rec["sim_fill"] = None
     rec["sim_fill_label"] = "SIM"
     reason = str(rec.get("reason") or "")

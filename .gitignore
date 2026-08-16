@@ -22,6 +22,8 @@ data/paper06dc/*
 !data/paper06dc/.gitkeep
 data/paper_maker/*
 !data/paper_maker/.gitkeep
+data/micro_live/*
+!data/micro_live/.gitkeep
 data/l2/*
 !data/l2/.gitkeep
 data/l2_ws/*
