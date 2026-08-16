@@ -1,4 +1,8 @@
-"""06dc R1/R4/R5/R6. R7 gated. 5m ticks = smoke. Real 06dc needs daily + T6."""
+"""06dc R1/R4/R5/R6. R7 gated.
+
+5m/15m L2 recorder does NOT cover 06dc daily/monthly books.
+Those ticks are smoke. 06dc truth = dump + paper_06dc + T6.
+"""
 
 from __future__ import annotations
 
@@ -9,6 +13,11 @@ from scripts.paper_06dc import decide_06dc
 from whiskas.fees import taker_fee_usdc
 from whiskas.l2 import BookTick
 
+# l2_recorder TFs only. Daily/monthly 06dc books are not in data/l2.
+L2_SHORT_TF = frozenset({"5m", "15m"})
+L2_COVERS_06DC = False
+TRUTH = "dump + paper_06dc + T6"
+
 
 def _kind(slug: str) -> str:
     text = str(slug or "").lower()
@@ -17,6 +26,21 @@ def _kind(slug: str) -> str:
     if "above" in text or "between" in text or "reach" in text or "what-price" in text:
         return "bracket"
     return "smoke_5m"
+
+
+def _l2_short_tf(tf: str | None) -> bool:
+    return str(tf or "").strip().lower() in L2_SHORT_TF
+
+
+def smoke_decision(*, pair: float | None = None, kind: str = "smoke_5m") -> Decision:
+    return Decision(
+        "s06dc",
+        False,
+        False,
+        "smoke_5m_not_daily",
+        pair=pair,
+        extra={"kind": kind, "r7": False, "smoke": True, "l2_covers_06dc": False, "truth": TRUTH},
+    )
 
 
 class S06dc(Strategy):
@@ -34,9 +58,9 @@ class S06dc(Strategy):
         if pair is None:
             return Decision(self.name, False, False, "no_pair")
         pair_f = float(pair)
-        extra = {"kind": kind, "r7": self.r7, "smoke": kind == "smoke_5m"}
+        extra = {"kind": kind, "r7": self.r7, "smoke": kind == "smoke_5m", "l2_covers_06dc": False, "truth": TRUTH}
         if kind == "smoke_5m":
-            return Decision(self.name, False, False, "smoke_5m_not_daily", pair=pair_f, extra=extra)
+            return smoke_decision(pair=pair_f, kind=kind)
         if pair_f + 1e-12 >= 1.0:
             return Decision(self.name, False, False, "pair_ge_1", pair=pair_f, extra=extra)
         # R6-style maker both if pair<0.99 on daily
@@ -47,18 +71,9 @@ class S06dc(Strategy):
 
     def on_tick(self, tick: BookTick, state: dict[str, Any] | None) -> tuple[Decision, dict[str, Any] | None]:
         kind = _kind(tick.slug)
-        if kind == "smoke_5m":
-            return (
-                Decision(
-                    self.name,
-                    False,
-                    False,
-                    "smoke_5m_not_daily",
-                    pair=tick.bid_sum,
-                    extra={"kind": kind, "r7": self.r7, "smoke": True},
-                ),
-                state,
-            )
+        # Recorder ticks are 5m/15m updown. Never 06dc daily/monthly truth.
+        if _l2_short_tf(tick.tf) or kind == "smoke_5m":
+            return smoke_decision(pair=tick.bid_sum, kind=kind), state
         rec = decide_06dc(
             kind="daily_ud" if kind == "daily_ud" else ("bracket" if kind == "bracket" else "daily_ud"),
             yes_ask=tick.au,
@@ -69,8 +84,6 @@ class S06dc(Strategy):
             depth_no=tick.sad,
             clip=self.clip,
         )
-        if kind == "smoke_5m":
-            rec["rule"] = rec.get("rule")
         edge = 0.0
         if rec.get("r3") and rec.get("ask_sum") is not None:
             pair = float(rec["ask_sum"])
@@ -87,7 +100,14 @@ class S06dc(Strategy):
                 edge=0.0,
                 measure_edge=edge,
                 pair=rec.get("bid_sum") or rec.get("ask_sum"),
-                extra={"rule": rec.get("rule"), "kind": kind, "r7": self.r7, "smoke": kind == "smoke_5m"},
+                extra={
+                    "rule": rec.get("rule"),
+                    "kind": kind,
+                    "r7": self.r7,
+                    "smoke": False,
+                    "l2_covers_06dc": False,
+                    "truth": TRUTH,
+                },
             ),
             state,
         )

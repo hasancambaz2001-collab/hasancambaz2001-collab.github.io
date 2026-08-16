@@ -2,6 +2,9 @@
 """Record top-of-book L2 for 5m/15m updown. GET only. Never posts.
 
 python3 scripts/l2_recorder.py --interval 1 --out-dir data/l2
+
+5m/15m only. Does NOT cover 06dc daily/monthly books.
+06dc truth = dump + paper_06dc + T6, not these ticks.
 """
 
 from __future__ import annotations

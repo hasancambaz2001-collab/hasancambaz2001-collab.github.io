@@ -1,9 +1,11 @@
 from pathlib import Path
 
 from whiskas.l2 import (
+    ASSETS,
     BookTick,
     PolicyMaker,
     REGIME_PRE,
+    TFS,
     action_bucket,
     decide_maker,
     regime_for_ts,
@@ -103,3 +105,16 @@ def test_no_live_and_size_ok_false() -> None:
     assert "size_ok: false" in yaml
     assert "pair_max: 0.90" in yaml
     assert Path("configs/size_schedule.yaml").read_text().count("size_ok: false") >= 1
+
+
+def test_l2_recorder_is_5m_15m_not_06dc() -> None:
+    assert TFS == ("5m", "15m")
+    assert "4h" not in TFS
+    assert "1d" not in TFS
+    assert "daily" not in TFS
+    assert "monthly" not in TFS
+    assert "doge" in ASSETS
+    rec = Path("scripts/l2_recorder.py").read_text()
+    assert "Does NOT cover 06dc" in rec
+    assert Path("configs/l2.yaml").read_text().count("covers_06dc: false") >= 1
+    assert "l2_recorder_covers_06dc: false" in Path("configs/06dc.yaml").read_text()

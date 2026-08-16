@@ -1,4 +1,5 @@
 from infra.book.source import BookSource, window_to_tick
+from infra.harness.run_all import run_harness
 from infra.match.fill_model import apply_fill
 from infra.size.ladder import load_ladder
 from infra.strategies.s1_maker import S1Maker
@@ -46,3 +47,13 @@ def test_tape_source_windows() -> None:
     assert wins
     tick = window_to_tick(wins[0])
     assert tick.slug
+
+
+def test_record_harness_s06dc_is_smoke_not_truth() -> None:
+    payload = run_harness(source_name="record", fill="residual")
+    assert payload["l2_recorder_covers_06dc"] is False
+    assert payload["s06dc_truth"] == "dump + paper_06dc + T6"
+    s06 = payload["strategies"]["s06dc"]
+    assert s06["smoke"] is True
+    assert s06["truth"] is False
+    assert s06["measure_edge"] == 0.0

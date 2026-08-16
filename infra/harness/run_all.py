@@ -94,8 +94,16 @@ def run_harness(*, source_name: str, fill: str, glob_pat: str = "data/l2/*.jsonl
         "legacy_ask_fok": "whiskas",
         "ladder": ladder,
         "note": "S1 go/no-go = replay edge, NOT queue fill%. Whiskas full measure ≠ license to trade pair>1.",
+        "s06dc_truth": "dump + paper_06dc + T6",
+        "l2_recorder_covers_06dc": False,
         **body,
     }
+    if source_name in {"record", "parquet"}:
+        s06 = payload.get("strategies", {}).get("s06dc")
+        if isinstance(s06, dict):
+            s06["smoke"] = True
+            s06["truth"] = False
+            s06["note"] = "5m/15m L2 recorder does NOT cover 06dc daily/monthly. Truth = dump + paper_06dc + T6."
     return payload
 
 

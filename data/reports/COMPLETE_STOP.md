@@ -28,7 +28,8 @@ n_ticks 4272 · **% bid_sum≤0.90 = 12.5702** · rest 173 / replace 57 / cancel
 | tape_mo | parity_tape | 3024.44 | 0 (5m smoke) | 700.56 | 2246.67 |
 | record | residual | 316.10 intended | 0 (5m smoke) | 1.79 | −3616.39 (pair>1 ATTR) |
 
-s06dc on 5m ticks is smoke. Real 06dc needs daily/monthly + T6. Whiskas full measure ≠ license to trade pair>1.
+s06dc on 5m/15m L2 ticks is smoke. l2_recorder does NOT cover 06dc daily/monthly.
+06dc truth = dump + paper_06dc + T6. Whiskas full measure ≠ license to trade pair>1.
 
 ## 5. KASA
 
@@ -64,6 +65,7 @@ Low record fill% = short L2 + join-back/hidden/latency. Calibrate. Do not kill S
 ## 9. T6 / R7
 
 GATE **UNCLEAR**. n directional resolved=8 (<20). hit-rate 50% (<58%). **r7_daily_t6=false**. R6 bid_sum≤0.99. No ATM directional invent.
+06dc truth = dump + paper_06dc + T6 — not l2_recorder ticks.
 
 ## 10. Explicit
 

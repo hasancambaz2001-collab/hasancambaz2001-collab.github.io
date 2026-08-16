@@ -2,6 +2,9 @@
 
 No live. size_ok=false. pair_gt_1_trade=false.
 
+5m/15m L2 recorder does NOT cover 06dc daily/monthly. s06dc on `record` = smoke.
+06dc truth = dump + paper_06dc + T6.
+
 | source | fill | s1_raw | s1_filled | s06dc_measure | whiskas_measure | whiskas_full_measure | ts |
 |---|---|---:|---:|---:|---:|---:|---|
 | tape_bosona | parity_tape | 3307.48 | 3307.48 | 0.00 | 412.93 | 2302.63 | 2026-08-16 17:41 UTC |

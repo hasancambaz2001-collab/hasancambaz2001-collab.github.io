@@ -16,7 +16,7 @@ REGIME_CUTOFF = datetime(2026, 8, 14, tzinfo=timezone.utc)
 REGIME_PRE = "pre_2026_08_14_DEBUG"
 REGIME_POST = "post_2026_08_14"
 ASSETS = ("btc", "eth", "sol", "xrp", "doge")
-TFS = ("5m", "15m")
+TFS = ("5m", "15m")  # l2_recorder only. Does not cover 06dc daily/monthly.
 
 
 def _finite(value: Any) -> float | None:

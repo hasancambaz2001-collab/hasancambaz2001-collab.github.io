@@ -1,4 +1,8 @@
-"""BookSource: live CLOB / record jsonl / parquet / tape_synthetic. No live orders."""
+"""BookSource: live CLOB / record jsonl / parquet / tape_synthetic. No live orders.
+
+record = 5m/15m l2_recorder. Does NOT cover 06dc daily/monthly.
+06dc truth = tape_06dc dump + paper_06dc + T6.
+"""
 
 from __future__ import annotations
 

@@ -28,3 +28,6 @@ python3 scripts/l2_recorder.py --interval 1 --out-dir data/l2
 python3 scripts/twin_l2.py --source parquet --path data/parquet/btc_ticks.parquet --clip 10 --fill none
 python3 scripts/twin_l2.py --source record --glob "data/l2/*.jsonl" --clip 10 --fill residual
 ```
+
+`l2_recorder` is 5m/15m updown only. It does **not** cover 06dc daily/monthly books.
+06dc truth = dump + `paper_06dc` + T6, not recorder ticks.

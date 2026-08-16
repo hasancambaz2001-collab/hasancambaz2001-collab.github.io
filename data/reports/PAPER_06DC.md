@@ -14,3 +14,4 @@ Second process. Not merged with 5m/15m/4h jsonl.
 Window: 2026-08-16T17:04:24.360309+00:00 → 2026-08-16T17:05:11.551664+00:00
 
 06dc measure-only. No live. No pair>1 taker. Separate from 5m jsonl.
+Truth with dump + T6. l2_recorder does not cover daily/monthly.

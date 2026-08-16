@@ -3,6 +3,8 @@
 
 Do not edit paper_whiskas.py. Do not write data/paper/intended.jsonl.
 No live. No pair>1 taker. No both-taker unless ask_sum<=0.96.
+
+06dc truth = this paper + dump + T6. l2_recorder is 5m/15m only and does not cover daily/monthly.
 """
 
 from __future__ import annotations

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""06dc daily T6 gate for R7. No live. No ATM directional invent. Do not reopen Whiskas T6."""
+"""06dc daily T6 gate for R7. No live. No ATM directional invent. Do not reopen Whiskas T6.
+
+Part of 06dc truth (dump + paper_06dc + T6). Not l2_recorder 5m/15m ticks.
+"""
 
 from __future__ import annotations
 

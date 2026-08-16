@@ -5,6 +5,8 @@ S1 maker complete-set (bid_sum≤0.90). Not residual/TWAP directional. No live. 
 
 **pre-08-14 parquet is DEBUG only; live parity needs post-08-14 L2**
 
+Recorder is 5m/15m only. Does **not** cover 06dc daily/monthly. 06dc truth = dump + paper_06dc + T6.
+
 ## Recorder
 
 - PID: **18356**
