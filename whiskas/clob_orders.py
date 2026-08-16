@@ -122,6 +122,30 @@ def connect(*, derive_l2: bool = False) -> Any | None:
     return client
 
 
+def _post_buy(
+    client: Any,
+    *,
+    token_id: str,
+    price: float,
+    size: float,
+    order_type: str,
+) -> dict[str, Any]:
+    if client is None:
+        raise AuthAbsent("AUTH_ABSENT")
+    _ClobClient, _ApiCreds, OrderArgs, OrderType, _OrderPayload = _import_client()
+    kind = OrderType.FOK if str(order_type).upper() == "FOK" else OrderType.GTC
+    args = OrderArgs(token_id=str(token_id), price=float(price), size=float(size), side="BUY")
+    resp = client.create_and_post_order(args, order_type=kind)
+    parsed = parse_order_status(resp if isinstance(resp, dict) else {})
+    parsed["sent"] = bool(parsed.get("order_id"))
+    parsed["side"] = "BUY"
+    parsed["type"] = "FOK" if kind == OrderType.FOK else "GTC"
+    parsed["price"] = float(price)
+    parsed["size"] = float(size)
+    parsed["token_id"] = str(token_id)
+    return parsed
+
+
 def create_gtc_buy(
     client: Any,
     *,
@@ -130,19 +154,18 @@ def create_gtc_buy(
     size: float,
 ) -> dict[str, Any]:
     """Post a BUY GTC. Requires a live client. Does not invent fills."""
-    if client is None:
-        raise AuthAbsent("AUTH_ABSENT")
-    _ClobClient, _ApiCreds, OrderArgs, OrderType, _OrderPayload = _import_client()
-    args = OrderArgs(token_id=str(token_id), price=float(price), size=float(size), side="BUY")
-    resp = client.create_and_post_order(args, order_type=OrderType.GTC)
-    parsed = parse_order_status(resp if isinstance(resp, dict) else {})
-    parsed["sent"] = bool(parsed.get("order_id"))
-    parsed["side"] = "BUY"
-    parsed["type"] = "GTC"
-    parsed["price"] = float(price)
-    parsed["size"] = float(size)
-    parsed["token_id"] = str(token_id)
-    return parsed
+    return _post_buy(client, token_id=token_id, price=price, size=size, order_type="GTC")
+
+
+def create_fok_buy(
+    client: Any,
+    *,
+    token_id: str,
+    price: float,
+    size: float,
+) -> dict[str, Any]:
+    """Post a BUY FOK (adverse complete only). Requires a live client. Does not invent fills."""
+    return _post_buy(client, token_id=token_id, price=price, size=size, order_type="FOK")
 
 
 def cancel_order(client: Any, order_id: str) -> dict[str, Any]:

@@ -1,6 +1,7 @@
 from whiskas.clob_auth import auth_status
 from whiskas.clob_orders import (
     AuthAbsent,
+    create_fok_buy,
     create_gtc_buy,
     normalize_status,
     parse_order_status,
@@ -24,6 +25,12 @@ def test_auth_absent_does_not_fake_real_fill() -> None:
 def test_create_gtc_without_client_raises() -> None:
     try:
         create_gtc_buy(None, token_id="1", price=0.40, size=5)
+    except AuthAbsent:
+        pass
+    else:
+        raise AssertionError("expected AuthAbsent")
+    try:
+        create_fok_buy(None, token_id="1", price=0.49, size=5)
     except AuthAbsent:
         return
     raise AssertionError("expected AuthAbsent")

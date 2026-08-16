@@ -1,0 +1,38 @@
+{
+  "generated": "2026-08-16 19:33 UTC",
+  "universe": "btc 5m only",
+  "clip": 5.0,
+  "auth_reason": "AUTH_ABSENT",
+  "sent": false,
+  "n_rest_intent": 0,
+  "still250_rate": null,
+  "still250_rate_paper_all_books": 0.7942238267148014,
+  "still250_logging_on_paper_maker": true,
+  "real_fill_rate": null,
+  "n_partial": 0,
+  "n_cancel": 0,
+  "net_pnl_usd": null,
+  "hit_max_daily_loss": false,
+  "pair_gt_1_trade": 0,
+  "paper": {
+    "paper_rows_24h": 20932,
+    "n_rest_intent_btc5_paper": 0,
+    "n_rest_intent_paper_all_books": 915,
+    "still250_rate_btc5_paper": null,
+    "still250_rate_paper_all_books": 0.7942238267148014,
+    "still250_field_on_all_paper_rests": true,
+    "pair_gt_1_trade_paper": 0,
+    "paper_real_fill_nonnull": 0
+  },
+  "micro": {
+    "n_rest_intent_micro": 0,
+    "still250_rate_micro": null,
+    "n_real_orders": 0,
+    "real_fill_rate": null,
+    "n_partial": 0,
+    "n_cancel": 0,
+    "n_pair_gt_1_trade": 0,
+    "net_pnl_usd": null
+  },
+  "note": "real_fill_rate is null until an order is sent. Do not invent real_fill. micro trial \u2260 full live. No size bump."
+}

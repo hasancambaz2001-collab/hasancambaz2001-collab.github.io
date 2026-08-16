@@ -62,9 +62,10 @@ def micro_payload(*, clip: float, g5: bool, g6: bool) -> dict[str, Any]:
             "bundle_sends_orders": False,
             "default_this_run": "measurement_and_yaml_only",
             "send_requires": [
-                "explicit --send-live-orders-now",
+                "--send --i-accept-micro-risk (or --send-live-orders-now --i-accept-micro-risk)",
                 "MICRO_LIVE_TRIAL.yaml",
                 "G6_fill_calibrated.flag",
+                "local CLOB keys",
             ],
             "clob_path": "scripts/micro_live.py",
             "auth_from": "env or configs/.env.clob",
@@ -73,7 +74,7 @@ def micro_payload(*, clip: float, g5: bool, g6: bool) -> dict[str, Any]:
         "notes": (
             "MICRO trial permit only. Bundle does not send orders. "
             "Not LIVE_READY. Not full ladder. No clip 67. pair_gt_1_trade=false. "
-            "clip 5 without G5, clip 10 with G5. micro trial ≠ full solve. "
+            "This trial clip 5 only (no clip 10/67). micro trial ≠ full live. "
             "real_fill only after orders sent. "
             "CLOB path: scripts/micro_live.py. AUTH_ABSENT => no send, no fake real_fill."
         ),

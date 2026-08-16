@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-16 19:07 UTC",
+  "generated": "2026-08-16 19:33 UTC",
   "micro_yaml": true,
   "micro_path": "/workspace/configs/generated/MICRO_LIVE_TRIAL.yaml",
   "auth_available": false,
@@ -16,7 +16,10 @@
   "live_ready_exists": false,
   "still250_note": "paper_maker still250 continues; real_fill=null until an order is sent",
   "clip_cap": 5.0,
-  "note": "AUTH_ABSENT => do not send, do not fake real_fill. micro trial \u2260 full solve.",
+  "asset": "btc",
+  "tf": "5m",
+  "halted_on_loss": false,
+  "note": "AUTH_ABSENT => do not send, do not fake real_fill. micro trial \u2260 full live.",
   "ok": true,
   "block": "AUTH_ABSENT",
   "reason": "AUTH_ABSENT"
