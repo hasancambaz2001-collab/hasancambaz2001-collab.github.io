@@ -195,7 +195,19 @@ def snapshot_maker(
             pair_max=float(pair_max),
             books=books,
         )
+        if still is None:
+            still = {
+                "still_there_250ms": False,
+                "bid_sum_250": None,
+                "min_size_250": None,
+                "probe_error": True,
+            }
     attach_layers(rec, still=still, clip=float(clip), pair_max=float(pair_max))
+    if str(rec.get("reason") or "") == "rest":
+        if rec.get("still_there_250ms") is None:
+            rec["still_there_250ms"] = False
+            rec["still250"] = False
+        rec["still250_absent"] = False
     return rec, next_state
 
 

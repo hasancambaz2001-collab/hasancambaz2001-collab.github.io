@@ -17,6 +17,7 @@ from scripts.paper_maker import (
     load_maker_yaml,
     snapshot_maker,
 )
+import scripts.paper_maker as paper_maker_mod
 
 
 def test_rest_both_when_cheap_and_deep() -> None:
@@ -297,8 +298,10 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert rec["live_order"] is False
     assert rec["book"] == "maker"
     assert rec["still_there_250ms"] is True
+    assert isinstance(rec["still_there_250ms"], bool)
     assert rec["still250"] is True
     assert rec["intent"] is True
+    assert rec["still250_absent"] is False
     assert rec["skip_reason"] is None
     assert rec["bid_sum"] is not None
     assert rec["bid_sum_0"] == rec["bid_sum"]
@@ -334,3 +337,19 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert "pair_max: 0.90" in yaml
     assert "cancel_above: 0.92" in yaml
     assert "requote: 2" in yaml
+
+
+def test_rest_intent_always_writes_still_there_250ms(monkeypatch) -> None:
+    tokens = {"Up": "u", "Down": "d"}
+    books = {
+        "Up": {"bids": [{"price": "0.40", "size": "12"}], "asks": [{"price": "0.42", "size": "12"}]},
+        "Down": {"bids": [{"price": "0.48", "size": "12"}], "asks": [{"price": "0.50", "size": "12"}]},
+    }
+    monkeypatch.setattr(paper_maker_mod, "_probe_still250", lambda **_k: None)
+    rec, _state = snapshot_maker(asset="btc", tf="5m", tokens=tokens, books=books, now=1786886400)
+    assert rec["reason"] == "rest"
+    assert "still_there_250ms" in rec
+    assert rec["still_there_250ms"] is False
+    src = Path("scripts/paper_maker.py").read_text(encoding="utf-8")
+    assert "still_there_250ms" in src
+    assert "_probe_still250" in src
