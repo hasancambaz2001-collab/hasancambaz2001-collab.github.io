@@ -43,6 +43,7 @@ def main() -> int:
     (PROC / "size_schedule.json").write_text(json.dumps(payload, indent=2) + "\n")
     yaml_out = {
         "size_ok": False,
+        "paper_clip": 10,
         "pair_gt_1_trade": False,
         "ladder": {
             "now": CLIP_NOW,

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Paper loop: log intended BUY FOKs on live up/down CLOB books. No orders."""
+"""LEGACY ask-FOK paper. Never primary 5m PnL.
+
+Primary 5m/15m signal = paper_maker (bid rest). This process is legacy_ask_fok.
+Measure-only. No orders.
+"""
 
 from __future__ import annotations
 
@@ -33,8 +37,9 @@ def _parse_since(text: str | None) -> datetime | None:
 
 def write_paper_report(stats: dict, path: Path) -> str:
     lines = [
-        "# PHASE3 paper (frozen)",
+        "# PHASE3 paper (legacy_ask_fok)",
         "",
+        "LEGACY ask-FOK. Never primary 5m PnL. Primary = paper_maker bid rest.",
         "Measure-only. No live. No pair>1. Clip 21. Repeat max 8. 4h = poll only.",
         "Ask buckets 0.90 / 0.96 unchanged. Bid bucket: log bid_sum; maker_intend when bid_sum≤0.98 on 5m/15m only.",
         "",

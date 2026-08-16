@@ -26,3 +26,5 @@ data/l2/*
 !data/l2/.gitkeep
 data/parquet/*
 !data/parquet/.gitkeep
+data/dumps/*
+!data/dumps/.gitkeep

@@ -31,6 +31,12 @@ for f in \
   scripts/l2_recorder.py \
   scripts/twin_l2.py \
   whiskas/l2.py \
+  infra/harness/run_all.py \
+  infra/strategies/s1_maker.py \
+  infra/book/source.py \
+  infra/match/queue_sim_v2.py \
+  scripts/queue_sim_run.py \
+  scripts/public_realism_pack.py \
   pipeline/patches/BID_BUCKET.md
 do
   if [ ! -f "$f" ]; then

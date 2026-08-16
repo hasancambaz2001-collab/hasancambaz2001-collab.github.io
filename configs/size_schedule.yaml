@@ -1,4 +1,5 @@
 size_ok: false
+paper_clip: 10
 pair_gt_1_trade: false
 ladder:
   now: 10.0
