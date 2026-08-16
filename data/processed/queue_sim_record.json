@@ -6,11 +6,11 @@
   "note": "S1 go/no-go = replay edge, NOT queue fill%. Low fill% on short L2 = calibrate, don't kill S1.",
   "scenarios": {
     "base": {
-      "n_rest": 69,
+      "n_rest": 81,
       "n_complete_fills": 7,
-      "intended_shares": 1380.0,
+      "intended_shares": 1620.0,
       "filled_shares": 140.0,
-      "fill_ratio": 0.10144927536231885,
+      "fill_ratio": 0.08641975308641975,
       "scenario": "base",
       "label": "plan",
       "clip": 10.0,
@@ -21,11 +21,11 @@
       "go_nogo": false
     },
     "pessimistic": {
-      "n_rest": 69,
-      "n_complete_fills": 5,
-      "intended_shares": 1380.0,
-      "filled_shares": 100.0,
-      "fill_ratio": 0.07246376811594203,
+      "n_rest": 81,
+      "n_complete_fills": 6,
+      "intended_shares": 1620.0,
+      "filled_shares": 120.0,
+      "fill_ratio": 0.07407407407407407,
       "scenario": "pessimistic",
       "label": "stress",
       "clip": 10.0,
@@ -36,11 +36,11 @@
       "go_nogo": false
     },
     "optimistic": {
-      "n_rest": 69,
+      "n_rest": 81,
       "n_complete_fills": 8,
-      "intended_shares": 1380.0,
+      "intended_shares": 1620.0,
       "filled_shares": 160.0,
-      "fill_ratio": 0.11594202898550725,
+      "fill_ratio": 0.09876543209876543,
       "scenario": "optimistic",
       "label": "upper_bound_only",
       "clip": 10.0,
@@ -51,5 +51,5 @@
       "go_nogo": false
     }
   },
-  "generated": "2026-08-16 17:41 UTC"
+  "generated": "2026-08-16 17:44 UTC"
 }

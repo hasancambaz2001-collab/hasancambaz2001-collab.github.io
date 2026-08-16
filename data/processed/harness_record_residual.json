@@ -1,7 +1,7 @@
 {
   "source": "record",
   "fill": "residual",
-  "generated": "2026-08-16 17:41 UTC",
+  "generated": "2026-08-16 17:43 UTC",
   "live": false,
   "size_ok": false,
   "pair_gt_1_trade": false,
@@ -19,18 +19,18 @@
   },
   "note": "S1 go/no-go = replay edge, NOT queue fill%. Whiskas full measure \u2260 license to trade pair>1.",
   "mode": "ticks",
-  "n_ticks": 3755,
+  "n_ticks": 4287,
   "strategies": {
     "s1": {
-      "n": 3755,
-      "intend": 307,
+      "n": 4287,
+      "intend": 354,
       "trade": true,
-      "edge_raw": 259.0999999999999,
-      "edge_filled": 259.0999999999999,
-      "measure_edge": 259.0999999999999
+      "edge_raw": 316.1000000000001,
+      "edge_filled": 316.1000000000001,
+      "measure_edge": 316.1000000000001
     },
     "s06dc": {
-      "n": 3755,
+      "n": 4287,
       "intend": 0,
       "trade": false,
       "edge_raw": 0.0,
@@ -38,7 +38,7 @@
       "measure_edge": 0.0
     },
     "whiskas": {
-      "n": 3755,
+      "n": 4287,
       "intend": 2,
       "trade": false,
       "edge_raw": 0.0,
@@ -46,12 +46,12 @@
       "measure_edge": 1.7942200000000001
     },
     "whiskas_full_measure": {
-      "n": 3755,
+      "n": 4287,
       "intend": 0,
       "trade": false,
       "edge_raw": 0.0,
       "edge_filled": 0.0,
-      "measure_edge": -3087.294000000109
+      "measure_edge": -3616.389000000138
     }
   }
 }

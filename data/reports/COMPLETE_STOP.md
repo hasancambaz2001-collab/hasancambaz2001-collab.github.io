@@ -1,13 +1,13 @@
 # COMPLETE STOP (L2 TWIN onward)
 
-Generated: 2026-08-16 17:42 UTC
+Generated: 2026-08-16 17:44 UTC
 No live. size_ok=false. pair_gt_1_trade=false. No merge.
 
 ## 1. Recorder
 
 - PID **18356** alive since 2026-08-16T17:25:53Z
-- hours of L2: **0.27**
-- n files: **10** (`data/l2/*.jsonl`) · ticks ~4268 and growing
+- hours of L2: **0.30**
+- n files: **10** (`data/l2/*.jsonl`) · ticks ~4787 and growing
 - assets btc/eth/sol/xrp/doge · tfs 5m/15m · interval 1s · live_order=false
 
 ## 2. Parquet DEBUG — REGIME=pre_2026_08_14_DEBUG
@@ -17,7 +17,7 @@ Span 2026-03-24 → 2026-05-18. `--fill none`. Policy wiring only.
 
 ## 3. Post-14 record twin — REGIME=post_2026_08_14
 
-n_ticks 3697 · **% bid_sum≤0.90 = 12.4425** · rest 146 / replace 48 / cancel 92 / rich 3077
+n_ticks 4272 · **% bid_sum≤0.90 = 12.5702** · rest 173 / replace 57 / cancel 107 / rich 3571
 `--fill residual`. Cross-check: 217 cheap mo/bosona windows since 08-14; 0 slugs with L2 yet (recorder started after those windows).
 
 ## 4. Harness
@@ -26,7 +26,7 @@ n_ticks 3697 · **% bid_sum≤0.90 = 12.4425** · rest 146 / replace 48 / cancel
 |---|---|---:|---:|---:|---:|
 | tape_bosona | parity_tape | 3307.48 | 0 (5m smoke) | 412.93 | 2302.63 |
 | tape_mo | parity_tape | 3024.44 | 0 (5m smoke) | 700.56 | 2246.67 |
-| record | residual | 259.10 intended | 0 (5m smoke) | 1.79 | −3087.29 (pair>1 ATTR) |
+| record | residual | 316.10 intended | 0 (5m smoke) | 1.79 | −3616.39 (pair>1 ATTR) |
 
 s06dc on 5m ticks is smoke. Real 06dc needs daily/monthly + T6. Whiskas full measure ≠ license to trade pair>1.
 
@@ -47,7 +47,7 @@ S1_cheap dominates. S3/pair>1 stay ATTR / trade=false.
 
 | source | base | pes | opt |
 |---|---:|---:|---:|
-| record (~16 min L2) | 0.1014 | 0.0725 | 0.1159 |
+| record (~18 min L2) | 0.0864 | 0.0741 | 0.0988 |
 | tape_bosona (coarse) | 0.3650 | 0.1901 | 0.9125 |
 
 Low record fill% = short L2 + join-back/hidden/latency. Calibrate. Do not kill S1. Optimistic not for sizing. size_ok stays false.
