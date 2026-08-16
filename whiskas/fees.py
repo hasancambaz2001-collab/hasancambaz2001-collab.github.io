@@ -1,0 +1,15 @@
+from __future__ import annotations
+
+from whiskas.constants import CRYPTO_TAKER_FEE_RATE
+
+
+def taker_fee_usdc(shares: float, price: float, fee_rate: float = CRYPTO_TAKER_FEE_RATE) -> float:
+    """Official formula: fee = C × feeRate × p × (1 − p), rounded to 5 decimals."""
+    if shares <= 0 or price <= 0 or price >= 1:
+        return 0.0
+    fee = shares * fee_rate * price * (1.0 - price)
+    return round(fee, 5)
+
+
+def notional_usdc(shares: float, price: float) -> float:
+    return float(shares) * float(price)
