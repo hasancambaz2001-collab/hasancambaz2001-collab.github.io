@@ -10,12 +10,14 @@ This repo is research + paper scaffolding. It is **not** a copy-trader and **not
 2. `scripts/build_windows.py` — parquet windows/fills + `data/reports/PHASE1.md`.
 3. `scripts/tieout_pnl.py` — official +$211k vs reconstructed books (`PHASE1_TIEOUT.md`).
 4. `scripts/analyze_maker.py` / `analyze_tape.py` / `analyze_cluster.py` — role split, Aug tape (T6–T9), proxy cluster.
-5. `configs/whiskas.yaml` — **pair_max default 0.96, cap 0.97, never 0.98**. Not live.
-6. Tests for slug parse, pair_cost / residual sign, kill-switch, fee/maker identity.
+5. `configs/whiskas.yaml` — **pair_max default 0.96, cap 0.97, clip 21**. Not live.
+6. `scripts/replay_whiskas.py` — taker complete-set replay on `ask_sum ≤ 0.96` (`PHASE3_REPLAY.md`).
+7. `scripts/paper_whiskas.py` — live CLOB **GET** logger of intended BUY FOKs. No orders.
+8. Tests for slug parse, pair_cost / residual sign, kill-switch, fee/maker identity, policy/replay/paper.
 
-**Read `PHASE1_TIEOUT.md` then `PHASE1_MAKER.md` / `TAPE.md` / `CLUSTER.md`.** PHASE1 `total_pnl=−$103k` is the broken register. Tie-out is green (`|$137|`). No bot / paper / live.
+**Read `PHASE1_TIEOUT.md` then `PHASE1_MAKER.md` / `TAPE.md` / `CLUSTER.md`, then `PHASE3_REPLAY.md`.** PHASE1 `total_pnl=−$103k` is the broken register. Tie-out is green (`|$137|`). T6–T9 stay closed.
 
-Do **not** start a bot, paper loop, or replay from this tree.
+Product is **taker complete-set only**: BUY both asks FOK, no SELL, no residual, no spot/TWAP, redeem after resolve. Maker/Diamond rebate is their edge. No live.
 
 ## Dump
 
@@ -43,9 +45,14 @@ Prints PHASE1 numbers, writes:
 
 Winners come from redeem rows, then closed-position `curPrice`, then Gamma `outcomePrices` for leftovers. Nothing is invented.
 
-## Paper (later)
+## Replay + paper (no live)
 
-Paper against the live CLOB is Phase 3B. It must log *intended* orders only. It is not implemented in this Phase 1 drop.
+```bash
+python3 scripts/replay_whiskas.py
+python3 scripts/paper_whiskas.py --once
+```
+
+Replay uses their taker fill prices as the ask proxy and sizes `clip=21`. Paper polls `GET /book` and writes `data/paper/intended.jsonl`. Neither script posts an order. See `data/reports/PHASE3_REPLAY.md`.
 
 ## Live (warning, not a how-to)
 

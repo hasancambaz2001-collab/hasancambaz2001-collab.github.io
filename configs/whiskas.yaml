@@ -2,18 +2,22 @@ wallet: '0x3048d65321be3497164cdfc2996f94f98a2e7537'
 username: x-MoneyForWhiskas
 profile: https://polymarket.com/@x-moneyforwhiskas
 market: btc-updown-5m
-# Decision after tie-out: default 0.96, cap 0.97, never 0.98. Not 0.9513.
+# Product: TAKER complete-set only. pair_max 0.96, cap 0.97, never 0.98. Not 0.9513.
 pair_max: 0.96
 pair_max_cap: 0.97
+clip: 21
+fill_prob_stress: 0.30
+day_dd: -0.15
+start_equity: 1000
 min_edge: 0.04
-clip: 20.86
-max_residual: 0.2478
+max_residual: 0
 burst_windows: 59
 late_max_price: 0.47
 late_t_seconds: 240
 fee:
   rate: 0.07
   category: crypto
-  assume_taker: false
+  assume_taker: true
+  assume_diamond: false
 slippage_ticks: 1
-notes: pair_max 0.96/0.97 from tie-out table, not p25. BUY is not always taker. Not a live enable.
+notes: Taker complete-set. BUY both asks FOK. No SELL, no residual, no maker, no live. Diamond rebate is theirs.

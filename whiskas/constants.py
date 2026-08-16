@@ -6,6 +6,7 @@ WHISKAS_WALLET = "0x3048d65321be3497164cdfc2996f94f98a2e7537"
 
 DATA_API = "https://data-api.polymarket.com"
 GAMMA_API = "https://gamma-api.polymarket.com"
+CLOB_API = "https://clob.polymarket.com"
 
 BTC_5M_PREFIX = "btc-updown-5m-"
 WINDOW_SECONDS = 300
@@ -14,6 +15,16 @@ LATE_T_SECONDS = 240
 # Official crypto taker fee: fee = C * feeRate * p * (1-p)
 # https://docs.polymarket.com/trading/fees
 CRYPTO_TAKER_FEE_RATE = 0.07
+
+# Product lock (taker complete-set). pair_max 0.9513 is forbidden.
+PAIR_MAX = 0.96
+PAIR_MAX_CAP = 0.97
+CLIP = 21.0
+FILL_PROB_STRESS = 0.30
+DAY_DD_PRODUCT = -0.15
+START_EQUITY = 1000.0
+REPLAY_SEED = 4921
+MAKER_EPS = 0.02
 
 ACTIVITY_LIMIT = 500
 ACTIVITY_OFFSET_MAX = 5000
