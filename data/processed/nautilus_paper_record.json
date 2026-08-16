@@ -1,0 +1,31 @@
+{
+  "engine": "nautilus_paper",
+  "nautilus": {
+    "installed": true,
+    "version": "1.231.0",
+    "polymarket_extra": false,
+    "historical_l2": false,
+    "live": false,
+    "note": "core QuoteTick only. No execution client. No historical L2."
+  },
+  "n_ticks": 2000,
+  "n_quotes": 3855,
+  "n_rest": 0,
+  "reasons": {
+    "rich_bid_sum": 1928,
+    "missing_bid": 72
+  },
+  "live_orders": false,
+  "size_ok": false,
+  "pair_gt_1_trade": false,
+  "g5_g6_unlocked": false,
+  "clip": 10.0,
+  "pair_max": 0.9,
+  "shadow_only": true,
+  "note": "paper bus only. do not live without G5 G6",
+  "source": "record",
+  "generated": "2026-08-16 18:28 UTC",
+  "g5_flag_exists": false,
+  "g6_flag_exists": false,
+  "live_ready_exists": false
+}

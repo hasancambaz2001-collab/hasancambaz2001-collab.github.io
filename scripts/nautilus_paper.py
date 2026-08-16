@@ -49,18 +49,30 @@ def main() -> int:
     PROC.mkdir(parents=True, exist_ok=True)
     REPORTS.mkdir(parents=True, exist_ok=True)
     (PROC / f"nautilus_paper_{args.source}.json").write_text(json.dumps(payload, indent=2) + "\n")
+    runs = []
+    for path in sorted(PROC.glob("nautilus_paper_*.json")):
+        try:
+            rec = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(rec, dict) and rec.get("engine") == "nautilus_paper":
+            runs.append(rec)
     lines = [
         "# NAUTILUS_PAPER",
         "",
         f"Generated: {payload['generated']}",
-        f"nautilus {probe.get('version')} · source={args.source} · n_ticks={payload['n_ticks']} · n_quotes={payload['n_quotes']}",
-        "live_orders=false · size_ok=false · g5_g6_unlocked=false",
-        "Polymarket execution client not imported. Historical L2 still PMData/recorder.",
+        f"nautilus {probe.get('version')} core QuoteTick bus. No Polymarket execution client.",
+        "Historical L2 still PMData/recorder. live_orders=false · size_ok=false · g5_g6_unlocked=false",
         "do not live without G5 G6",
         "",
-        f"rest={payload['n_rest']} reasons={payload['reasons']}",
-        "",
+        "| source | n_ticks | n_quotes | n_rest | reasons |",
+        "|---|---:|---:|---:|---|",
     ]
+    for rec in runs:
+        lines.append(
+            f"| {rec.get('source')} | {rec.get('n_ticks')} | {rec.get('n_quotes')} | {rec.get('n_rest')} | {rec.get('reasons')} |"
+        )
+    lines.extend(["", "Paper bus only. Does not unlock G5/G6. Does not write LIVE_READY.", ""])
     (REPORTS / "NAUTILUS_PAPER.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({
         "ok": True,
