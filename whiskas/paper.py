@@ -90,6 +90,36 @@ def tokens_from_market(market: dict[str, Any]) -> dict[str, str]:
     return out
 
 
+def cached_discover_tokens(
+    slug: str,
+    cache: dict[str, dict[str, str]] | None = None,
+    *,
+    force: bool = False,
+) -> tuple[dict[str, str], bool]:
+    """Reuse Up/Down token ids for a slug. Miss or force → Gamma GET. Empty result is not cached."""
+    if cache is not None and not force:
+        hit = cache.get(slug)
+        if isinstance(hit, dict) and hit.get("Up") and hit.get("Down"):
+            return dict(hit), True
+    tokens = discover_tokens(slug)
+    if cache is not None and tokens.get("Up") and tokens.get("Down"):
+        stale = [k for k in list(cache) if k != slug and str(k).rsplit("-", 1)[0] == str(slug).rsplit("-", 1)[0]]
+        for old in stale:
+            cache.pop(old, None)
+        cache[slug] = dict(tokens)
+    return tokens, False
+
+
+def fetch_books_parallel(token_up: str, token_down: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    """GET both CLOB books at once. Two workers; no extra sleep."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        fut_up = pool.submit(fetch_book, str(token_up))
+        fut_down = pool.submit(fetch_book, str(token_down))
+        return fut_up.result(), fut_down.result()
+
+
 def discover_tokens(slug: str) -> dict[str, str]:
     """Gamma public market → Up/Down CLOB token ids. GET only."""
     events = get_json(f"{GAMMA_API}/events", {"slug": slug}, timeout=20, retries=3, pause=0.08)

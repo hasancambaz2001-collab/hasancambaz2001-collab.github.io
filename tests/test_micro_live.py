@@ -113,6 +113,10 @@ def test_clip_cap_without_g5() -> None:
     assert "still250_false" in src
     assert "off_touch" in src
     assert "inventory_flat" in src
+    assert "still_ms" in src
+    assert "post_ack_ms" in src
+    assert "t_intent" in src
+    assert "token_cache" in src
     clob = Path("whiskas/clob_orders.py").read_text()
     assert "post_orders" in clob
     assert "trader_side" in clob

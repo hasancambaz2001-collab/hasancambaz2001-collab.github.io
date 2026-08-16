@@ -29,9 +29,9 @@ from whiskas.paper import (
     best_ask,
     best_bid,
     book_key,
+    cached_discover_tokens,
     current_t0,
-    discover_tokens,
-    fetch_book,
+    fetch_books_parallel,
     load_jsonl,
     normalize_tf,
 )
@@ -117,6 +117,7 @@ def snapshot_maker(
     now: float | None = None,
     pair_max: float = PAIR_MAX,
     cancel_above: float = CANCEL_ABOVE,
+    token_cache: dict[str, dict[str, str]] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
     tf_key = normalize_tf(tf)
     ts_now = time.time() if now is None else float(now)
@@ -131,9 +132,21 @@ def snapshot_maker(
         "slug": slug,
         "live_order": False,
         "clip": float(clip),
+        "t_intent": None,
+        "intent_ts": None,
+        "still_ms": None,
+        "sign_ms": None,
+        "post_ack_ms": None,
+        "lag_ms": None,
+        "token_cache_hit": None,
     }
     try:
-        tok = tokens if tokens is not None else discover_tokens(slug)
+        if tokens is not None:
+            tok = tokens
+            rec["token_cache_hit"] = None
+        else:
+            tok, hit = cached_discover_tokens(slug, token_cache)
+            rec["token_cache_hit"] = hit
     except Exception as exc:
         rec["error"] = f"gamma:{exc}"
         rec["reason"] = "gamma_error"
@@ -143,6 +156,8 @@ def snapshot_maker(
         rec["error"] = "missing_tokens"
         rec["reason"] = "missing_tokens"
         rec["orders"] = []
+        if token_cache is not None:
+            token_cache.pop(slug, None)
         return attach_layers(rec), state
     rec["token_up"] = tok["Up"]
     rec["token_down"] = tok["Down"]
@@ -151,12 +166,13 @@ def snapshot_maker(
             book_up = books.get("Up") or {}
             book_down = books.get("Down") or {}
         else:
-            book_up = fetch_book(tok["Up"])
-            book_down = fetch_book(tok["Down"])
+            book_up, book_down = fetch_books_parallel(tok["Up"], tok["Down"])
     except Exception as exc:
         rec["error"] = f"clob:{exc}"
         rec["reason"] = "clob_error"
         rec["orders"] = []
+        if token_cache is not None:
+            token_cache.pop(slug, None)
         return attach_layers(rec), state
     bid_up, sz_up = best_bid(book_up)
     bid_down, sz_down = best_bid(book_down)
@@ -190,12 +206,15 @@ def snapshot_maker(
     still = None
     if str(decision.get("reason") or "") == "rest":
         rec["t_intent"] = time.time()
+        rec["intent_ts"] = datetime.fromtimestamp(float(rec["t_intent"]), tz=timezone.utc).isoformat()
+        t_still = time.time()
         still = _probe_still250(
             tokens=tok,
             clip=float(clip),
             pair_max=float(pair_max),
             books=books,
         )
+        rec["still_ms"] = (time.time() - t_still) * 1000.0
         if still is None:
             still = {
                 "still_there_250ms": False,
@@ -203,6 +222,8 @@ def snapshot_maker(
                 "min_size_250": None,
                 "probe_error": True,
             }
+        elif still.get("still_ms") is not None:
+            rec["still_ms"] = still.get("still_ms")
     attach_layers(rec, still=still, clip=float(clip), pair_max=float(pair_max))
     if str(rec.get("reason") or "") == "rest":
         if rec.get("still_there_250ms") is None:
@@ -226,16 +247,17 @@ def _probe_still250(
     books: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     """Re-read both books after 250ms. still250 = bid_sum<=pair_max and min_size>=clip."""
+    t0 = time.time()
     if books is None:
         time.sleep(STILL_PROBE_SEC)
         try:
-            book_up = fetch_book(tokens["Up"])
-            book_down = fetch_book(tokens["Down"])
+            book_up, book_down = fetch_books_parallel(tokens["Up"], tokens["Down"])
         except Exception:
             return None
     else:
         book_up = books.get("Up") or {}
         book_down = books.get("Down") or {}
+    still_ms = (time.time() - t0) * 1000.0
     bid_up, sz_up = best_bid(book_up)
     bid_down, sz_down = best_bid(book_down)
     ask_up, _ask_sz_up = best_ask(book_up)
@@ -249,6 +271,7 @@ def _probe_still250(
             "bid_down_250": bid_down,
             "ask_up_250": ask_up,
             "ask_down_250": ask_down,
+            "still_ms": still_ms,
         }
     bid_sum = float(bid_up) + float(bid_down)
     min_size = min(float(sz_up), float(sz_down))
@@ -260,6 +283,7 @@ def _probe_still250(
         "bid_down_250": float(bid_down),
         "ask_up_250": None if ask_up is None else float(ask_up),
         "ask_down_250": None if ask_down is None else float(ask_down),
+        "still_ms": still_ms,
     }
 
 
@@ -380,28 +404,15 @@ def run_loop(
     while True:
         for asset in assets:
             for tf in tfs:
-                t0 = current_t0(tf=tf)
                 key = book_key(asset, tf)
-                slug = asset_window_slug(asset, t0, tf)
-                tokens = token_cache.get(slug)
-                if tokens is None:
-                    try:
-                        tokens = discover_tokens(slug)
-                    except Exception:
-                        tokens = {}
-                    if tokens:
-                        stale = [k for k in token_cache if k.startswith(f"{asset}-updown-{tf}-") and k != slug]
-                        for old in stale:
-                            token_cache.pop(old, None)
-                        token_cache[slug] = tokens
                 rec, new_state = snapshot_maker(
                     asset=asset,
                     tf=tf,
                     clip=clip,
-                    tokens=tokens or None,
                     state=states.get(key),
                     pair_max=pair_max,
                     cancel_above=cancel_above,
+                    token_cache=token_cache,
                 )
                 rec["live_order"] = False
                 states[key] = new_state

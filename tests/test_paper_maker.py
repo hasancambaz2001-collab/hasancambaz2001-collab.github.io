@@ -303,6 +303,12 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert rec["intent"] is True
     assert rec.get("send_blocked") is None
     assert rec.get("would_send") is True
+    assert rec.get("t_intent") is not None
+    assert rec.get("intent_ts")
+    assert rec.get("still_ms") is not None
+    assert rec.get("sign_ms") is None
+    assert rec.get("post_ack_ms") is None
+    assert rec.get("lag_ms") is None
     assert rec["still250_absent"] is False
     assert rec["skip_reason"] is None
     assert rec["bid_sum"] is not None
@@ -359,3 +365,5 @@ def test_rest_intent_always_writes_still_there_250ms(monkeypatch) -> None:
     assert "still_there_250ms" in src
     assert "_probe_still250" in src
     assert "apply_still250_send_gate" in src
+    assert "fetch_books_parallel" in src
+    assert "cached_discover_tokens" in src

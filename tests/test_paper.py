@@ -7,8 +7,10 @@ from whiskas.paper import (
     asset_window_slug,
     best_ask,
     best_bid,
+    cached_discover_tokens,
     confirm_ask_exists,
     current_t0,
+    fetch_books_parallel,
     snapshot_window,
     summarize_paper,
     tokens_from_market,
@@ -351,3 +353,36 @@ def test_paper_is_get_only() -> None:
     assert "Request(" not in blob
     assert "create_order" not in blob
     assert "post_order" not in blob
+
+
+def test_token_cache_hits_and_parallel_books(monkeypatch) -> None:
+    calls = {"n": 0}
+
+    def fake_discover(slug: str):
+        calls["n"] += 1
+        return {"Up": "u1", "Down": "d1"}
+
+    monkeypatch.setattr("whiskas.paper.discover_tokens", fake_discover)
+    cache: dict = {}
+    first, hit1 = cached_discover_tokens("btc-updown-5m-1", cache)
+    second, hit2 = cached_discover_tokens("btc-updown-5m-1", cache)
+    assert first == {"Up": "u1", "Down": "d1"}
+    assert hit1 is False
+    assert hit2 is True
+    assert calls["n"] == 1
+    started: list[float] = []
+    import time as _t
+
+    def fake_book(token_id: str, **_k):
+        started.append(_t.time())
+        _t.sleep(0.05)
+        return {"token": token_id}
+
+    monkeypatch.setattr("whiskas.paper.fetch_book", fake_book)
+    t0 = _t.time()
+    up, down = fetch_books_parallel("u", "d")
+    elapsed = _t.time() - t0
+    assert up["token"] == "u"
+    assert down["token"] == "d"
+    assert elapsed < 0.09
+    assert abs(started[0] - started[1]) < 0.04

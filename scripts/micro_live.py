@@ -51,7 +51,7 @@ from whiskas.micro_report import (
     layer_records,
     write_24h,
 )
-from whiskas.paper import append_jsonl, current_t0
+from whiskas.paper import append_jsonl, current_t0, fetch_books_parallel
 from scripts.paper_maker import snapshot_maker
 
 MICRO = ROOT / "configs" / "generated" / "MICRO_LIVE_TRIAL.yaml"
@@ -109,6 +109,8 @@ def print_preconditions() -> dict[str, Any]:
             "fetch_order",
             "still250_false",
             "guard_still250_send",
+            "still_ms",
+            "post_ack_ms",
         )
     )
     pre = {
@@ -264,6 +266,9 @@ def _block_send(rec: dict[str, Any], reason: str, *, clip: float) -> dict[str, A
     rec["real_fill_rate"] = None
     rec["pair_gt_1_trade"] = False
     rec.setdefault("lag_ms", None)
+    rec.setdefault("sign_ms", None)
+    rec.setdefault("post_ack_ms", None)
+    rec.setdefault("still_ms", rec.get("still_ms"))
     rec.setdefault("adverse_action", rec.get("adverse"))
     rec.setdefault("residual", None)
     rec.setdefault("fill_role", None)
@@ -289,22 +294,21 @@ def _buy_off_touch(px: Any, best_bid: Any) -> bool:
 
 
 def _reread_book(rec: dict[str, Any]) -> dict[str, Any]:
-    from whiskas.paper import best_ask, best_bid, fetch_book
+    from whiskas.paper import best_ask, best_bid
 
     out: dict[str, Any] = {}
+    if not rec.get("token_up") or not rec.get("token_down"):
+        return out
     try:
-        if rec.get("token_up"):
-            book_up = fetch_book(str(rec["token_up"]))
-            bu, _ = best_bid(book_up)
-            au, _ = best_ask(book_up)
-            out["bid_up"] = bu
-            out["ask_up"] = au
-        if rec.get("token_down"):
-            book_down = fetch_book(str(rec["token_down"]))
-            bd, _ = best_bid(book_down)
-            ad, _ = best_ask(book_down)
-            out["bid_down"] = bd
-            out["ask_down"] = ad
+        book_up, book_down = fetch_books_parallel(str(rec["token_up"]), str(rec["token_down"]))
+        bu, _ = best_bid(book_up)
+        au, _ = best_ask(book_up)
+        bd, _ = best_bid(book_down)
+        ad, _ = best_ask(book_down)
+        out["bid_up"] = bu
+        out["ask_up"] = au
+        out["bid_down"] = bd
+        out["ask_down"] = ad
     except Exception:
         return out
     if out.get("bid_up") is not None and out.get("bid_down") is not None:
@@ -367,6 +371,7 @@ def send_rest_both(
     t_intent = rec.get("t_intent")
     t0_send = time.time()
     posted: list[dict[str, Any]] = []
+    timings: dict[str, Any] = {}
     try:
         posted = create_gtc_buy_pair(
             client,
@@ -375,6 +380,7 @@ def send_rest_both(
             token_down=tokens["Down"],
             price_down=px_down,
             size=float(clip),
+            timings=timings,
         )
     except AuthAbsent:
         rec["send_blocked"] = "AUTH_ABSENT"
@@ -382,6 +388,8 @@ def send_rest_both(
         rec["real_fill"] = None
         rec["real_fill_rate"] = None
         rec["would_send"] = False
+        rec["sign_ms"] = timings.get("sign_ms")
+        rec["post_ack_ms"] = timings.get("post_ack_ms")
         rec["lag_ms"] = (time.time() - float(t_intent or t0_send)) * 1000.0
         return rec
     except Exception as exc:
@@ -396,10 +404,14 @@ def send_rest_both(
         rec["real_fill"] = None
         rec["real_fill_rate"] = None
         rec["would_send"] = False
+        rec["sign_ms"] = timings.get("sign_ms")
+        rec["post_ack_ms"] = timings.get("post_ack_ms")
         rec["lag_ms"] = (time.time() - float(t_intent or t0_send)) * 1000.0
         return rec
+    rec["sign_ms"] = timings.get("sign_ms")
+    rec["post_ack_ms"] = timings.get("post_ack_ms", (time.time() - t0_send) * 1000.0)
     rec["lag_ms"] = (time.time() - float(t_intent or t0_send)) * 1000.0
-    rec["post_ack_ms"] = (time.time() - t0_send) * 1000.0
+    rec["lag_primary"] = "t_intent_to_ack"
     refreshed = _refresh_orders(client, posted)
     if not refreshed:
         rec["real_fill"] = None
@@ -418,6 +430,8 @@ def send_rest_both(
     rec["pair_gt_1_trade"] = False
     rec["intent"] = True
     rec["would_send"] = True
+    created = [o.get("created_at") for o in refreshed if o.get("created_at") is not None]
+    rec["clob_created_at"] = min(created) if created else None
     _stamp_fill_fields(rec, refreshed, clip=clip)
     return rec
 
@@ -609,6 +623,7 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
     open_windows: dict[int, list[dict[str, Any]]] = {}
     open_meta: dict[int, dict[str, Any]] = {}
     inventory: dict[int, dict[str, float]] = {}
+    token_cache: dict[str, dict[str, str]] = {}
     loss_charged: set[int] = set()
     daily_loss = 0.0
     n_sent = 0
@@ -622,7 +637,7 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
                 cancel_open(client, orders, reason="daily_loss")
             halted = True
             break
-        rec, _state = snapshot_maker(asset=ASSET, tf=TF, clip=clip)
+        rec, _state = snapshot_maker(asset=ASSET, tf=TF, clip=clip, token_cache=token_cache)
         rec["asset"] = ASSET
         rec["tf"] = TF
         t0 = int(rec.get("t0") or current_t0(tf=TF))

@@ -323,6 +323,11 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "reason": rec.get("reason"),
         "bid_sum_0": rec.get("bid_sum_0", rec.get("bid_sum")),
         "min_size_0": rec.get("min_size_0", rec.get("min_bid_size")),
+        "t_intent": rec.get("t_intent"),
+        "intent_ts": rec.get("intent_ts"),
+        "still_ms": rec.get("still_ms"),
+        "send_blocked": rec.get("send_blocked"),
+        "would_send": rec.get("would_send"),
     }
     still = {
         **base,
@@ -331,6 +336,7 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "still250": rec.get("still250"),
         "bid_sum_250": rec.get("bid_sum_250"),
         "min_size_250": rec.get("min_size_250"),
+        "still_ms": rec.get("still_ms"),
     }
     out: dict[str, dict[str, Any]] = {"INTENT": intent, "still_there_250ms": still}
     rf = rec.get("real_fill")
@@ -353,6 +359,11 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
             ],
             "real_fill_rate": rec.get("real_fill_rate"),
             "lag_ms": rec.get("lag_ms"),
+            "still_ms": rec.get("still_ms"),
+            "sign_ms": rec.get("sign_ms"),
+            "post_ack_ms": rec.get("post_ack_ms"),
+            "clob_created_at": rec.get("clob_created_at"),
+            "lag_primary": rec.get("lag_primary") or "t_intent_to_ack",
             "adverse_action": rec.get("adverse_action", rec.get("adverse")),
             "residual": rec.get("residual"),
             "fill_role": rec.get("fill_role"),

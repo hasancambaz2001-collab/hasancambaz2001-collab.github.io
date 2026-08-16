@@ -6,6 +6,7 @@ If auth is absent, send paths return sent=False and real_fill=None.
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from whiskas.clob_auth import auth_status, load_secrets
@@ -165,6 +166,7 @@ def create_gtc_buy_pair(
     token_down: str,
     price_down: float,
     size: float,
+    timings: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Sign both GTCs then post_orders in one HTTP call. Fallback: sequential post."""
     if client is None:
@@ -173,11 +175,15 @@ def create_gtc_buy_pair(
     args_up = OrderArgs(token_id=str(token_up), price=float(price_up), size=float(size), side="BUY")
     args_down = OrderArgs(token_id=str(token_down), price=float(price_down), size=float(size), side="BUY")
     posted: list[dict[str, Any]] = []
+    t_all = time.time()
     try:
+        t_sign = time.time()
         signed_up = client.create_order(args_up)
         signed_down = client.create_order(args_down)
+        sign_ms = (time.time() - t_sign) * 1000.0
         from py_clob_client_v2.clob_types import PostOrdersV2Args
 
+        t_http = time.time()
         raw = client.post_orders(
             [
                 PostOrdersV2Args(order=signed_up, orderType=OrderType.GTC),
@@ -200,6 +206,10 @@ def create_gtc_buy_pair(
             parsed["maker_bid"] = True
             posted.append(parsed)
         if len(posted) == 2 and all(p.get("order_id") for p in posted):
+            if timings is not None:
+                timings["sign_ms"] = sign_ms
+                timings["post_http_ms"] = (time.time() - t_http) * 1000.0
+                timings["post_ack_ms"] = (time.time() - t_all) * 1000.0
             return posted
         for prev in posted:
             if prev.get("order_id"):
@@ -212,6 +222,7 @@ def create_gtc_buy_pair(
         raise
     except Exception:
         posted = []
+    t_fb = time.time()
     up = create_gtc_buy(client, token_id=token_up, price=price_up, size=size)
     posted = [{**up, "outcome": "Up", "maker_bid": True}]
     try:
@@ -224,6 +235,11 @@ def create_gtc_buy_pair(
             except Exception:
                 pass
         raise
+    if timings is not None:
+        timings["sign_ms"] = None
+        timings["post_http_ms"] = None
+        timings["post_ack_ms"] = (time.time() - t_fb) * 1000.0
+        timings["post_fallback"] = True
     return posted
 
 
