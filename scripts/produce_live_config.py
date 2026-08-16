@@ -22,10 +22,12 @@ from whiskas.live_config import (
     COVER_MIN,
     G5_FLAG,
     G6_FLAG,
+    LIVE_BLOCKED,
     LIVE_READY,
     PAPER_ONLY,
     ensure_pmdata_env_file,
     evaluate_gates,
+    live_blocked_payload,
     live_ready_payload,
     live_status,
     load_pmdata_env,
@@ -63,17 +65,25 @@ def main() -> int:
         g5_flag=ROOT / G5_FLAG,
         g6_flag=ROOT / G6_FLAG,
         cover_min=float(cfg.get("cover_min", COVER_MIN)),
+        accept_risk=bool(args.accept_risk),
     )
     paper_path = ROOT / (paper.get("path") or PAPER_ONLY)
     write_yaml(paper_path, paper_only_payload())
     status = live_status(eval_gates=ev, accept_risk=bool(args.accept_risk))
     live_path = None
+    blocked_path = None
     if status == "LIVE_READY":
         live_path = write_yaml(ROOT / LIVE_READY, live_ready_payload())
+    else:
+        blocked_path = write_yaml(
+            ROOT / LIVE_BLOCKED,
+            live_blocked_payload(gates=ev["gates"]),
+        )
     payload = {
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "status": status,
         "paper_only": str(paper_path),
+        "live_blocked": str(blocked_path),
         "live_ready": None if live_path is None else str(live_path),
         "accept_risk": bool(args.accept_risk),
         "pair_gt_1_trade": False,
@@ -91,6 +101,7 @@ def main() -> int:
         f"Generated: {payload['generated']}",
         f"status: **{status}**",
         f"PAPER: `{paper_path}`",
+        f"blocked file: `{blocked_path}`",
         "do not live without G5 G6",
         "",
         "| gate | result | detail |",
@@ -103,6 +114,7 @@ def main() -> int:
         "G4_shadow_path": "G4 shadow path",
         "G5_size_ok": "G5 size_ok",
         "G6_fill_calibration": "G6 fill calibration",
+        "G7_accept_risk": "G7 --i-accept-risk",
     }
     for key, label in labels.items():
         cell = ev["gates"][key]
@@ -110,10 +122,13 @@ def main() -> int:
         extra = {k: v for k, v in cell.items() if k != "pass"}
         lines.append(f"| {label} | **{mark}** | {extra} |")
     lines.extend(["", "No hand-edited LIVE_READY. No clip 67 day-one. No pair>1.", ""])
-    (REPORTS / "LIVE_CONFIG.md").write_text("\n".join(lines), encoding="utf-8")
+    report = "\n".join(lines)
+    (REPORTS / "LIVE_CONFIG.md").write_text(report, encoding="utf-8")
+    (REPORTS / "LIVE_GATE_REPORT.md").write_text(report.replace("# LIVE_CONFIG", "# LIVE_GATE_REPORT"), encoding="utf-8")
     print(json.dumps({
         "status": status,
         "paper_only": str(paper_path),
+        "live_blocked": str(blocked_path),
         "live_ready": payload["live_ready"],
         "gates": {k: ("PASS" if v["pass"] else "FAIL") for k, v in ev["gates"].items()},
         "note": "do not live without G5 G6",

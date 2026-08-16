@@ -13,6 +13,13 @@ paper:
   tfs: [5m, 15m]
 smart_copy:
   shadow_only: true
+  require_s1_gate: true
+  no_blind_pair_gt1: true
+mm:
+  join: back
+  cancel_rich: true
+  cancel_above: 0.92
+  risk_averse_queue: true
 leaders:
   bosona: 0xc2ad03f79ca3f3c17d8c7de2612ce0c89b7d40ed
   mo-money: 0x32ed2e546b187ca15e2841edc82b22c713cf8ec3

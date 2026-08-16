@@ -25,6 +25,7 @@ MAX_DAILY_LOSS = 100.0
 G5_FLAG = Path("data/ops/G5_size_ok.flag")
 G6_FLAG = Path("data/ops/G6_fill_calibrated.flag")
 PAPER_ONLY = Path("configs/generated/PAPER_ONLY.yaml")
+LIVE_BLOCKED = Path("configs/generated/LIVE_BLOCKED.yaml")
 LIVE_READY = Path("configs/generated/LIVE_READY.yaml")
 ENV_PMDATA = Path("configs/.env.pmdata")
 
@@ -108,6 +109,7 @@ def evaluate_gates(
     g5_flag: Path | None = None,
     g6_flag: Path | None = None,
     cover_min: float = COVER_MIN,
+    accept_risk: bool = False,
 ) -> dict[str, Any]:
     g5 = flag_exists(g5_flag or G5_FLAG)
     g6 = flag_exists(g6_flag or G6_FLAG)
@@ -115,6 +117,7 @@ def evaluate_gates(
     g2 = mo_cover is not None and float(mo_cover) + 1e-12 >= float(cover_min)
     g3 = pair_gt_1_trade is False
     g4 = bool(shadow_only)
+    g7 = bool(accept_risk)
     gates = {
         "G1_bosona_cover": {"pass": g1, "cover": bosona_cover, "min": cover_min},
         "G2_mo_cover": {"pass": g2, "cover": mo_cover, "min": cover_min},
@@ -124,15 +127,17 @@ def evaluate_gates(
         "G6_fill_calibration": {
             "pass": g6,
             "flag": str(g6_flag or G6_FLAG),
-            "note": "FAIL until paper fill% logged vs sim",
+            "note": "FAIL until paper fill% logged vs sim + human flag",
         },
+        "G7_accept_risk": {"pass": g7, "note": "FAIL until --i-accept-risk"},
     }
     blocked = not (g5 and g6)
     return {
         "gates": gates,
         "all_selection": g1 and g2 and g3 and g4,
         "g5_g6": g5 and g6,
-        "live_blocked": blocked,
+        "g7": g7,
+        "live_blocked": blocked or not (g1 and g2 and g3 and g4) or not g7,
         "cover_min": cover_min,
     }
 
@@ -152,6 +157,24 @@ def paper_only_payload() -> dict[str, Any]:
         "smart_copy": {"shadow_only": True},
         "notes": "PAPER only. do not live without G5 G6. No clip 67 day-one.",
     }
+
+
+def live_blocked_payload(*, gates: dict[str, Any] | None = None) -> dict[str, Any]:
+    body = paper_only_payload()
+    body.update(
+        {
+            "status": "LIVE_BLOCKED",
+            "live_orders": False,
+            "live": False,
+            "size_ok": False,
+            "notes": "LIVE_BLOCKED. do not live without G5 G6. No hand-edited LIVE_READY.",
+        }
+    )
+    if gates is not None:
+        body["gates"] = {
+            k: ("PASS" if v.get("pass") else "FAIL") for k, v in gates.items()
+        }
+    return body
 
 
 def live_ready_payload() -> dict[str, Any]:
@@ -178,6 +201,10 @@ def write_yaml(path: Path, payload: dict[str, Any]) -> Path:
 
 
 def live_status(*, eval_gates: dict[str, Any], accept_risk: bool) -> str:
-    if eval_gates["live_blocked"] or not accept_risk or not eval_gates["all_selection"]:
+    if (
+        not eval_gates.get("g5_g6")
+        or not accept_risk
+        or not eval_gates.get("all_selection")
+    ):
         return "LIVE_BLOCKED"
     return "LIVE_READY"

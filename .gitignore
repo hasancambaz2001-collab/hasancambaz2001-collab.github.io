@@ -24,6 +24,10 @@ data/paper_maker/*
 !data/paper_maker/.gitkeep
 data/l2/*
 !data/l2/.gitkeep
+data/l2_ws/*
+!data/l2_ws/.gitkeep
+data/pmdata/*
+!data/pmdata/.gitkeep
 data/parquet/*
 !data/parquet/.gitkeep
 data/dumps/*

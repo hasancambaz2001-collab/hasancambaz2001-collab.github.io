@@ -311,6 +311,7 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert MAKER_TFS == ("5m", "15m")
     assert "4h" not in MAKER_TFS
     cfg = load_maker_yaml()
+    assert Path(cfg["path"]).name == "PAPER_ONLY.yaml"
     assert cfg["pair_max"] == 0.90
     assert cfg["cancel_above"] == 0.92
     assert cfg["clip"] == 10.0

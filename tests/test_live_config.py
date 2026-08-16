@@ -23,6 +23,7 @@ def test_g5_g6_fail_without_flags(tmp_path: Path) -> None:
     assert ev["gates"]["G4_shadow_path"]["pass"] is True
     assert ev["gates"]["G5_size_ok"]["pass"] is False
     assert ev["gates"]["G6_fill_calibration"]["pass"] is False
+    assert ev["gates"]["G7_accept_risk"]["pass"] is False
     assert ev["live_blocked"] is True
     assert live_status(eval_gates=ev, accept_risk=True) == "LIVE_BLOCKED"
     assert live_status(eval_gates=ev, accept_risk=False) == "LIVE_BLOCKED"
@@ -40,8 +41,10 @@ def test_live_ready_only_with_flags_and_accept(tmp_path: Path) -> None:
         shadow_only=True,
         g5_flag=g5,
         g6_flag=g6,
+        accept_risk=True,
     )
     assert ev["g5_g6"] is True
+    assert ev["gates"]["G7_accept_risk"]["pass"] is True
     assert live_status(eval_gates=ev, accept_risk=False) == "LIVE_BLOCKED"
     assert live_status(eval_gates=ev, accept_risk=True) == "LIVE_READY"
 
@@ -65,4 +68,6 @@ def test_paper_only_locks() -> None:
     assert p["size_ok"] is False
     src = Path("scripts/produce_live_config.py").read_text()
     assert "--i-accept-risk" in src
+    assert "LIVE_BLOCKED" in src
+    assert "LIVE_GATE_REPORT.md" in src
     assert "sk-" not in Path("whiskas/live_config.py").read_text()
