@@ -1,6 +1,7 @@
+from datetime import datetime, timezone
 from pathlib import Path
 
-from whiskas.paper import best_ask, snapshot_window, tokens_from_market
+from whiskas.paper import best_ask, snapshot_window, summarize_paper, tokens_from_market
 
 
 def test_best_ask_is_min_price_not_first_row() -> None:
@@ -46,6 +47,24 @@ def test_snapshot_intends_only_when_sum_le_096() -> None:
     skip = snapshot_window(now=1786886400, tokens=tokens, books=books_dear)
     assert skip["intend"] is False
     assert skip["orders"] == []
+
+
+def test_summarize_counts_le096_and_depth() -> None:
+    rows = [
+        {"ts": "2026-08-16T20:00:00+00:00", "ask_sum": 1.01, "depth_up": 100, "depth_down": 100},
+        {"ts": "2026-08-16T21:00:00+00:00", "ask_sum": 0.95, "depth_up": 30, "depth_down": 30},
+        {"ts": "2026-08-16T22:00:00+00:00", "ask_sum": 0.94, "depth_up": 10, "depth_down": 40},
+        {"ts": "2026-08-16T12:00:00+00:00", "ask_sum": 0.90, "depth_up": 50, "depth_down": 50},
+    ]
+    since = datetime(2026, 8, 16, 19, 0, tzinfo=timezone.utc)
+    stats = summarize_paper(rows, since=since, pair_max=0.96, clip=21)
+    assert stats["n_poll"] == 3
+    assert stats["n_le_096"] == 2
+    assert stats["n_le_096_depth_ge_clip"] == 1
+    assert stats["paper_pass_if_zero_edge"] is False
+    zero = summarize_paper(rows[:1], pair_max=0.96, clip=21)
+    assert zero["n_le_096"] == 0
+    assert zero["paper_pass_if_zero_edge"] is True
 
 
 def test_paper_is_get_only() -> None:

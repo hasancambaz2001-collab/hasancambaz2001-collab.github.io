@@ -187,6 +187,94 @@ def append_jsonl(path: Path, rec: dict[str, Any]) -> None:
         fh.write(json.dumps(rec, separators=(",", ":")) + "\n")
 
 
+def _parse_ts(value: Any) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        return []
+    rows: list[dict[str, Any]] = []
+    with path.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(rec, dict):
+                rows.append(rec)
+    return rows
+
+
+def summarize_paper(
+    rows: list[dict[str, Any]],
+    *,
+    since: datetime | None = None,
+    pair_max: float = PAIR_MAX,
+    clip: float = CLIP,
+) -> dict[str, Any]:
+    """Morning counts: polls, ask_sum≤pair_max, and of those both depths ≥ clip."""
+    n_poll = 0
+    n_le = 0
+    n_le_depth = 0
+    n_err = 0
+    first_ts = None
+    last_ts = None
+    for rec in rows:
+        ts = _parse_ts(rec.get("ts"))
+        if since is not None and ts is not None and ts < since:
+            continue
+        n_poll += 1
+        if first_ts is None or (ts is not None and ts < first_ts):
+            first_ts = ts
+        if last_ts is None or (ts is not None and ts > last_ts):
+            last_ts = ts
+        if rec.get("error") or rec.get("reason") in {"gamma_error", "clob_error", "poll_error"}:
+            n_err += 1
+        ask_sum = rec.get("ask_sum")
+        try:
+            s = float(ask_sum) if ask_sum is not None else None
+        except (TypeError, ValueError):
+            s = None
+        if s is None or s > float(pair_max) + 1e-12:
+            continue
+        n_le += 1
+        depth_up = float(rec.get("depth_up") or 0.0)
+        depth_down = float(rec.get("depth_down") or 0.0)
+        if depth_up + 1e-12 >= float(clip) and depth_down + 1e-12 >= float(clip):
+            n_le_depth += 1
+    paper_pass = n_le == 0
+    return {
+        "n_poll": n_poll,
+        "n_le_096": n_le,
+        "n_le_096_depth_ge_clip": n_le_depth,
+        "n_err": n_err,
+        "pair_max": float(pair_max),
+        "clip": float(clip),
+        "first_ts": first_ts.isoformat() if first_ts else None,
+        "last_ts": last_ts.isoformat() if last_ts else None,
+        "paper_pass_if_zero_edge": paper_pass,
+        "note": (
+            "0 prints with ask_sum≤0.96 is a paper PASS: live book did not show the pair. "
+            "Edge stays on their historical taker fills. Do not raise clip or reopen replay."
+            if paper_pass
+            else "Live book printed ask_sum≤0.96 at least once. Still no orders."
+        ),
+    }
+
+
 def run_paper(
     *,
     out_path: Path,
@@ -195,15 +283,70 @@ def run_paper(
     interval: float = 5.0,
     pair_max: float = PAIR_MAX,
     clip: float = CLIP,
+    collect: bool = True,
+    heartbeat_every: int = 60,
 ) -> list[dict[str, Any]]:
     """Poll live books. Log intended FOKs. Never send orders."""
     deadline = time.time() + max(0.0, float(seconds))
     rows: list[dict[str, Any]] = []
+    token_cache: dict[str, dict[str, str]] = {}
+    n = 0
+    next_tick = time.time()
     while True:
-        rec = snapshot_window(pair_max=pair_max, clip=clip)
+        t0 = current_t0()
+        slug = window_slug(t0)
+        tokens = token_cache.get(slug)
+        if tokens is None:
+            try:
+                tokens = discover_tokens(slug)
+            except Exception:
+                tokens = {}
+            if tokens:
+                token_cache.clear()
+                token_cache[slug] = tokens
+        try:
+            rec = snapshot_window(
+                pair_max=pair_max,
+                clip=clip,
+                tokens=tokens or None,
+            )
+        except Exception as exc:
+            rec = {
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "t0": t0,
+                "slug": slug,
+                "clip": float(clip),
+                "pair_max": float(pair_max),
+                "live_order": False,
+                "maker_bid": False,
+                "intend": False,
+                "reason": "poll_error",
+                "error": str(exc),
+                "orders": [],
+            }
         append_jsonl(out_path, rec)
-        rows.append(rec)
+        n += 1
+        if collect:
+            rows.append(rec)
+        if heartbeat_every and n % int(heartbeat_every) == 0:
+            print(
+                json.dumps(
+                    {
+                        "heartbeat": n,
+                        "slug": rec.get("slug"),
+                        "ask_sum": rec.get("ask_sum"),
+                        "intend": rec.get("intend"),
+                        "live_order": False,
+                    }
+                ),
+                flush=True,
+            )
         if once or time.time() >= deadline:
             break
-        time.sleep(max(0.2, float(interval)))
+        next_tick += max(0.2, float(interval))
+        sleep_for = next_tick - time.time()
+        if sleep_for < 0:
+            next_tick = time.time()
+            sleep_for = 0.2
+        time.sleep(sleep_for)
     return rows
