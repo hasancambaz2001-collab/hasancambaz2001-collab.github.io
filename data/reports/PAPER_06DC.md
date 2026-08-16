@@ -1,10 +1,16 @@
-# paper_06dc (daily complete-set)
+# paper_06dc
 
-Second process. Clip **20**. Pair **< 1.00**. No ATM directional. No live. Not the 5m jsonl.
+Wallet `0x06dc51826bc524d9a83770e7de9dd7e005b04524`. Clip **20**. No live. No pair>1 taker. R3 both-taker only if ask_sum≤0.96.
+R1 tail / R4 favorite / R5 fade-wide / R6 maker bids. ATM without R6 = watch.
+Second process. Not merged with 5m/15m/4h jsonl.
 
-| asset | day | polls | intend | depth_ok | still250 | n_<1 | n_>=1 |
-|---|---|---:|---:|---:|---:|---:|---:|
+| kind | rows | taker_intend | maker_intend | R1 | R4 | R5 | R6 | atm_watch |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| daily_ud | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| bracket | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| monthly | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **all** | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 Window: None → None
 
-06dc daily complete-set only. No live. No pair>=1. No ATM directional. Separate from 5m jsonl.
+06dc measure-only. No live. No pair>1 taker. Separate from 5m jsonl.
