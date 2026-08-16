@@ -52,10 +52,20 @@ def micro_payload(*, clip: float, g5: bool, g6: bool) -> dict[str, Any]:
         "max_open_windows": MAX_OPEN,
         "g5": "PASS" if g5 else "FAIL",
         "g6": "PASS" if g6 else "FAIL",
+        "executor": {
+            "gtc_both_only_if_bid_sum_le": 0.90,
+            "cancel_if_sum_gt": 0.92,
+            "complete_only_if_fill_plus_opp_ask_le": 0.90,
+            "log_layers": ["intent", "still250", "real_fill"],
+            "stop_if_daily_loss_usd": MAX_DAILY_LOSS,
+            "pair_gt_1_trade": False,
+            "bundle_sends_orders": False,
+        },
         "notes": (
             "MICRO trial permit only. Bundle does not send orders. "
             "Not LIVE_READY. Not full ladder. No clip 67. pair_gt_1_trade=false. "
-            "clip 5 without G5, clip 10 with G5."
+            "clip 5 without G5, clip 10 with G5. micro trial ≠ full solve. "
+            "real_fill only after orders sent."
         ),
     }
 

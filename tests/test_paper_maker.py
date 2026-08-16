@@ -297,8 +297,15 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert rec["live_order"] is False
     assert rec["book"] == "maker"
     assert rec["still_there_250ms"] is True
+    assert rec["still250"] is True
+    assert rec["intent"] is True
     assert rec["skip_reason"] is None
     assert rec["bid_sum"] is not None
+    assert rec["bid_sum_0"] == rec["bid_sum"]
+    assert rec["bid_sum_250"] == rec["bid_sum"]
+    assert rec["real_fill"] is None
+    assert rec["real_fill_rate"] is None
+    assert rec["pair_gt_1_trade"] is False
     assert state is not None
     src = Path("scripts/paper_maker.py").read_text(encoding="utf-8")
     assert "create_order" not in src

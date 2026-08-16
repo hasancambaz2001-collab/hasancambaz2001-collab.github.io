@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
 
 from whiskas.config import load_config
 from whiskas.l2 import BookTick, PolicyMaker, decide_maker, level_eaten
+from whiskas.measure_layers import attach_layers, still250_ok
 from whiskas.paper import (
     append_jsonl,
     asset_window_slug,
@@ -137,12 +138,12 @@ def snapshot_maker(
         rec["error"] = f"gamma:{exc}"
         rec["reason"] = "gamma_error"
         rec["orders"] = []
-        return rec, state
+        return attach_layers(rec), state
     if "Up" not in tok or "Down" not in tok:
         rec["error"] = "missing_tokens"
         rec["reason"] = "missing_tokens"
         rec["orders"] = []
-        return rec, state
+        return attach_layers(rec), state
     rec["token_up"] = tok["Up"]
     rec["token_down"] = tok["Down"]
     try:
@@ -156,7 +157,7 @@ def snapshot_maker(
         rec["error"] = f"clob:{exc}"
         rec["reason"] = "clob_error"
         rec["orders"] = []
-        return rec, state
+        return attach_layers(rec), state
     bid_up, sz_up = best_bid(book_up)
     bid_down, sz_down = best_bid(book_down)
     ask_up, ask_sz_up = best_ask(book_up)
@@ -186,30 +187,26 @@ def snapshot_maker(
     rec["bid_sum"] = decision.get("bid_sum")
     rec["asset"] = str(asset).strip().lower()
     rec["tf"] = tf_key
+    still = None
     if str(decision.get("reason") or "") == "rest":
-        rec["skip_reason"] = None
-        rec["still_there_250ms"] = _probe_still_there_250ms(
+        still = _probe_still250(
             tokens=tok,
-            px_up=decision.get("bid_up"),
-            px_down=decision.get("bid_down"),
+            clip=float(clip),
+            pair_max=float(pair_max),
             books=books,
         )
-    else:
-        rec["skip_reason"] = decision.get("reason")
-        rec["still_there_250ms"] = None
+    attach_layers(rec, still=still, clip=float(clip), pair_max=float(pair_max))
     return rec, next_state
 
 
-def _probe_still_there_250ms(
+def _probe_still250(
     *,
     tokens: dict[str, str],
-    px_up: Any,
-    px_down: Any,
+    clip: float,
+    pair_max: float,
     books: dict[str, dict[str, Any]] | None = None,
-) -> bool | None:
-    """Re-read both books after 250ms (or immediately when books injected). GET only."""
-    if px_up is None or px_down is None:
-        return None
+) -> dict[str, Any] | None:
+    """Re-read both books after 250ms. still250 = bid_sum<=pair_max and min_size>=clip."""
     if books is None:
         time.sleep(STILL_PROBE_SEC)
         try:
@@ -220,13 +217,17 @@ def _probe_still_there_250ms(
     else:
         book_up = books.get("Up") or {}
         book_down = books.get("Down") or {}
-    bid_up, _ = best_bid(book_up)
-    bid_down, _ = best_bid(book_down)
-    ask_up, _ = best_ask(book_up)
-    ask_down, _ = best_ask(book_down)
-    still_up = not level_eaten(float(px_up), bid_up, ask_up)
-    still_down = not level_eaten(float(px_down), bid_down, ask_down)
-    return bool(still_up and still_down)
+    bid_up, sz_up = best_bid(book_up)
+    bid_down, sz_down = best_bid(book_down)
+    if bid_up is None or bid_down is None:
+        return {"still_there_250ms": False, "bid_sum_250": None, "min_size_250": 0.0}
+    bid_sum = float(bid_up) + float(bid_down)
+    min_size = min(float(sz_up), float(sz_down))
+    return {
+        "still_there_250ms": still250_ok(bid_sum, min_size, clip=clip, pair_max=pair_max),
+        "bid_sum_250": bid_sum,
+        "min_size_250": min_size,
+    }
 
 
 def _interesting(rec: dict[str, Any]) -> bool:
@@ -265,10 +266,18 @@ def print_line(rec: dict[str, Any]) -> None:
                 "fill_px": rec.get("fill_px"),
                 "opp_ask": rec.get("opp_ask"),
                 "complete_pair": rec.get("complete_pair"),
+                "intent": rec.get("intent"),
                 "skip_reason": rec.get("skip_reason"),
+                "still250": rec.get("still250"),
                 "still_there_250ms": rec.get("still_there_250ms"),
+                "bid_sum_0": rec.get("bid_sum_0"),
+                "bid_sum_250": rec.get("bid_sum_250"),
+                "real_fill": rec.get("real_fill"),
+                "real_fill_rate": rec.get("real_fill_rate"),
+                "sim_fill": rec.get("sim_fill"),
                 "live_order": False,
                 "pair_gt_1": False,
+                "pair_gt_1_trade": False,
             }
         ),
         flush=True,

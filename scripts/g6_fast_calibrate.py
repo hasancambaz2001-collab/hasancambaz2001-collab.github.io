@@ -510,32 +510,7 @@ def write_reports(stats: dict[str, Any], *, root: Path = ROOT) -> None:
     if not stats.get("g6_pass"):
         lines.extend(["## FAIL reason", "", f"{stats.get('fail_reasons')}", ""])
     (reports / "G6_FAST.md").write_text("\n".join(lines), encoding="utf-8")
-
-    closed = [
-        "# G6_CLOSED",
-        "",
-        f"Generated: {stats.get('generated')}",
-        "Three columns. Never mix residual-sim, historical queue, and paper/live fills.",
-        "",
-        "G6-fast is historical twin calibration, not live fill proof.",
-        "Does not set G5 size_ok. Does not write LIVE_READY.",
-        "Still recommend short live paper smoke after G6-fast before real size.",
-        "",
-        "| metric | g6_fast | paper_live | notes |",
-        "|---|---|---|---|",
-        f"| n_rest | {stats.get('n_rest')} | {paper.get('n_rest')} | rest intents; columns not mixed |",
-        f"| fill_band | ra={ra.get('fill_ratio')} / prob={pr.get('fill_ratio')} | {paper.get('fill_band')} | (a) residual-sim (b) hist queue (c) paper live — never mix |",
-        f"| still250 | n/a | {paper.get('still250')} | hist has no 250ms probe |",
-        "",
-        f"- G6 flag written? **{flag}**",
-        f"- G5 still **FAIL**",
-        f"- LIVE still **BLOCKED**",
-        f"- MICRO yaml is not LIVE_READY",
-        "",
-        'G6-fast replaces week-long wait for calibration evidence; micro live still needed before size',
-        "",
-    ]
-    (reports / "G6_CLOSED.md").write_text("\n".join(closed), encoding="utf-8")
+    # G6_CLOSED.md is owned by scripts/g6_close.py (revised rest-count rule).
 
 
 def run_g6_fast(
