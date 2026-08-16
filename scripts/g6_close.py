@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.g6_fill_cal import FILL, SKIP, analyze as analyze_paper
+from scripts.g6_fill_cal import SKIP, analyze as analyze_paper
 from whiskas.live_config import G5_FLAG, G6_FLAG, LIVE_READY
 from whiskas.paper import load_jsonl
 
