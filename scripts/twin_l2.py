@@ -290,9 +290,10 @@ def pmdata_optional() -> dict[str, Any]:
             "reason": "no PMDATA_API_KEY (or PM_DATA_API_KEY). HF parquet covers pre-08-14 DEBUG. No paid Mar–May pull.",
         }
     return {
-        "skipped": True,
-        "reason": f"{key} present but post-08-14 L2 recorder is the truth source; no bulk Mar–May PMData download.",
+        "skipped": False,
+        "reason": f"{key} present. Post-08-14 slug pulls only (scripts/pmdata_wallet_config.py). No Mar–May bulk. Nautilus has no historical L2.",
         "had_key": True,
+        "l2_covers_06dc": False,
     }
 
 
