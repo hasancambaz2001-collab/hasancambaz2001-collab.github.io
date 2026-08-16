@@ -37,6 +37,7 @@ def write_report(stats: dict) -> str:
     a = stats["a"]
     x = stats["a2_extra"]
     p = stats["a_plus_a2"]
+    r8 = stats.get("a_plus_a2_repeat") or {}
     gate = "PASS" if stats["passed"] else "FAIL"
     reasons = ", ".join(stats["fail_reasons"]) if stats["fail_reasons"] else "none"
     return f"""# PHASE3 A vs A+A2 (BTC tape only)
@@ -58,8 +59,10 @@ A+A2 = A windows (existing VWAP complete-set) **plus** sequential A2 on the othe
 | A | {a["n_windows"]} | {_fmt(a["pnl_fill1"])} | {_fmt(a["pnl_fill30_ev"])} | {_fmt(a["max_naked_sec"], 1)} | {_pct(a["worst_day_pct_fill30_ev"])} |
 | A2 extra | {x["n_windows"]} | {_fmt(x["pnl_fill1"])} | {_fmt(x["pnl_fill30_ev"])} | {_fmt(x["max_naked_sec"], 1)} | — |
 | **A+A2** | {p["n_windows"]} | {_fmt(p["pnl_fill1"])} | {_fmt(p["pnl_fill30_ev"])} | {_fmt(p["max_naked_sec"], 1)} | {_pct(p["worst_day_pct_fill30_ev"])} |
+| A+A2+repeat@8 | {p["n_windows"]} | {_fmt(r8.get("pnl_fill1"))} | {_fmt(r8.get("pnl_fill30_ev"))} | — | measure only |
 
 A2 extra first-legs={x["n_first"]}, completes={x["n_complete"]}, leftover windows={x["n_residual"]}.
+Repeat (measure only): n={r8.get("n_repeat", 0)} extra lifts, max clips seen={r8.get("max_clips", 0)} (cap 8). Not a new strategy.
 A+A2 30% MC pnl={_fmt(p["pnl_fill30_mc"])}, worst MC day={_pct(p["worst_day_pct_fill30_mc"])}.
 
 ## PASS
@@ -99,6 +102,8 @@ def main() -> int:
         "a2_extra_pnl30": stats["a2_extra"]["pnl_fill30_ev"],
         "plus_n": stats["a_plus_a2"]["n_windows"],
         "plus_pnl30": stats["a_plus_a2"]["pnl_fill30_ev"],
+        "repeat8_pnl30": (stats.get("a_plus_a2_repeat") or {}).get("pnl_fill30_ev"),
+        "repeat8_n": (stats.get("a_plus_a2_repeat") or {}).get("n_repeat"),
         "max_naked_sec": stats["a_plus_a2"]["max_naked_sec"],
         "passed": stats["passed"],
         "fail_reasons": stats["fail_reasons"],

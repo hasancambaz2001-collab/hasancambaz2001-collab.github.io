@@ -8,9 +8,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-from whiskas.constants import CLIP, CLOB_API, GAMMA_API, PAIR_MAX, PAIR_MAX_CAP, WINDOW_SECONDS
+from whiskas.constants import CLIP, CLOB_API, GAMMA_API, PAIR_MAX, PAIR_MAX_CAP, REPEAT_CLIP_MAX, WINDOW_SECONDS
 from whiskas.http import get_json
-from whiskas.policy import BookInventory, decide_a, decide_a2
+from whiskas.policy import BookInventory, PolicyDecision, decide_a, decide_a2, decide_repeat
 
 PAPER_ASSETS = ("btc", "eth", "sol", "xrp")
 CONFIRM_DELAY_SEC = 0.25
@@ -185,6 +185,9 @@ def snapshot_window(
     books: dict[str, dict[str, Any]] | None = None,
     asset: str = "btc",
     inventory: BookInventory | None = None,
+    filled_this_window: bool = False,
+    clips_this_window: int = 0,
+    max_clips: int = REPEAT_CLIP_MAX,
 ) -> dict[str, Any]:
     t0 = current_t0(now)
     asset_key = str(asset).strip().lower()
@@ -203,6 +206,8 @@ def snapshot_window(
         "still_there_250ms": None,
         "a_intend": False,
         "a2_intend": False,
+        "repeat_intend": False,
+        "clips_this_window": int(clips_this_window),
         "held_leg": None,
         "held_qty": 0.0,
     }
@@ -213,6 +218,7 @@ def snapshot_window(
         rec["intend"] = False
         rec["a_intend"] = False
         rec["a2_intend"] = False
+        rec["repeat_intend"] = False
         rec["reason"] = "gamma_error"
         rec["orders"] = []
         return rec
@@ -221,6 +227,7 @@ def snapshot_window(
         rec["intend"] = False
         rec["a_intend"] = False
         rec["a2_intend"] = False
+        rec["repeat_intend"] = False
         rec["reason"] = "missing_tokens"
         rec["orders"] = []
         return rec
@@ -238,6 +245,7 @@ def snapshot_window(
         rec["intend"] = False
         rec["a_intend"] = False
         rec["a2_intend"] = False
+        rec["repeat_intend"] = False
         rec["reason"] = "clob_error"
         rec["orders"] = []
         return rec
@@ -259,6 +267,8 @@ def snapshot_window(
     rec["avg_up"] = inv.avg("Up")
     rec["avg_down"] = inv.avg("Down")
     a = decide_a(ask_up, ask_down, depth_up, depth_down, pair_max=pair_max, pair_max_cap=pair_max_cap, clip=clip)
+    if filled_this_window and a.intend:
+        a = PolicyDecision(False, "a_already_filled", a.ask_up, a.ask_down, a.ask_sum, a.clip)
     a2 = decide_a2(
         ask_up,
         ask_down,
@@ -280,6 +290,35 @@ def snapshot_window(
     rec["reason"] = a.reason if a.intend else (a2.reason if a2.intend else a.reason)
     rec["orders"] = rec["a_orders"] if a.intend else rec["a2_orders"]
     rec["depth_short"] = a.reason == "depth_short"
+    clips = int(clips_this_window)
+    filled = bool(filled_this_window)
+    if rec["a_intend"] or rec["a2_intend"]:
+        filled = True
+        if clips < int(max_clips):
+            clips += 1
+        rec["repeat_intend"] = False
+        rec["repeat_reason"] = "repeat_not_same_poll"
+        rec["repeat_orders"] = []
+    else:
+        rpt = decide_repeat(
+            ask_up,
+            ask_down,
+            depth_up,
+            depth_down,
+            inv,
+            filled_this_window=filled,
+            clips_this_window=clips,
+            pair_max=pair_max,
+            clip=clip,
+            max_clips=max_clips,
+        )
+        rec["repeat_intend"] = bool(rpt.intend)
+        rec["repeat_reason"] = rpt.reason
+        rec["repeat_orders"] = [o.to_dict() for o in rpt.orders]
+        if rpt.intend:
+            clips += 1
+    rec["clips_this_window"] = clips
+    rec["filled_this_window"] = filled
     return rec
 
 
@@ -326,6 +365,8 @@ def _empty_asset_stats() -> dict[str, Any]:
         "n_le_096": 0,
         "n_a_hits": 0,
         "n_a2_hits": 0,
+        "n_repeat_hits": 0,
+        "max_clips_on_hit": 0,
         "n_le_096_depth_ge_clip": 0,
         "n_still_there_250ms": 0,
         "n_err": 0,
@@ -369,6 +410,12 @@ def summarize_paper(
             bucket["n_a_hits"] += 1
         if rec.get("a2_intend"):
             bucket["n_a2_hits"] += 1
+        if rec.get("repeat_intend"):
+            bucket["n_repeat_hits"] += 1
+        if rec.get("a_intend") or rec.get("a2_intend") or rec.get("repeat_intend"):
+            clips = int(rec.get("clips_this_window") or 0)
+            if clips > bucket["max_clips_on_hit"]:
+                bucket["max_clips_on_hit"] = clips
         if rec.get("still_there_250ms") is True:
             bucket["n_still_there_250ms"] += 1
         if s is None or s > float(pair_max) + 1e-12:
@@ -381,12 +428,17 @@ def summarize_paper(
     totals = _empty_asset_stats()
     for bucket in by_asset.values():
         for key in totals:
-            totals[key] += bucket[key]
+            if key == "max_clips_on_hit":
+                totals[key] = max(totals[key], bucket[key])
+            else:
+                totals[key] += bucket[key]
     return {
         "n_poll": totals["n_poll"],
         "n_le_096": totals["n_le_096"],
         "n_a_hits": totals["n_a_hits"],
         "n_a2_hits": totals["n_a2_hits"],
+        "n_repeat_hits": totals["n_repeat_hits"],
+        "max_clips_on_hit": totals["max_clips_on_hit"],
         "n_le_096_depth_ge_clip": totals["n_le_096_depth_ge_clip"],
         "n_still_there_250ms": totals["n_still_there_250ms"],
         "n_err": totals["n_err"],
@@ -424,6 +476,7 @@ def run_paper(
     rows: list[dict[str, Any]] = []
     token_cache: dict[str, dict[str, str]] = {}
     inventories: dict[str, BookInventory] = {a: BookInventory() for a in asset_list}
+    clip_state: dict[str, dict[str, Any]] = {a: {"t0": None, "clips": 0, "filled": False} for a in asset_list}
     n_lines = 0
     n_cycles = 0
     next_tick = time.time()
@@ -432,9 +485,13 @@ def run_paper(
         cycle_sums: dict[str, Any] = {}
         for asset in asset_list:
             inv = inventories.get(asset) or BookInventory()
+            st = clip_state.get(asset) or {"t0": None, "clips": 0, "filled": False}
             if inv.t0 != t0:
                 inventories[asset] = BookInventory(t0=t0)
                 inv = inventories[asset]
+            if st.get("t0") != t0:
+                st = {"t0": t0, "clips": 0, "filled": False}
+                clip_state[asset] = st
             slug = asset_window_slug(asset, t0)
             tokens = token_cache.get(slug)
             if tokens is None:
@@ -454,6 +511,8 @@ def run_paper(
                     tokens=tokens or None,
                     asset=asset,
                     inventory=inv,
+                    filled_this_window=bool(st["filled"]),
+                    clips_this_window=int(st["clips"]),
                 )
             except Exception as exc:
                 rec = {
@@ -468,13 +527,15 @@ def run_paper(
                     "intend": False,
                     "a_intend": False,
                     "a2_intend": False,
+                    "repeat_intend": False,
+                    "clips_this_window": int(st["clips"]),
                     "reason": "poll_error",
                     "error": str(exc),
                     "orders": [],
                     "still_there_250ms": None,
                 }
-            confirm_list = rec.get("a2_orders") or rec.get("a_orders") or rec.get("orders") or []
-            if (rec.get("a_intend") or rec.get("a2_intend")) and tokens and confirm_list:
+            confirm_list = rec.get("a2_orders") or rec.get("a_orders") or rec.get("repeat_orders") or rec.get("orders") or []
+            if (rec.get("a_intend") or rec.get("a2_intend") or rec.get("repeat_intend")) and tokens and confirm_list:
                 time.sleep(max(0.0, float(confirm_delay)))
                 rec["still_there_250ms"] = confirm_orders(tokens, confirm_list)
                 rec["ts_250ms"] = datetime.now(timezone.utc).isoformat()
@@ -483,6 +544,9 @@ def run_paper(
             if rec.get("a2_intend") and rec.get("a2_orders"):
                 for order in rec["a2_orders"]:
                     inv.apply_buy(str(order["outcome"]), float(order["size"]), float(order["price"]))
+            st["clips"] = int(rec.get("clips_this_window") or st["clips"])
+            st["filled"] = bool(rec.get("filled_this_window") or st["filled"])
+            clip_state[asset] = st
             rec["live_order"] = False
             append_jsonl(out_path, rec)
             n_lines += 1

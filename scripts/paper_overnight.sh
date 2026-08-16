@@ -7,6 +7,6 @@ mkdir -p data/paper
 START="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "$START" > data/paper/overnight_start.txt
 INTERVAL="${PAPER_INTERVAL:-5}"
-echo "paper multi-asset start=${START} interval=${INTERVAL} assets=btc,eth,sol,xrp out=data/paper/intended.jsonl live=0 leave_up=1" >&2
+echo "paper multi-asset+repeat start=${START} interval=${INTERVAL} assets=btc,eth,sol,xrp max_clips=8 out=data/paper/intended.jsonl live=0 leave_up=1" >&2
 # No --once, --seconds 0 → leave the loop up.
 python3 scripts/paper_whiskas.py --interval "$INTERVAL" --out data/paper/intended.jsonl --assets btc,eth,sol,xrp

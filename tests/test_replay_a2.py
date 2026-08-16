@@ -1,6 +1,6 @@
 from whiskas.policy import complete_set_pnl
 from whiskas.replay import run_replay, synthetic_taker_fills
-from whiskas.replay_a2 import run_a2_compare, simulate_a2_window
+from whiskas.replay_a2 import run_a2_compare, simulate_a2_window, simulate_repeat_extra
 
 
 def test_a2_first_leg_then_complete() -> None:
@@ -64,3 +64,24 @@ def test_a_plus_a2_does_not_replace_a() -> None:
     assert cmp_["a_plus_a2"]["n_windows"] == 2
     assert cmp_["a_plus_a2"]["pnl_fill30_ev"] + 1e-9 >= cmp_["a"]["pnl_fill30_ev"]
     assert cmp_["passed"]
+    assert "a_plus_a2_repeat" in cmp_
+    assert cmp_["a_plus_a2_repeat"]["pnl_fill30_ev"] + 1e-9 >= cmp_["a_plus_a2"]["pnl_fill30_ev"]
+
+
+def test_repeat_extra_after_first_fill() -> None:
+    slug = "btc-updown-5m-1786886400"
+    t0 = 1786886400
+    fills = synthetic_taker_fills(
+        [
+            {"slug": slug, "leg": "Up", "size": 21, "price": 0.40, "timestamp": t0 + 10, "winner": "Up"},
+            {"slug": slug, "leg": "Down", "size": 21, "price": 0.50, "timestamp": t0 + 11, "winner": "Up"},
+            {"slug": slug, "leg": "Up", "size": 21, "price": 0.41, "timestamp": t0 + 40, "winner": "Up"},
+            {"slug": slug, "leg": "Down", "size": 21, "price": 0.50, "timestamp": t0 + 41, "winner": "Up"},
+            {"slug": slug, "leg": "Up", "size": 21, "price": 0.41, "timestamp": t0 + 80, "winner": "Up"},
+            {"slug": slug, "leg": "Down", "size": 21, "price": 0.50, "timestamp": t0 + 81, "winner": "Up"},
+        ]
+    )
+    rpt = simulate_repeat_extra(fills)
+    assert rpt["clips"] >= 2
+    assert rpt["n_repeat"] >= 1
+    assert rpt["repeat_pnl"] > 0

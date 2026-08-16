@@ -1761,6 +1761,16 @@
       }
     ]
   },
+  "a_plus_a2_repeat": {
+    "n_repeat": 27711,
+    "max_clips": 8,
+    "repeat_pnl_fill1": 62697.20491345499,
+    "repeat_pnl_fill30_ev": 18809.161474036497,
+    "pnl_fill1": 79612.28920582883,
+    "pnl_fill30_ev": 23883.68676174865,
+    "max_clips_cap": 8,
+    "note": "measure-only extra clips after first A/A2 fill; same 0.96 cap; not a new strategy"
+  },
   "pass_a2_ge_a": true,
   "pass_day": true,
   "passed": true,

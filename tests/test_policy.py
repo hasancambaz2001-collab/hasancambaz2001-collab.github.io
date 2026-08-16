@@ -7,6 +7,7 @@ from whiskas.policy import (
     decide,
     decide_a,
     decide_a2,
+    decide_repeat,
 )
 
 
@@ -130,3 +131,24 @@ def test_inventory_not_netted_across_assets() -> None:
     assert btc.residual_leg() == "Up"
     assert eth.is_flat()
     assert eth.residual_qty() == 0.0
+
+
+def test_repeat_is_measure_only_same_cap() -> None:
+    idle = decide_repeat(0.40, 0.55, 30, 30, filled_this_window=False, clips_this_window=0)
+    assert not idle.intend
+    hit = decide_repeat(0.40, 0.55, 30, 30, filled_this_window=True, clips_this_window=1)
+    assert hit.intend
+    assert hit.reason == "repeat_pair"
+    assert len(hit.orders) == 2
+    dear = decide_repeat(0.49, 0.48, 30, 30, filled_this_window=True, clips_this_window=1)
+    assert not dear.intend
+    cap = decide_repeat(0.40, 0.55, 30, 30, filled_this_window=True, clips_this_window=8)
+    assert not cap.intend
+    assert cap.reason == "repeat_clip_cap"
+    inv = BookInventory()
+    inv.apply_buy("Up", 10, 0.40)
+    hold_ok = decide_repeat(0.50, 0.55, 30, 30, inv, filled_this_window=True, clips_this_window=1)
+    assert hold_ok.intend
+    hold_no = decide_repeat(0.50, 0.57, 30, 30, inv, filled_this_window=True, clips_this_window=1)
+    assert not hold_no.intend
+    assert hold_no.reason == "repeat_above_pair_max"

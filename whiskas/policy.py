@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from whiskas.constants import CLIP, PAIR_MAX, PAIR_MAX_CAP
+from whiskas.constants import CLIP, PAIR_MAX, PAIR_MAX_CAP, REPEAT_CLIP_MAX
 from whiskas.fees import taker_fee_usdc
 
 FORBIDDEN_PAIR_MAX = 0.9513
@@ -277,4 +277,59 @@ def decide_a2(
         ask_sum,
         float(clip),
         (IntendedFOK("BUY", cheap_leg, "FOK", cheap_px, size),),
+    )
+
+
+def decide_repeat(
+    ask_up: float | None,
+    ask_down: float | None,
+    size_up: float = 0.0,
+    size_down: float = 0.0,
+    inventory: BookInventory | None = None,
+    *,
+    filled_this_window: bool,
+    clips_this_window: int,
+    pair_max: float = PAIR_MAX,
+    clip: float = CLIP,
+    max_clips: int = REPEAT_CLIP_MAX,
+) -> PolicyDecision:
+    """Measure-only: would we lift another clip after an A/A2 fill. Same 0.96 cap. Not a new strategy."""
+    up = down = None
+    try:
+        up = float(ask_up) if ask_up is not None else None
+        down = float(ask_down) if ask_down is not None else None
+    except (TypeError, ValueError):
+        return PolicyDecision(False, "invalid_ask", None, None, None, clip)
+    ask_sum = (up + down) if up is not None and down is not None else None
+    if not filled_this_window:
+        return PolicyDecision(False, "repeat_need_prior_fill", up, down, ask_sum, clip)
+    if int(clips_this_window) >= int(max_clips):
+        return PolicyDecision(False, "repeat_clip_cap", up, down, ask_sum, clip)
+    if min(float(size_up or 0.0), float(size_down or 0.0)) + 1e-12 < float(clip):
+        return PolicyDecision(False, "repeat_depth_short", up, down, ask_sum, clip)
+    inv = inventory or BookInventory()
+    if not inv.is_flat():
+        held = inv.residual_leg()
+        avg = inv.avg(held) if held else None
+        other = up if held == "Down" else down
+        if avg is None or other is None or not (0.0 < other < 1.0):
+            return PolicyDecision(False, "repeat_missing_ask", up, down, ask_sum, clip)
+        if avg + other > float(pair_max) + 1e-12:
+            return PolicyDecision(False, "repeat_above_pair_max", up, down, ask_sum, clip)
+        return PolicyDecision(True, "repeat_holding", up, down, ask_sum, clip)
+    if up is None or down is None or not (0.0 < up < 1.0 and 0.0 < down < 1.0):
+        return PolicyDecision(False, "repeat_missing_ask", up, down, ask_sum, clip)
+    if up + down > float(pair_max) + 1e-12:
+        return PolicyDecision(False, "repeat_above_pair_max", up, down, ask_sum, clip)
+    return PolicyDecision(
+        True,
+        "repeat_pair",
+        up,
+        down,
+        up + down,
+        float(clip),
+        (
+            IntendedFOK("BUY", "Up", "FOK", up, float(clip)),
+            IntendedFOK("BUY", "Down", "FOK", down, float(clip)),
+        ),
     )

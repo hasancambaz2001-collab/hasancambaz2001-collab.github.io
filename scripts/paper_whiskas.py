@@ -38,20 +38,22 @@ def write_paper_report(stats: dict, path: Path) -> None:
         "",
         "Replay was not touched. Clip stays 21. No live orders. PR not merged.",
         "",
-        "| asset | polls | A_hits | A2_hits | depth≥21 | still@250ms |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| asset | polls | A_hits | A2_hits | repeat_hits | depth≥21 | still@250ms | max clips |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for asset in ("btc", "eth", "sol", "xrp"):
         row = assets.get(asset) or {}
         lines.append(
             f"| {asset} | {row.get('n_poll', 0)} | {row.get('n_a_hits', 0)} | "
-            f"{row.get('n_a2_hits', 0)} | {row.get('n_le_096_depth_ge_clip', 0)} | "
-            f"{row.get('n_still_there_250ms', 0)} |"
+            f"{row.get('n_a2_hits', 0)} | {row.get('n_repeat_hits', 0)} | "
+            f"{row.get('n_le_096_depth_ge_clip', 0)} | {row.get('n_still_there_250ms', 0)} | "
+            f"{row.get('max_clips_on_hit', 0)} |"
         )
     lines.append(
         f"| **all** | {stats['n_poll']} | {stats.get('n_a_hits', 0)} | "
-        f"{stats.get('n_a2_hits', 0)} | {stats['n_le_096_depth_ge_clip']} | "
-        f"{stats.get('n_still_there_250ms', 0)} |"
+        f"{stats.get('n_a2_hits', 0)} | {stats.get('n_repeat_hits', 0)} | "
+        f"{stats['n_le_096_depth_ge_clip']} | {stats.get('n_still_there_250ms', 0)} | "
+        f"{stats.get('max_clips_on_hit', 0)} |"
     )
     lines.extend(
         [
@@ -127,6 +129,8 @@ def main() -> int:
                 "intend": rec.get("intend"),
                 "a_intend": rec.get("a_intend"),
                 "a2_intend": rec.get("a2_intend"),
+                "repeat_intend": rec.get("repeat_intend"),
+                "clips_this_window": rec.get("clips_this_window"),
                 "reason": rec.get("reason"),
                 "depth_ok": rec.get("depth_ok"),
                 "still_there_250ms": rec.get("still_there_250ms"),

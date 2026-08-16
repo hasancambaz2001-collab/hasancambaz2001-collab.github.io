@@ -17,8 +17,10 @@ A+A2 = A windows (existing VWAP complete-set) **plus** sequential A2 on the othe
 | A | 6556 | 11649.56 | 3494.87 | 0.0 | 0.09% |
 | A2 extra | 6423 | 5265.52 | 1579.66 | 285.0 | — |
 | **A+A2** | 12979 | 16915.08 | 5074.53 | 285.0 | 0.18% |
+| A+A2+repeat@8 | 12979 | 79612.29 | 23883.69 | — | measure only |
 
 A2 extra first-legs=3233, completes=3719, leftover windows=793.
+Repeat (measure only): n=27711 extra lifts, max clips seen=8 (cap 8). Not a new strategy.
 A+A2 30% MC pnl=4880.14, worst MC day=-0.18%.
 
 ## PASS
