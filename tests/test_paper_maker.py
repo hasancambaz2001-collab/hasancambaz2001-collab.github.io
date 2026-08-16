@@ -4,13 +4,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.paper_maker import (
+    CANCEL_ABOVE,
     CANCEL_RICH,
     CLIP_DEFAULT,
     MAKER_ASSETS,
     MAKER_TFS,
+    PAIR_MAX,
+    REQUOTE_MAX,
     REST_MAX,
     decide_maker,
     level_eaten,
+    load_maker_yaml,
     snapshot_maker,
 )
 
@@ -298,6 +302,23 @@ def test_level_eaten_and_snapshot_no_live() -> None:
     assert "post_order" not in src
     assert "data/paper/intended.jsonl" in src
     assert CLIP_DEFAULT == 10.0
+    assert PAIR_MAX == 0.90
+    assert CANCEL_ABOVE == 0.92
+    assert REQUOTE_MAX == 2.0
+    assert REST_MAX == PAIR_MAX
+    assert CANCEL_RICH == CANCEL_ABOVE
     assert MAKER_ASSETS == ("btc", "eth", "sol", "xrp", "doge")
     assert MAKER_TFS == ("5m", "15m")
     assert "4h" not in MAKER_TFS
+    cfg = load_maker_yaml()
+    assert cfg["pair_max"] == 0.90
+    assert cfg["cancel_above"] == 0.92
+    assert cfg["clip"] == 10.0
+    assert cfg["requote"] <= 2.0
+    assert cfg["assets"] == MAKER_ASSETS
+    assert cfg["tfs"] == MAKER_TFS
+    assert cfg["live_order"] is False
+    yaml = Path("configs/maker.yaml").read_text(encoding="utf-8")
+    assert "pair_max: 0.90" in yaml
+    assert "cancel_above: 0.92" in yaml
+    assert "requote: 2" in yaml

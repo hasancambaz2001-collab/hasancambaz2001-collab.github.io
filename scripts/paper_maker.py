@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from whiskas.config import load_config
 from whiskas.paper import (
     append_jsonl,
     asset_window_slug,
@@ -35,8 +36,11 @@ from whiskas.paper import (
 
 CLIP_DEFAULT = 10.0
 INTERVAL_DEFAULT = 2.0
-REST_MAX = 0.90
-CANCEL_RICH = 0.92
+PAIR_MAX = 0.90
+CANCEL_ABOVE = 0.92
+REQUOTE_MAX = 2.0
+REST_MAX = PAIR_MAX
+CANCEL_RICH = CANCEL_ABOVE
 MAX_AGE_SEC = 45.0
 MAKER_ASSETS = ("btc", "eth", "sol", "xrp", "doge")
 MAKER_TFS = ("5m", "15m")
@@ -57,6 +61,27 @@ def _parse_ts(value: Any) -> datetime | None:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(timezone.utc)
+
+
+def load_maker_yaml() -> dict[str, Any]:
+    """Formal keys from configs/maker.yaml. Same rest/cancel policy. No new strategy."""
+    cfg = load_config(ROOT / "configs" / "maker.yaml")
+    assets = cfg.get("assets") or list(MAKER_ASSETS)
+    tfs = cfg.get("tfs") or list(MAKER_TFS)
+    requote = float(cfg.get("requote", cfg.get("interval", INTERVAL_DEFAULT)))
+    if requote > REQUOTE_MAX + 1e-12:
+        requote = REQUOTE_MAX
+    return {
+        "pair_max": float(cfg.get("pair_max", cfg.get("rest_max", PAIR_MAX))),
+        "cancel_above": float(cfg.get("cancel_above", cfg.get("cancel_rich", CANCEL_ABOVE))),
+        "clip": float(cfg.get("clip", CLIP_DEFAULT)),
+        "requote": requote,
+        "max_age_sec": float(cfg.get("max_age_sec", MAX_AGE_SEC)),
+        "assets": tuple(str(a).strip().lower() for a in assets),
+        "tfs": tuple(str(t).strip().lower() for t in tfs if str(t).strip().lower() in {"5m", "15m"}),
+        "live_order": False,
+        "pair_gt_1": False,
+    }
 
 
 def _parse_since(text: str | None) -> datetime | None:
@@ -251,6 +276,8 @@ def snapshot_maker(
     books: dict[str, dict[str, Any]] | None = None,
     state: dict[str, Any] | None = None,
     now: float | None = None,
+    pair_max: float = PAIR_MAX,
+    cancel_above: float = CANCEL_ABOVE,
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
     tf_key = normalize_tf(tf)
     ts_now = time.time() if now is None else float(now)
@@ -307,10 +334,14 @@ def snapshot_maker(
         now=ts_now,
         t0=t0,
         clip=clip,
+        rest_max=float(pair_max),
+        cancel_rich=float(cancel_above),
     )
     rec.update(decision)
     rec["live_order"] = False
     rec["pair_gt_1"] = False
+    rec["pair_max"] = float(pair_max)
+    rec["cancel_above"] = float(cancel_above)
     return rec, new_state
 
 
@@ -405,6 +436,8 @@ def run_loop(
     once: bool,
     seconds: float,
     stop_after_print: bool = False,
+    pair_max: float = PAIR_MAX,
+    cancel_above: float = CANCEL_ABOVE,
 ) -> list[dict[str, Any]]:
     forever = (not once) and float(seconds) <= 0
     deadline = None if forever else time.time() + max(0.0, float(seconds))
@@ -439,6 +472,8 @@ def run_loop(
                     clip=clip,
                     tokens=tokens or None,
                     state=states.get(key),
+                    pair_max=pair_max,
+                    cancel_above=cancel_above,
                 )
                 rec["live_order"] = False
                 states[key] = new_state
@@ -494,12 +529,15 @@ def main() -> int:
         help="exit after the first rest or rich_* line (default: leave up)",
     )
     args = parser.parse_args()
+    cfg = load_maker_yaml()
     if args.out.resolve() in {FIVE_M_JSONL.resolve(), DC06_JSONL.resolve()}:
         print("refusing to write the 5m or 06dc jsonl", file=sys.stderr)
         return 2
-    assets = tuple(a.strip().lower() for a in args.assets.split(",") if a.strip())
+    assets = tuple(a.strip().lower() for a in args.assets.split(",") if a.strip()) or cfg["assets"]
     tfs = tuple(normalize_tf(t) for t in args.tfs.split(",") if t.strip())
-    tfs = tuple(t for t in tfs if t in {"5m", "15m"})
+    tfs = tuple(t for t in tfs if t in {"5m", "15m"}) or cfg["tfs"]
+    interval = min(float(args.interval), float(cfg["requote"]), REQUOTE_MAX)
+    clip = float(args.clip) if args.clip != CLIP_DEFAULT else float(cfg["clip"])
     since = _parse_since(args.since)
     if args.since_file and args.since_file.is_file():
         since = _parse_since(args.since_file.read_text(encoding="utf-8").splitlines()[0])
@@ -511,16 +549,19 @@ def main() -> int:
         return 0
     rows = run_loop(
         out_path=args.out,
-        interval=float(args.interval),
-        clip=float(args.clip),
+        interval=interval,
+        clip=clip,
         assets=assets,
         tfs=tfs,
         once=bool(args.once),
         seconds=float(args.seconds),
         stop_after_print=bool(args.stop_after_print),
+        pair_max=float(cfg["pair_max"]),
+        cancel_above=float(cfg["cancel_above"]),
     )
     print(
-        f"appended to {args.out} book=maker clip={args.clip} assets={','.join(assets)} "
+        f"appended to {args.out} book=maker clip={clip} pair_max={cfg['pair_max']} "
+        f"cancel_above={cfg['cancel_above']} requote={interval} assets={','.join(assets)} "
         f"tfs={','.join(tfs)} rows={len(rows)} (GET only, no orders)",
         flush=True,
     )
