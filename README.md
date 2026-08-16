@@ -4,14 +4,17 @@ Public reconstruction of [@x-moneyforwhiskas](https://polymarket.com/@x-moneyfor
 
 This repo is research + paper scaffolding. It is **not** a copy-trader and **not** a live execution tutorial.
 
-## What exists now (Phase 1)
+## What exists now (Phase 1 + tie-out)
 
 1. `scripts/dump_whiskas.py` — full Data API activity + closed positions (no keys).
 2. `scripts/build_windows.py` — parquet windows/fills + `data/reports/PHASE1.md`.
-3. `configs/whiskas.yaml` — filled from Phase 1 quantiles after the build.
-4. Tests for slug parse, pair_cost / residual sign, kill-switch.
+3. `scripts/tieout_pnl.py` — official +$211k vs reconstructed books. Writes `data/reports/PHASE1_TIEOUT.md` inputs (`data/processed/tieout_stats.json`).
+4. `configs/whiskas.yaml` — quantile scratch, **not** a live go. `pair_max=0.9513` is p25 cargo-cult.
+5. Tests for slug parse, pair_cost / residual sign, kill-switch, fee/maker identity.
 
-Do **not** start `python -m whiskas.bot` until `PHASE1.md` exists and you have read the T1–T5 table.
+**Read `data/reports/PHASE1_TIEOUT.md` before `PHASE1.md`.** PHASE1 `total_pnl=−$103k` is the broken register (taker fee applied to every BUY on top of `usdcSize`). Tie-out is green: `|payout − size×price − official| = $137`.
+
+Do **not** start a bot, paper loop, or replay from this tree.
 
 ## Dump
 

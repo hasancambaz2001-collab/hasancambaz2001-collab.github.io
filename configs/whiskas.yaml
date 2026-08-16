@@ -2,6 +2,8 @@ wallet: '0x3048d65321be3497164cdfc2996f94f98a2e7537'
 username: x-MoneyForWhiskas
 profile: https://polymarket.com/@x-moneyforwhiskas
 market: btc-updown-5m
+# 0.9513 is usdc pair_cost p25 (fee already in the average). Not a live ask_sum.
+# Do not copy this number. Pick from data/reports/PHASE1_TIEOUT.md after the green tie-out.
 pair_max: 0.9513
 min_edge: 0.04
 clip: 20.86

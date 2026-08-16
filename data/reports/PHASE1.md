@@ -2,6 +2,8 @@
 
 Generated: 2026-08-16 13:44 UTC
 
+**Ledger lock is `PHASE1_TIEOUT.md`, not this file.** `total_pnl=−$103,515` double-counts taker fees on top of `usdcSize` and treats every BUY as a taker. Official ALL is +$211,013.58; reconstructed fee0 (`payout − size×price`) is +$210,876.56 (`|$137|`). Do not retune `pair_max` from the p25=0.9513 line below.
+
 Do not start the bot loop from this file. Config below is quantile-fitted, not a live go.
 
 ## Identity
