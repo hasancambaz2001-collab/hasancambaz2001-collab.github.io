@@ -1,0 +1,10 @@
+# Scaffold only. No live. No --run. paper_06dc.py already has R1–R6; do not overwrite.
+wallet: '0x06dc51826bc524d9a83770e7de9dd7e005b04524'
+live: false
+clip: 20
+pair_taker_max: 0.96
+pair_hard_cap: 1.00
+r6_bid_max: 0.98
+rules: [R1, R3, R4, R5, R6]
+r7: false
+notes: Do not bump clip. Do not add R7. Do not apply BID_BUCKET.md. Do not restart paper_06dc.
