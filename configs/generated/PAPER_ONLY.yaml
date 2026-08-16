@@ -1,6 +1,7 @@
 live_orders: false
 live: false
 clip: 10.0
+interval: 1.0
 pair_max: 0.9
 cancel_above: 0.92
 assets:

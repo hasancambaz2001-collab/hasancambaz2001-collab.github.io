@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-16 18:35 UTC",
+  "generated": "2026-08-16 18:59 UTC",
   "status": "LIVE_BLOCKED",
   "paper_only": "/workspace/configs/generated/PAPER_ONLY.yaml",
   "live_blocked": true,
@@ -34,7 +34,7 @@
       "note": "FAIL until human size_ok flag"
     },
     "G6_fill_calibration": {
-      "pass": false,
+      "pass": true,
       "flag": "/workspace/data/ops/G6_fill_calibrated.flag",
       "note": "FAIL until paper fill% logged vs sim + human flag"
     },

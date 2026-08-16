@@ -392,7 +392,7 @@ def load_slim(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
     if df.empty:
         return df
-    if "best_bid" in df.columns:
+    if "bid_size" in df.columns and "best_bid" in df.columns:
         return df
     return bbo_timeline_full(df)
 
@@ -483,7 +483,9 @@ def write_reports(stats: dict[str, Any], *, root: Path = ROOT) -> None:
         f"- n_slugs_downloaded: {stats.get('n_slugs_downloaded')}",
         f"- n_slugs_one_leg: {stats.get('n_slugs_one_leg')}",
         f"- n_slugs_joined: {stats.get('n_slugs_joined')}",
-        f"- n_rest recorder: {stats.get('n_rest_recorder')} · joined: {stats.get('n_rest_joined')}",
+        f"- n_rest unique (slug,t0): {stats.get('n_rest')} "
+        f"(raw recorder={stats.get('n_rest_recorder')} raw joined={stats.get('n_rest_joined')}; "
+        f"dense BBO can re-rest after cancel_age)",
         f"- leader S1 union: {stats.get('n_leader_s1')} · downloaded overlap: {stats.get('n_leader_s1_downloaded')}",
         f"- AGREE: {stats.get('n_agree')} · cover: {cover_s}",
         f"- bosona S1 cover on downloaded: {stats.get('cover_bosona')}",

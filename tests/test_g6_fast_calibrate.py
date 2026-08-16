@@ -4,6 +4,7 @@ from scripts.g6_fast_calibrate import (
     N_REST_MIN,
     edge_proxy,
     evaluate_pass,
+    load_slim,
     one_leg_stats,
     policy_rests,
     run_g6_fast,
@@ -105,6 +106,32 @@ def test_edge_proxy_ignores_pair_gt_1() -> None:
     )
     assert passed is True
     assert reasons == []
+
+
+def test_load_slim_converts_raw_l2(tmp_path: Path) -> None:
+    raw = pd.DataFrame(
+        [
+            {
+                "market_slug": "btc-updown-5m-1",
+                "timestamp": 1000.0,
+                "event_type": "book",
+                "bid_prices": [0.40],
+                "bid_sizes": [20.0],
+                "ask_prices": [0.42],
+                "ask_sizes": [9.0],
+                "best_bid": None,
+                "best_ask": None,
+                "pc_size": None,
+                "pc_side": None,
+            }
+        ]
+    )
+    path = tmp_path / "raw.parquet"
+    raw.to_parquet(path, index=False)
+    slim = load_slim(path)
+    assert "bid_size" in slim.columns
+    assert float(slim.iloc[0].best_bid) == 0.40
+    assert float(slim.iloc[0].bid_size) == 20.0
 
 
 def test_src_locks() -> None:

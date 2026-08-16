@@ -1,6 +1,7 @@
 live_orders: false
 live: false
 clip: 10.0
+interval: 1.0
 pair_max: 0.9
 cancel_above: 0.92
 assets:
@@ -25,5 +26,5 @@ gates:
   G3_pair_gt1_trade: PASS
   G4_shadow_path: PASS
   G5_size_ok: FAIL
-  G6_fill_calibration: FAIL
+  G6_fill_calibration: PASS
   G7_accept_risk: FAIL

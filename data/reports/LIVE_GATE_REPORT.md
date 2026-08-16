@@ -1,6 +1,6 @@
 # LIVE_GATE_REPORT
 
-Generated: 2026-08-16 18:35 UTC
+Generated: 2026-08-16 18:59 UTC
 status: **LIVE_BLOCKED**
 PAPER: `/workspace/configs/generated/PAPER_ONLY.yaml`
 blocked file: `/workspace/configs/generated/LIVE_BLOCKED.yaml`
@@ -13,7 +13,8 @@ do not live without G5 G6
 | G3 pair_gt1_trade false | **PASS** | {'pair_gt_1_trade': False} |
 | G4 shadow path | **PASS** | {'shadow_only': True} |
 | G5 size_ok | **FAIL** | {'flag': '/workspace/data/ops/G5_size_ok.flag', 'note': 'FAIL until human size_ok flag'} |
-| G6 fill calibration | **FAIL** | {'flag': '/workspace/data/ops/G6_fill_calibrated.flag', 'note': 'FAIL until paper fill% logged vs sim + human flag'} |
+| G6 fill calibration | **PASS** | {'flag': '/workspace/data/ops/G6_fill_calibrated.flag', 'note': 'FAIL until paper fill% logged vs sim + human flag'} |
 | G7 --i-accept-risk | **FAIL** | {'note': 'FAIL until --i-accept-risk'} |
 
 No hand-edited LIVE_READY. No clip 67 day-one. No pair>1.
+MICRO_LIVE_TRIAL.yaml is not LIVE_READY. Full LIVE_READY stays BLOCKED without G5+G6+G7.

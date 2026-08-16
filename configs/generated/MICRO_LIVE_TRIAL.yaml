@@ -1,0 +1,24 @@
+status: MICRO_LIVE_TRIAL
+generated: 2026-08-16 18:59 UTC
+live_orders: true
+live: false
+full_live_ready: false
+bundle_placed_orders: false
+micro_trial: true
+clip: 5.0
+max_clip: 5.0
+assets:
+- btc
+tfs:
+- 5m
+pair_max: 0.9
+cancel_above: 0.92
+pair_gt_1_trade: false
+size_ok: false
+max_daily_loss_usd: 25.0
+kill_switch: true
+max_open_windows: 2
+g5: FAIL
+g6: PASS
+notes: MICRO trial permit only. Bundle does not send orders. Not LIVE_READY. Not full
+  ladder. No clip 67. pair_gt_1_trade=false. clip 5 without G5, clip 10 with G5.
