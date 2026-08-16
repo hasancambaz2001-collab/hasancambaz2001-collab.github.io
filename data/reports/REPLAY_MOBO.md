@@ -1,6 +1,6 @@
 # REPLAY_MOBO
 
-Generated: 2026-08-16 17:13 UTC
+Generated: 2026-08-16 17:41 UTC
 Validated on **their tape** (`data/raw/mobo_*_activity.jsonl`). Not paper intends.
 Do **not** treat `paper_maker` rest lines as PnL.
 
@@ -9,12 +9,12 @@ PASS = cover ≥80% of their pair<0.90 two-leg 5m/15m windows.
 
 ## GATE **PASS**
 
-cover ≥80% of pair<0.90 two-leg 5m/15m: mo-money 85% (71/84), bosona 84% (67/80).
+cover ≥80% of pair<0.90 two-leg 5m/15m: mo-money 85% (94/111), bosona 80% (85/106).
 
 | wallet | two-leg 5m/15m | pair<0.90 | covered | cover | maker both legs |
 |---|---:|---:|---:|---:|---:|
-| mo-money | 152 | 84 | 71 | 84.5% | 66 |
-| bosona | 137 | 80 | 67 | 83.8% | 72 |
+| mo-money | 205 | 111 | 94 | 84.7% | 88 |
+| bosona | 186 | 106 | 85 | 80.2% | 93 |
 
 Covered iff the cheap window has a maker fill and min size ≥ clip 10 (rest-both rule on their observed set). maker-both-legs is a separate count (bosona 72/80 = 90%); it is not PnL.
 

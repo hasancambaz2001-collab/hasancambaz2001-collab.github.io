@@ -1,6 +1,6 @@
 # KASA attribution
 
-Generated: 2026-08-16 17:21 UTC
+Generated: 2026-08-16 17:41 UTC
 Their tape. Not paper intends. pair_gt_1_trade=false. paper_maker primary.
 Two-leg by market slug (Yes+No same binary). 06dc ladders are not event-wide sets.
 

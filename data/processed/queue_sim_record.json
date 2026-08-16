@@ -1,0 +1,55 @@
+{
+  "source": "record",
+  "clip": 10.0,
+  "size_ok": false,
+  "go_nogo": false,
+  "note": "S1 go/no-go = replay edge, NOT queue fill%. Low fill% on short L2 = calibrate, don't kill S1.",
+  "scenarios": {
+    "base": {
+      "n_rest": 69,
+      "n_complete_fills": 7,
+      "intended_shares": 1380.0,
+      "filled_shares": 140.0,
+      "fill_ratio": 0.10144927536231885,
+      "scenario": "base",
+      "label": "plan",
+      "clip": 10.0,
+      "hidden_factor": 1.25,
+      "cancel_frac": 0.35,
+      "latency_ticks": 1,
+      "size_ok": false,
+      "go_nogo": false
+    },
+    "pessimistic": {
+      "n_rest": 69,
+      "n_complete_fills": 5,
+      "intended_shares": 1380.0,
+      "filled_shares": 100.0,
+      "fill_ratio": 0.07246376811594203,
+      "scenario": "pessimistic",
+      "label": "stress",
+      "clip": 10.0,
+      "hidden_factor": 1.6,
+      "cancel_frac": 0.35,
+      "latency_ticks": 2,
+      "size_ok": false,
+      "go_nogo": false
+    },
+    "optimistic": {
+      "n_rest": 69,
+      "n_complete_fills": 8,
+      "intended_shares": 1380.0,
+      "filled_shares": 160.0,
+      "fill_ratio": 0.11594202898550725,
+      "scenario": "optimistic",
+      "label": "upper_bound_only",
+      "clip": 10.0,
+      "hidden_factor": 1.0,
+      "cancel_frac": 0.35,
+      "latency_ticks": 0,
+      "size_ok": false,
+      "go_nogo": false
+    }
+  },
+  "generated": "2026-08-16 17:41 UTC"
+}

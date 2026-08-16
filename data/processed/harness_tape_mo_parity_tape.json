@@ -1,0 +1,57 @@
+{
+  "source": "tape_mo",
+  "fill": "parity_tape",
+  "generated": "2026-08-16 17:41 UTC",
+  "live": false,
+  "size_ok": false,
+  "pair_gt_1_trade": false,
+  "primary": "paper_maker",
+  "legacy_ask_fok": "whiskas",
+  "ladder": {
+    "size_ok": false,
+    "paper_clip": 10.0,
+    "now": 10.0,
+    "after_parity": null,
+    "target_p50": 64.0448,
+    "armed": false,
+    "pair_gt_1_trade": false,
+    "note": "10 -> after_parity -> target_p50 (~67). Not armed. Queue does not set size_ok."
+  },
+  "note": "S1 go/no-go = replay edge, NOT queue fill%. Whiskas full measure \u2260 license to trade pair>1.",
+  "mode": "windows",
+  "n_windows": 205,
+  "strategies": {
+    "s1": {
+      "n": 205,
+      "intend": 95,
+      "trade": true,
+      "edge_raw": 3024.440949822228,
+      "edge_filled": 3024.440949822228,
+      "measure_edge": 3024.440949822228
+    },
+    "s06dc": {
+      "n": 205,
+      "intend": 0,
+      "trade": false,
+      "edge_raw": 0.0,
+      "edge_filled": 0.0,
+      "measure_edge": 0.0
+    },
+    "whiskas": {
+      "n": 205,
+      "intend": 23,
+      "trade": false,
+      "edge_raw": 0.0,
+      "edge_filled": 0.0,
+      "measure_edge": 700.5632612451009
+    },
+    "whiskas_full_measure": {
+      "n": 205,
+      "intend": 0,
+      "trade": false,
+      "edge_raw": 0.0,
+      "edge_filled": 0.0,
+      "measure_edge": 2246.6677033125193
+    }
+  }
+}

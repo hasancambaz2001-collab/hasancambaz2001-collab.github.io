@@ -47,6 +47,18 @@ class S06dc(Strategy):
 
     def on_tick(self, tick: BookTick, state: dict[str, Any] | None) -> tuple[Decision, dict[str, Any] | None]:
         kind = _kind(tick.slug)
+        if kind == "smoke_5m":
+            return (
+                Decision(
+                    self.name,
+                    False,
+                    False,
+                    "smoke_5m_not_daily",
+                    pair=tick.bid_sum,
+                    extra={"kind": kind, "r7": self.r7, "smoke": True},
+                ),
+                state,
+            )
         rec = decide_06dc(
             kind="daily_ud" if kind == "daily_ud" else ("bracket" if kind == "bracket" else "daily_ud"),
             yes_ask=tick.au,
