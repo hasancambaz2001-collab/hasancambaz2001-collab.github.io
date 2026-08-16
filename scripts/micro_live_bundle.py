@@ -60,6 +60,12 @@ def micro_payload(*, clip: float, g5: bool, g6: bool) -> dict[str, Any]:
             "stop_if_daily_loss_usd": MAX_DAILY_LOSS,
             "pair_gt_1_trade": False,
             "bundle_sends_orders": False,
+            "default_this_run": "measurement_and_yaml_only",
+            "send_requires": [
+                "explicit --send-live-orders-now",
+                "MICRO_LIVE_TRIAL.yaml",
+                "G6_fill_calibrated.flag",
+            ],
             "clob_path": "scripts/micro_live.py",
             "auth_from": "env or configs/.env.clob",
             "print_keys": False,

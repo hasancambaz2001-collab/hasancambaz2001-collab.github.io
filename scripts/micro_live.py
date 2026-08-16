@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """MICRO CLOB path: GTC / cancel / status. Not LIVE_READY.
 
-python3 scripts/micro_live.py
-  → probe only. If AUTH_ABSENT: stop at MICRO yaml + paper still250. real_fill=null.
+Default: measurement + yaml only. Does not send.
 
-python3 scripts/micro_live.py --send --i-accept-micro-risk
-  → posts GTC both legs only with local keys + MICRO yaml. clip 5 without G5.
+Send is refused unless ALL of:
+  1) user passes --send-live-orders-now  (explicit "send live orders now")
+  2) configs/generated/MICRO_LIVE_TRIAL.yaml exists
+  3) data/ops/G6_fill_calibrated.flag exists
+  4) --i-accept-micro-risk
+  5) local CLOB keys present
 
-Keys from env / configs/.env.clob. Never print. Never commit.
+--send alone is not enough. Keys from env / configs/.env.clob. Never print.
 pair_gt_1_trade=false. No clip 67. micro trial ≠ full solve.
 """
 
@@ -229,6 +232,8 @@ def cancel_open(client: Any, orders: list[dict[str, Any]], *, reason: str) -> li
 
 
 def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
+    if not (ROOT / G6_FLAG).is_file():
+        return {"ok": False, "reason": "G6 flag missing; refuse send", "sent": False, "real_fill_rate": None}
     micro = load_micro()
     if not micro:
         return {"ok": False, "reason": "MICRO yaml missing", "sent": False, "real_fill_rate": None}
@@ -285,15 +290,37 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="MICRO CLOB path. No keys => no send, no fake real_fill.")
-    parser.add_argument("--send", action="store_true")
+    parser = argparse.ArgumentParser(description="MICRO CLOB path. Default: measurement only. No send.")
+    parser.add_argument("--send", action="store_true", help="ignored unless --send-live-orders-now")
+    parser.add_argument(
+        "--send-live-orders-now",
+        action="store_true",
+        dest="send_now",
+        help="required explicit phrase. Still needs MICRO yaml + G6 flag + keys.",
+    )
     parser.add_argument("--i-accept-micro-risk", action="store_true", dest="accept")
     parser.add_argument("--seconds", type=float, default=30.0)
     parser.add_argument("--interval", type=float, default=1.0)
     args = parser.parse_args()
-    if args.send:
+    if args.send and not args.send_now:
+        print(json.dumps({
+            "ok": False,
+            "sent": False,
+            "real_fill_rate": None,
+            "reason": "refused: --send alone is not enough; need --send-live-orders-now + MICRO yaml + G6 flag",
+        }))
+        return 2
+    if args.send_now:
         if not args.accept:
-            print(json.dumps({"ok": False, "reason": "pass --i-accept-micro-risk to send"}))
+            print(json.dumps({"ok": False, "sent": False, "reason": "pass --i-accept-micro-risk"}))
+            return 2
+        if not (ROOT / G6_FLAG).is_file() or load_micro() is None:
+            print(json.dumps({
+                "ok": False,
+                "sent": False,
+                "real_fill_rate": None,
+                "reason": "need MICRO_LIVE_TRIAL.yaml and G6_fill_calibrated.flag",
+            }))
             return 2
         payload = run_send(seconds=float(args.seconds), interval=float(args.interval))
     else:

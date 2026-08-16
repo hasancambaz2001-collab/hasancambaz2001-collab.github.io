@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import subprocess
+import sys
+
 from scripts.micro_live import _guard_rest, clip_cap, probe, send_rest_both
 
 
@@ -42,10 +45,23 @@ def test_send_without_client_does_not_invent_fill() -> None:
     assert out.get("send_blocked") == "AUTH_ABSENT"
 
 
+def test_send_alone_is_refused() -> None:
+    proc = subprocess.run(
+        [sys.executable, "scripts/micro_live.py", "--send"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 2
+    assert "not enough" in proc.stdout
+    assert "sent" in proc.stdout
+
+
 def test_clip_cap_without_g5() -> None:
     assert clip_cap(g5=False, yaml_clip=10) == 5
     assert clip_cap(g5=True, yaml_clip=10) == 10
     src = Path("scripts/micro_live.py").read_text()
-    assert "--send" in src
+    assert "--send-live-orders-now" in src
+    assert "Default: measurement + yaml only" in src
     assert "AUTH_ABSENT" in src
     assert "create_order" in src or "create_gtc_buy" in src

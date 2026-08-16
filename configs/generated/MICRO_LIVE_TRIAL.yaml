@@ -1,5 +1,5 @@
 status: MICRO_LIVE_TRIAL
-generated: 2026-08-16 19:05 UTC
+generated: 2026-08-16 19:06 UTC
 live_orders: true
 live: false
 full_live_ready: false
@@ -31,6 +31,11 @@ executor:
   stop_if_daily_loss_usd: 25.0
   pair_gt_1_trade: false
   bundle_sends_orders: false
+  default_this_run: measurement_and_yaml_only
+  send_requires:
+  - explicit --send-live-orders-now
+  - MICRO_LIVE_TRIAL.yaml
+  - G6_fill_calibrated.flag
   clob_path: scripts/micro_live.py
   auth_from: env or configs/.env.clob
   print_keys: false
