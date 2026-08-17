@@ -16,7 +16,7 @@ from scripts.micro_live import (
     send_rest_both,
     trial_clip,
 )
-from whiskas.measure_layers import apply_still250_send_gate, guard_still250_send
+from whiskas.measure_layers import apply_still250_send_gate, guard_maker_join, guard_still250_send
 from whiskas.micro_report import adverse_action, fee_estimated_net_pnl, layer_records
 
 
@@ -62,6 +62,62 @@ def test_still250_false_blocks_send() -> None:
     assert out2.get("send_blocked") == "bid_sum_250_gt_pair_max"
 
 
+def test_join_at_or_through_ask_blocks_send() -> None:
+    """07:14 join==ask and 08:27 bid>ask were taker one-leg. Maker GTC only."""
+    locked = {
+        "reason": "rest",
+        "bid_sum": 0.86,
+        "bid_up": 0.30,
+        "bid_down": 0.56,
+        "min_bid_size": 5,
+        "clip": 5,
+        "still_there_250ms": True,
+        "bid_sum_250": 0.87,
+        "bid_up_250": 0.30,
+        "bid_down_250": 0.57,
+        "ask_up": 0.44,
+        "ask_down": 0.57,
+        "ask_up_250": 0.44,
+        "ask_down_250": 0.57,
+    }
+    assert guard_maker_join(locked) == "join_crosses_ask"
+    out = send_rest_both(None, dict(locked), {"Up": "u", "Down": "d"}, clip=5)
+    assert out["live_order"] is False
+    assert out["real_fill"] is None
+    assert out.get("send_blocked") == "join_crosses_ask"
+    crossed = {
+        **locked,
+        "bid_sum": 0.89,
+        "bid_sum_250": 0.89,
+        "bid_up": 0.26,
+        "bid_down": 0.63,
+        "bid_up_250": 0.26,
+        "bid_down_250": 0.63,
+        "ask_up": 0.23,
+        "ask_down": 0.78,
+        "ask_up_250": 0.23,
+        "ask_down_250": 0.78,
+    }
+    assert guard_maker_join(crossed) == "join_crosses_ask"
+    both_ok = {
+        **locked,
+        "bid_sum": 0.69,
+        "bid_sum_250": 0.69,
+        "bid_up": 0.52,
+        "bid_down": 0.17,
+        "bid_up_250": 0.52,
+        "bid_down_250": 0.17,
+        "ask_up": 0.84,
+        "ask_down": 0.18,
+        "ask_up_250": 0.84,
+        "ask_down_250": 0.18,
+        "min_bid_size": 52,
+    }
+    assert guard_maker_join(both_ok) is None
+    apply_still250_send_gate(both_ok)
+    assert both_ok.get("would_send") is True
+
+
 def test_send_without_client_does_not_invent_fill() -> None:
     rec = {
         "reason": "rest",
@@ -78,6 +134,10 @@ def test_send_without_client_does_not_invent_fill() -> None:
         "bid_sum_250": 0.88,
         "bid_up_250": 0.40,
         "bid_down_250": 0.48,
+        "ask_up": 0.42,
+        "ask_down": 0.50,
+        "ask_up_250": 0.42,
+        "ask_down_250": 0.50,
     }
     out = send_rest_both(None, rec, {"Up": "u", "Down": "d"}, clip=5)
     assert out["live_order"] is False
@@ -111,6 +171,7 @@ def test_clip_cap_without_g5() -> None:
     assert "create_fok_buy" in src
     assert "MICRO_LIVE_24H" in src or "write_24h" in src
     assert "still250_false" in src
+    assert "join_crosses_ask" in Path("whiskas/measure_layers.py").read_text()
     assert "off_touch" in src
     assert "inventory_flat" in src
     assert "still_ms" in src

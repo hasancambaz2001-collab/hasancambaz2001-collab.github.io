@@ -122,8 +122,25 @@ def guard_still250_send(rec: dict[str, Any], *, pair_max: float = PAIR_MAX) -> s
     return None
 
 
+def guard_maker_join(rec: dict[str, Any], *, require_ask: bool = False) -> str | None:
+    """SEND YOK if a join bid is at or through the ask. Maker GTC only. No clip/pair change."""
+    up = rec.get("bid_up_250", rec.get("bid_up"))
+    down = rec.get("bid_down_250", rec.get("bid_down"))
+    ask_up = rec.get("ask_up_250", rec.get("ask_up"))
+    ask_down = rec.get("ask_down_250", rec.get("ask_down"))
+    if up is None or down is None:
+        return "not_best_bid" if require_ask else None
+    if ask_up is None or ask_down is None:
+        return "missing_ask" if require_ask else None
+    if float(up) + 1e-12 >= float(ask_up) or float(down) + 1e-12 >= float(ask_down):
+        return "join_crosses_ask"
+    return None
+
+
 def apply_still250_send_gate(rec: dict[str, Any], *, pair_max: float = PAIR_MAX) -> dict[str, Any]:
     blocked = guard_still250_send(rec, pair_max=pair_max)
+    if blocked is None:
+        blocked = guard_maker_join(rec)
     rec["send_blocked"] = blocked
     rec["would_send"] = blocked is None and str(rec.get("reason") or "") == "rest"
     return rec

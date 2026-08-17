@@ -41,7 +41,12 @@ from whiskas.clob_orders import (
 )
 from whiskas.config import load_config
 from whiskas.live_config import G5_FLAG, G6_FLAG, LIVE_READY
-from whiskas.measure_layers import apply_still250_send_gate, attach_layers, guard_still250_send
+from whiskas.measure_layers import (
+    apply_still250_send_gate,
+    attach_layers,
+    guard_maker_join,
+    guard_still250_send,
+)
 from whiskas.micro_report import (
     FILL_LOG,
     INTENT_LOG,
@@ -229,6 +234,8 @@ def _best_bid_join_prices(rec: dict[str, Any]) -> tuple[float, float] | None:
         return None
     if float(up) + float(down) > PAIR_MAX + 1e-12:
         return None
+    if guard_maker_join(rec) == "join_crosses_ask":
+        return None
     return float(up), float(down)
 
 
@@ -360,7 +367,8 @@ def send_rest_both(
     rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
     still_block = guard_still250_send(rec)
     book_block = _guard_rest(rec, clip=clip)
-    guard = still_block or book_block
+    maker_block = guard_maker_join(rec, require_ask=True)
+    guard = still_block or book_block or maker_block
     if guard:
         return _block_send(rec, guard, clip=clip)
     prices = _best_bid_join_prices(rec)
