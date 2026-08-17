@@ -429,3 +429,40 @@ def test_requote_when_cheap_off_touch(monkeypatch) -> None:
     assert [o["order_id"] for o in out] == ["up2", "dn2"]
     _out2, why2 = manage_open(None, rec, orders, clip=5, book_now=book, n_requote=8)
     assert why2 == "off_touch"
+
+
+def test_requote_gap_stays_on_book(monkeypatch) -> None:
+    """Event-driven wake must not flatten just because we requoted 50ms ago."""
+    posted: list[tuple[float, float]] = []
+
+    def fake_fetch(_client, oid: str):
+        return {
+            "order_id": oid,
+            "status": "open",
+            "filled_size": 0.0,
+            "rested_size": 5.0,
+            "price": 0.40 if oid == "up" else 0.40,
+            "outcome": "Up" if oid == "up" else "Down",
+        }
+
+    def fake_pair(_client, **kwargs):
+        posted.append((kwargs["price_up"], kwargs["price_down"]))
+        return []
+
+    monkeypatch.setattr("scripts.micro_live.fetch_order", fake_fetch)
+    monkeypatch.setattr("scripts.micro_live.create_gtc_buy_pair", fake_pair)
+    rec = {"token_up": "u", "token_down": "d", "bid_sum": 0.80}
+    orders = [
+        {"order_id": "up", "outcome": "Up", "price": 0.40, "filled_size": 0.0, "rested_size": 5.0},
+        {"order_id": "dn", "outcome": "Down", "price": 0.40, "filled_size": 0.0, "rested_size": 5.0},
+    ]
+    book = {"bid_up": 0.41, "bid_down": 0.39, "ask_up": 0.50, "ask_down": 0.48, "bid_sum": 0.80, "min_bid_size": 20, "source": "ws"}
+    import time as _t
+
+    _out, why = manage_open(None, rec, orders, clip=5, book_now=book, n_requote=0, last_requote_ts=_t.time())
+    assert why is None
+    assert posted == []
+    src = Path("scripts/micro_live.py").read_text()
+    assert "SIT_WAKE_SEC" in src
+    assert "wait_change" in src
+    assert "_book_from_ws" in src

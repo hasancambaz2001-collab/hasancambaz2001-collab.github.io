@@ -35,3 +35,8 @@ They look like “every window both-fill” because the **window** completes ove
 | 07:59 | 0.52/0.17 vs ask 0.84/0.18, bid_sum 0.69, depth 52 | no | **yes** |
 
 Logs: `would_be_taker_blocked`, `both_fill`, `one_leg_taker`, `off_touch`, `n_requote`.
+
+## Event-driven sit (not a faster server)
+
+First send is unchanged: still250 + pair≤0.90 + join < ask + 1 tick + clip 5.
+Once resting, off-touch requote wakes on CLOB market WS book updates (`wait_change` / `bbo`), not only the 1s poll. Max 8 requotes/window. `requote_gap` (100ms) stays on the book — it does not flatten. pair>0.92 still exits. This is time-in-queue, not directional chase.

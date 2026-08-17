@@ -64,6 +64,22 @@ def test_book_age_fresh_and_stale() -> None:
     assert fresh["Up"]["bids"][0]["price"] == "0.40"
     cache._recv_ts["u"] = cache._recv_ts["u"] - 1.0
     assert cache.fresh_books("u", "d", max_age_sec=0.25) is None
+    bbo = cache.bbo("u", "d")
+    assert bbo is not None
+    assert bbo["bid_sum"] == 0.88
+    assert bbo["source"] == "ws"
+    gen = cache.gen()
+    assert cache.wait_change("u", "d", gen, timeout=0.05) == gen
+    cache._handle(
+        {
+            "event_type": "book",
+            "asset_id": "u",
+            "bids": [{"price": "0.41", "size": "12"}],
+            "asks": [{"price": "0.43", "size": "12"}],
+        }
+    )
+    assert cache.gen() > gen
+    assert cache.wait_change("u", "d", gen, timeout=0.05) > gen
 
 
 def test_v2_skips_sleep_when_ws_age_ok(monkeypatch) -> None:

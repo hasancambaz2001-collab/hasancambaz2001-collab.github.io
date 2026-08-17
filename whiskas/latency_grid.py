@@ -79,6 +79,8 @@ class BookAgeCache:
         self._recv_n = 0
         self._last_error = None
         self._resub_timer: threading.Timer | None = None
+        self._gen = 0
+        self._cv = threading.Condition(self._lock)
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -186,13 +188,61 @@ class BookAgeCache:
             "age_down_ms": (now - td) * 1000.0,
         }
 
-    def _apply_book(self, token_id: str, book: dict[str, Any]) -> None:
+    def gen(self) -> int:
+        with self._lock:
+            return int(self._gen)
+
+    def wait_change(self, token_up: str, token_down: str, gen: int, *, timeout: float) -> int:
+        """Block until either token's book updates, or timeout. Event-driven sit/requote."""
+        deadline = time.time() + max(0.0, float(timeout))
+        _ = (token_up, token_down)
+        with self._cv:
+            while int(self._gen) == int(gen):
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    return int(self._gen)
+                self._cv.wait(timeout=remaining)
+            return int(self._gen)
+
+    def bbo(self, token_up: str, token_down: str) -> dict[str, Any] | None:
+        """Latest cached BBO. Not age-gated — sit/requote uses this, still250 uses fresh_books."""
+        from whiskas.paper import best_ask, best_bid
+
+        with self._lock:
+            up = self._books.get(str(token_up))
+            down = self._books.get(str(token_down))
+        if not up or not down:
+            return None
+        bu, su = best_bid(up)
+        au, _ = best_ask(up)
+        bd, sd = best_bid(down)
+        ad, _ = best_ask(down)
+        if bu is None or bd is None:
+            return None
+        out: dict[str, Any] = {
+            "bid_up": float(bu),
+            "bid_down": float(bd),
+            "ask_up": None if au is None else float(au),
+            "ask_down": None if ad is None else float(ad),
+            "bid_sum": float(bu) + float(bd),
+            "source": "ws",
+        }
+        if su is not None and sd is not None:
+            out["min_bid_size"] = min(float(su), float(sd))
+        return out
+
+    def _touch(self, token_id: str, book: dict[str, Any]) -> None:
         if not token_id or not isinstance(book, dict):
             return
-        with self._lock:
+        with self._cv:
             self._books[str(token_id)] = book
             self._recv_ts[str(token_id)] = time.time()
             self._recv_n += 1
+            self._gen += 1
+            self._cv.notify_all()
+
+    def _apply_book(self, token_id: str, book: dict[str, Any]) -> None:
+        self._touch(token_id, book)
 
     def _handle(self, payload: Any) -> None:
         rows = payload if isinstance(payload, list) else [payload]
@@ -213,20 +263,19 @@ class BookAgeCache:
                         continue
                     with self._lock:
                         book = dict(self._books.get(token) or {"bids": [], "asks": []})
-                        side = str(ch.get("side") or "").upper()
-                        key = "bids" if side in {"BID", "BUY"} else "asks"
-                        levels = list(book.get(key) or [])
-                        px = str(ch.get("price") or "")
-                        sz = str(ch.get("size") or "0")
-                        levels = [lv for lv in levels if str((lv or {}).get("price")) != px]
-                        try:
-                            if float(sz) > 0:
-                                levels.append({"price": px, "size": sz})
-                        except (TypeError, ValueError):
-                            pass
-                        book[key] = levels
-                        self._books[token] = book
-                        self._recv_ts[token] = time.time()
+                    side = str(ch.get("side") or "").upper()
+                    key = "bids" if side in {"BID", "BUY"} else "asks"
+                    levels = list(book.get(key) or [])
+                    px = str(ch.get("price") or "")
+                    sz = str(ch.get("size") or "0")
+                    levels = [lv for lv in levels if str((lv or {}).get("price")) != px]
+                    try:
+                        if float(sz) > 0:
+                            levels.append({"price": px, "size": sz})
+                    except (TypeError, ValueError):
+                        pass
+                    book[key] = levels
+                    self._touch(token, book)
 
     def _run(self) -> None:
         try:

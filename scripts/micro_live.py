@@ -76,6 +76,8 @@ MAX_DAILY_LOSS = 25.0
 MAX_OPEN = 2
 UNPAIRED_TIMEOUT_SEC = 45.0
 POST_ACK_SEC = 0.25
+REQUOTE_MIN_GAP_SEC = 0.10
+SIT_WAKE_SEC = 0.20
 ASSET = "btc"
 TF = "5m"
 
@@ -310,9 +312,22 @@ def _buy_off_touch(px: Any, best_bid: Any) -> bool:
     return float(px) + 1e-12 < float(best_bid)
 
 
-def _reread_book(rec: dict[str, Any]) -> dict[str, Any]:
+def _book_from_ws(book_cache: Any, token_up: Any, token_down: Any) -> dict[str, Any]:
+    if book_cache is None or not token_up or not token_down:
+        return {}
+    try:
+        got = book_cache.bbo(str(token_up), str(token_down))
+    except Exception:
+        return {}
+    return got or {}
+
+
+def _reread_book(rec: dict[str, Any], book_cache: Any = None) -> dict[str, Any]:
     from whiskas.paper import best_ask, best_bid
 
+    ws = _book_from_ws(book_cache, rec.get("token_up"), rec.get("token_down"))
+    if ws:
+        return ws
     out: dict[str, Any] = {}
     if not rec.get("token_up") or not rec.get("token_down"):
         return out
@@ -332,6 +347,7 @@ def _reread_book(rec: dict[str, Any]) -> dict[str, Any]:
         return out
     if out.get("bid_up") is not None and out.get("bid_down") is not None:
         out["bid_sum"] = float(out["bid_up"]) + float(out["bid_down"])
+    out["source"] = "rest"
     return out
 
 
@@ -502,10 +518,18 @@ def _unpaired_notional(orders: list[dict[str, Any]], *, clip: float) -> float:
     return float(px) * float(filled[0].get("filled_size") or 0.0)
 
 
-def _requote_block(book: dict[str, Any], *, clip: float, n_requote: int) -> str | None:
+def _requote_block(
+    book: dict[str, Any],
+    *,
+    clip: float,
+    n_requote: int,
+    last_requote_ts: float | None = None,
+) -> str | None:
     """Requote only while maker-only, bid_sum<=0.90, 1-tick spread, depth>=clip, n<8."""
     if int(n_requote) >= int(REQUOTE_MAX):
         return "requote_max"
+    if last_requote_ts is not None and (time.time() - float(last_requote_ts)) < REQUOTE_MIN_GAP_SEC:
+        return "requote_gap"
     bid_sum = book.get("bid_sum")
     if bid_sum is None or float(bid_sum) > PAIR_MAX + 1e-12:
         return "requote_rich"
@@ -529,8 +553,9 @@ def _try_requote(
     *,
     clip: float,
     n_requote: int,
+    last_requote_ts: float | None = None,
 ) -> tuple[list[dict[str, Any]] | None, str]:
-    block = _requote_block(book, clip=clip, n_requote=n_requote)
+    block = _requote_block(book, clip=clip, n_requote=n_requote, last_requote_ts=last_requote_ts)
     if block:
         return None, block
     token_up = rec.get("token_up")
@@ -559,6 +584,7 @@ def _try_requote(
     rec["n_requote"] = int(n_requote) + 1
     rec["adverse_action"] = "requote"
     rec["off_touch"] = True
+    rec["requote_source"] = book.get("source") or rec.get("requote_source") or "poll"
     rec["join_bid_up"] = float(px_up)
     rec["join_bid_down"] = float(px_down)
     rec["sign_ms"] = timings.get("sign_ms")
@@ -575,10 +601,12 @@ def manage_open(
     book_now: dict[str, Any] | None = None,
     force_flatten: bool = False,
     n_requote: int = 0,
+    last_requote_ts: float | None = None,
+    book_cache: Any = None,
 ) -> tuple[list[dict[str, Any]], str | None]:
     """One-leg/adverse FIRST, then off-touch, then rich_cancel. Complete only if fill+opp<=0.90."""
     refreshed = _refresh_orders(client, orders)
-    book = book_now if book_now is not None else _reread_book(rec)
+    book = book_now if book_now is not None else _reread_book(rec, book_cache)
     if book.get("ask_up") is not None:
         rec["ask_up"] = book.get("ask_up")
     if book.get("ask_down") is not None:
@@ -647,10 +675,21 @@ def manage_open(
         if off:
             rec["off_touch"] = True
             if not filled:
-                posted, rq = _try_requote(client, rec, leftover, book, clip=clip, n_requote=n_requote)
+                posted, rq = _try_requote(
+                    client,
+                    rec,
+                    leftover,
+                    book,
+                    clip=clip,
+                    n_requote=n_requote,
+                    last_requote_ts=last_requote_ts,
+                )
                 if posted:
                     _stamp_fill_fields(rec, posted, clip=clip)
                     return posted, "requote"
+                if rq == "requote_gap":
+                    _stamp_fill_fields(rec, refreshed, clip=clip)
+                    return refreshed, None
             cancelled = cancel_open(client, leftover, reason="off_touch")
             rec["adverse_action"] = "off_touch"
             _stamp_fill_fields(rec, filled + cancelled, clip=clip)
@@ -689,17 +728,18 @@ def after_send_manage(
     clip: float,
     sleep_s: float = POST_ACK_SEC,
     n_requote: int = 0,
+    book_cache: Any = None,
 ) -> tuple[list[dict[str, Any]], str | None]:
     """Immediate one-leg if MATCHED; then 200–500ms off-touch (requote if still cheap+maker)."""
     why: str | None = None
     filled_n = sum(1 for o in orders if float(o.get("filled_size") or 0.0) > 0)
     if filled_n == 1:
-        orders, why = manage_open(client, rec, orders, clip=clip, n_requote=n_requote)
+        orders, why = manage_open(client, rec, orders, clip=clip, n_requote=n_requote, book_cache=book_cache)
         if why in _pop_reasons():
             return orders, why
     if sleep_s > 0:
         time.sleep(min(0.5, max(0.2, float(sleep_s))))
-    return manage_open(client, rec, orders, clip=clip, n_requote=n_requote)
+    return manage_open(client, rec, orders, clip=clip, n_requote=n_requote, book_cache=book_cache)
 
 
 def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
@@ -723,10 +763,8 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
     deadline = time.time() + max(0.0, float(seconds))
     token_cache: dict[str, dict[str, str]] = {}
     variant = current_variant()
-    book_cache = None
-    if variant == V2:
-        book_cache = BookAgeCache()
-        book_cache.start()
+    book_cache = BookAgeCache()
+    book_cache.start()
     max_loss = float(micro.get("max_daily_loss_usd") or MAX_DAILY_LOSS)
     max_open = int(micro.get("max_open_windows") or MAX_OPEN)
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -745,6 +783,66 @@ def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
     finally:
         if book_cache is not None:
             book_cache.stop()
+
+
+def _tick_open_windows(
+    *,
+    client: Any,
+    rec: dict[str, Any],
+    t0: int,
+    clip: float,
+    open_windows: dict[int, list[dict[str, Any]]],
+    open_meta: dict[int, dict[str, Any]],
+    inventory: dict[int, dict[str, float]],
+    loss_charged: set[int],
+    daily_loss: float,
+    book_cache: Any,
+    log_requote: bool = False,
+) -> float:
+    """Manage resting orders. WS BBO when cached so off-touch requote is event-driven."""
+    for ot0 in list(open_windows):
+        meta = open_meta.get(ot0) or {}
+        age = time.time() - float(meta.get("rest_ts") or time.time())
+        ended = int(ot0) != int(t0)
+        one_leg_inv = not inventory_flat(inventory.get(ot0))
+        force = ended or (one_leg_inv and age > UNPAIRED_TIMEOUT_SEC + 1e-12)
+        rec_use = rec if int(ot0) == int(t0) else {**rec, "token_up": meta.get("token_up"), "token_down": meta.get("token_down")}
+        rec_use["token_up"] = rec_use.get("token_up") or meta.get("token_up")
+        rec_use["token_down"] = rec_use.get("token_down") or meta.get("token_down")
+        book = _book_from_ws(book_cache, rec_use.get("token_up"), rec_use.get("token_down"))
+        orders, why = manage_open(
+            client,
+            rec_use,
+            open_windows[ot0],
+            clip=clip,
+            book_now=book or None,
+            force_flatten=force,
+            n_requote=int(meta.get("n_requote") or 0),
+            last_requote_ts=meta.get("last_requote_ts"),
+            book_cache=book_cache,
+        )
+        inventory[ot0] = _inv_from_orders(orders)
+        if why in {"rich_complete", "pair_gt_1_refused", "unpaired_timeout", "cancel_missing_opp"} and ot0 not in loss_charged:
+            daily_loss += _unpaired_notional(orders, clip=clip)
+            loss_charged.add(ot0)
+        if why in _pop_reasons():
+            open_windows.pop(ot0, None)
+            open_meta.pop(ot0, None)
+        else:
+            open_windows[ot0] = orders
+            if why == "requote":
+                meta["n_requote"] = int(rec_use.get("n_requote") or meta.get("n_requote") or 0)
+                meta["last_requote_ts"] = time.time()
+                open_meta[ot0] = meta
+                rec["n_requote"] = meta["n_requote"]
+                rec["adverse_action"] = "requote"
+                rec["requote_source"] = rec_use.get("requote_source") or book.get("source") or "ws"
+                rec["off_touch"] = True
+                if log_requote:
+                    rec["pair_gt_1_trade"] = False
+                    rec["daily_loss_usd"] = daily_loss
+                    log_layers(rec)
+    return daily_loss
 
 
 def _run_send_loop(
@@ -766,6 +864,8 @@ def _run_send_loop(
     daily_loss = 0.0
     n_sent = 0
     halted = False
+    last_snap = 0.0
+    ws_gen = 0
     while time.time() < deadline:
         if daily_loss + 1e-12 >= max_loss:
             for orders in list(open_windows.values()):
@@ -787,32 +887,18 @@ def _run_send_loop(
         rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
         if str(rec.get("reason") or "") == "rest":
             apply_still250_send_gate(rec)
-        for ot0 in list(open_windows):
-            meta = open_meta.get(ot0) or {}
-            age = time.time() - float(meta.get("rest_ts") or time.time())
-            ended = int(ot0) != int(t0)
-            one_leg_inv = not inventory_flat(inventory.get(ot0))
-            force = ended or (one_leg_inv and age > UNPAIRED_TIMEOUT_SEC + 1e-12)
-            orders, why = manage_open(
-                client,
-                rec if int(ot0) == int(t0) else {**rec, "token_up": meta.get("token_up"), "token_down": meta.get("token_down")},
-                open_windows[ot0],
-                clip=clip,
-                force_flatten=force,
-                n_requote=int(meta.get("n_requote") or 0),
-            )
-            inventory[ot0] = _inv_from_orders(orders)
-            if why in {"rich_complete", "pair_gt_1_refused", "unpaired_timeout", "cancel_missing_opp"} and ot0 not in loss_charged:
-                daily_loss += _unpaired_notional(orders, clip=clip)
-                loss_charged.add(ot0)
-            if why in _pop_reasons():
-                open_windows.pop(ot0, None)
-                open_meta.pop(ot0, None)
-            else:
-                open_windows[ot0] = orders
-                if why == "requote":
-                    meta["n_requote"] = int(rec.get("n_requote") or meta.get("n_requote") or 0)
-                    open_meta[ot0] = meta
+        daily_loss = _tick_open_windows(
+            client=client,
+            rec=rec,
+            t0=t0,
+            clip=clip,
+            open_windows=open_windows,
+            open_meta=open_meta,
+            inventory=inventory,
+            loss_charged=loss_charged,
+            daily_loss=daily_loss,
+            book_cache=book_cache,
+        )
         can_rest = (
             rec.get("reason") == "rest"
             and rec.get("would_send") is True
@@ -826,7 +912,7 @@ def _run_send_loop(
             rec = send_rest_both(client, rec, tokens, clip=clip)
             if rec.get("live_order") and rec.get("real_fill"):
                 orders = list((rec["real_fill"] or {}).get("orders") or [])
-                orders, why = after_send_manage(client, rec, orders, clip=clip, n_requote=0)
+                orders, why = after_send_manage(client, rec, orders, clip=clip, n_requote=0, book_cache=book_cache)
                 rec["real_fill"] = {
                     "orders": orders,
                     "filled_size": sum(float(o.get("filled_size") or 0.0) for o in orders),
@@ -846,11 +932,34 @@ def _run_send_loop(
                         "token_up": rec.get("token_up"),
                         "token_down": rec.get("token_down"),
                         "n_requote": int(rec.get("n_requote") or 0),
+                        "last_requote_ts": time.time() if int(rec.get("n_requote") or 0) else None,
                     }
         rec["pair_gt_1_trade"] = False
         rec["daily_loss_usd"] = daily_loss
         log_layers(rec)
-        time.sleep(max(0.5, float(interval)))
+        last_snap = time.time()
+        if open_windows and book_cache is not None:
+            meta0 = next(iter(open_meta.values()), {})
+            tu, td = meta0.get("token_up"), meta0.get("token_down")
+            sit_until = last_snap + max(0.5, float(interval))
+            while time.time() < deadline and time.time() < sit_until and open_windows and tu and td:
+                ws_gen = book_cache.wait_change(str(tu), str(td), ws_gen, timeout=SIT_WAKE_SEC)
+                t0_now = int(current_t0(tf=TF))
+                daily_loss = _tick_open_windows(
+                    client=client,
+                    rec=rec,
+                    t0=t0_now,
+                    clip=clip,
+                    open_windows=open_windows,
+                    open_meta=open_meta,
+                    inventory=inventory,
+                    loss_charged=loss_charged,
+                    daily_loss=daily_loss,
+                    book_cache=book_cache,
+                    log_requote=True,
+                )
+        else:
+            time.sleep(max(0.5, float(interval)))
     payload = probe()
     payload["sent"] = n_sent > 0
     payload["n_sent_windows"] = n_sent
