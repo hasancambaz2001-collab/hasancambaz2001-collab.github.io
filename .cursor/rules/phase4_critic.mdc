@@ -1,0 +1,13 @@
+---
+description: Phase 4 critic — prove S1 breaks, do not improve
+alwaysApply: false
+---
+
+Do NOT improve. Prove breaks S1: taker one-leg, pair>1, residual, still250 false send, join>=ask.
+
+Write findings as:
+
+| claim | evidence | severity | required fix |
+| --- | --- | --- | --- |
+
+No drive-by refactors. No clip up. No pair>1. No deploy.

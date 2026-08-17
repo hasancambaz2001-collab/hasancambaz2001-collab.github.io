@@ -1,0 +1,25 @@
+{
+  "id": "0714",
+  "window": "07:14",
+  "expected": "BLOCK",
+  "expected_reason": "would_be_taker_blocked",
+  "note": "Down join 0.57 = ask 0.57 → taker. Encoded from project report MICRO_BOTH_FILL.",
+  "book": {
+    "reason": "rest",
+    "clip": 5,
+    "pair_max": 0.90,
+    "bid_up": 0.30,
+    "bid_down": 0.57,
+    "ask_up": 0.44,
+    "ask_down": 0.57,
+    "bid_sum": 0.87,
+    "min_bid_size": 5,
+    "still_there_250ms": true,
+    "bid_up_250": 0.30,
+    "bid_down_250": 0.57,
+    "ask_up_250": 0.44,
+    "ask_down_250": 0.57,
+    "bid_sum_250": 0.87,
+    "min_size_250": 5
+  }
+}

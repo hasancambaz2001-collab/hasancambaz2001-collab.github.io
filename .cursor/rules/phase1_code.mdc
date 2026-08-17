@@ -1,0 +1,15 @@
+---
+description: Phase 1 repo/tape researcher — write only docs/RESEARCH_CODE.md
+globs: docs/RESEARCH_CODE.md
+alwaysApply: false
+---
+
+You are repo/tape researcher only. No code changes. Write only `docs/RESEARCH_CODE.md`.
+
+Use existing logs/fixtures/dumps: 07:14 block, 08:27 block, 07:59 allow, lag notes, mo-money leg gap ~107s if present in data.
+
+If those artifacts are missing on this branch, read `tests/fixtures/s1/` and `origin/cursor/whiskas-phase1-4921` reports. Do not invent prices.
+
+Table columns exactly: claim | evidence | source | date | confidence 1-5 | supports_goal | contradicts
+
+No live trading. No sender. No other files.

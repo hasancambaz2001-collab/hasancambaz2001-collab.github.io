@@ -1,0 +1,12 @@
+---
+description: Phase 4 implement only what ARCH.md says
+alwaysApply: false
+---
+
+Implement only what `docs/ARCH.md` says. clip 5 locks. No pair>1. No clip up. Do not deploy sender.
+
+Output: files changed + how to verify (`make verify`).
+
+If ARCH is empty / has no RESEARCH decisions, change nothing except verify harness if ARCH names it.
+
+Do not modify live `micro_live` sender behavior unless ARCH requires it **and** `make verify` is PASS. Still do not deploy.
