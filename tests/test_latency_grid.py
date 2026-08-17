@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import scripts.paper_maker as paper_maker_mod
-from scripts.paper_maker import _probe_still250, snapshot_maker
+from scripts.paper_maker import _align_join_book_to_still250, _probe_still250, snapshot_maker
 from whiskas.latency_grid import (
     V1,
     V2,
@@ -33,12 +33,35 @@ def test_percentile_and_summarize() -> None:
     assert summary["p50"] == 200
 
 
-def test_set_tokens_accumulates() -> None:
+def test_set_tokens_replaces_want_set() -> None:
     cache = BookAgeCache()
-    cache.set_tokens("u1", "d1")
-    cache.set_tokens("u2", "d2")
-    assert cache._want == {"u1", "d1", "u2", "d2"}
-    assert cache.stats()["ws_n_want"] == 4
+    try:
+        cache._handle(
+            {
+                "event_type": "book",
+                "asset_id": "u1",
+                "bids": [{"price": "0.40", "size": "12"}],
+                "asks": [{"price": "0.42", "size": "12"}],
+            }
+        )
+        cache.set_tokens("u1", "d1")
+        assert cache._want == {"u1", "d1"}
+        assert cache.stats()["ws_n_want"] == 2
+        cache.set_tokens("u2", "d2")
+        assert cache._want == {"u2", "d2"}
+        assert cache.stats()["ws_n_want"] == 2
+        assert "u1" not in cache._books
+        cache._handle(
+            {
+                "event_type": "book",
+                "asset_id": "u1",
+                "bids": [{"price": "0.41", "size": "12"}],
+                "asks": [{"price": "0.43", "size": "12"}],
+            }
+        )
+        assert "u1" not in cache._books
+    finally:
+        cache.stop()
 
 
 def test_book_age_fresh_and_stale() -> None:
@@ -82,20 +105,32 @@ def test_book_age_fresh_and_stale() -> None:
     assert cache.wait_change("u", "d", gen, timeout=0.05) > gen
 
 
-def test_v2_skips_sleep_when_ws_age_ok(monkeypatch) -> None:
+def test_v2_still250_uses_rest_not_ws_age(monkeypatch) -> None:
+    """12:20: WS 250 said 0.97, REST live was 0.81. Send-gate must use REST."""
+    slept = {"n": 0}
+
+    def fake_sleep(_s):
+        slept["n"] += 1
+
+    monkeypatch.setattr(paper_maker_mod.time, "sleep", fake_sleep)
+    monkeypatch.setattr(
+        paper_maker_mod,
+        "fetch_books_parallel",
+        lambda *_a, **_k: (
+            {"bids": [{"price": "0.51", "size": "12"}], "asks": [{"price": "0.52", "size": "12"}]},
+            {"bids": [{"price": "0.30", "size": "12"}], "asks": [{"price": "0.31", "size": "12"}]},
+        ),
+    )
+
     class Cache:
         def fresh_books(self, *_a, **_k):
             return {
-                "Up": {"bids": [{"price": "0.40", "size": "12"}], "asks": [{"price": "0.42", "size": "12"}]},
-                "Down": {"bids": [{"price": "0.48", "size": "12"}], "asks": [{"price": "0.50", "size": "12"}]},
+                "Up": {"bids": [{"price": "0.51", "size": "12"}], "asks": [{"price": "0.52", "size": "12"}]},
+                "Down": {"bids": [{"price": "0.46", "size": "12"}], "asks": [{"price": "0.47", "size": "12"}]},
                 "age_up_ms": 40.0,
                 "age_down_ms": 41.0,
             }
 
-    def boom(*_a, **_k):
-        raise AssertionError("v2 must not sleep when WS age ≤250ms")
-
-    monkeypatch.setattr(paper_maker_mod.time, "sleep", boom)
     out = _probe_still250(
         tokens={"Up": "u", "Down": "d"},
         clip=5,
@@ -103,14 +138,38 @@ def test_v2_skips_sleep_when_ws_age_ok(monkeypatch) -> None:
         latency_variant=V2,
         book_cache=Cache(),
     )
+    assert slept["n"] == 1
     assert out is not None
-    assert out["still250_source"] == "ws_age"
+    assert out["still250_source"] == "rest_sleep"
     assert out["still_there_250ms"] is True
-    assert out["bid_sum_250"] == 0.88
-    assert out["book_age_up_ms"] == 40.0
+    assert out["bid_sum_250"] == 0.81
+    assert out["bid_down_250"] == 0.30
 
 
-def test_v2_fallback_sleeps_when_stale(monkeypatch) -> None:
+def test_align_join_book_to_rest_still250() -> None:
+    rec = {
+        "bid_up": 0.51,
+        "bid_down": 0.46,
+        "bid_sum": 0.97,
+        "ask_up": 0.52,
+        "ask_down": 0.47,
+        "min_bid_size": 12,
+        "bid_up_250": 0.51,
+        "bid_down_250": 0.30,
+        "bid_sum_250": 0.81,
+        "ask_up_250": 0.52,
+        "ask_down_250": 0.31,
+        "min_size_250": 12,
+        "still250_source": "rest_sleep",
+    }
+    _align_join_book_to_still250(rec)
+    assert rec["bid_sum"] == 0.81
+    assert rec["bid_down"] == 0.30
+    assert rec["ask_down"] == 0.31
+    assert rec["join_book_source"] == "rest_sleep"
+
+
+def test_v2_rest_sleep_when_ws_stale(monkeypatch) -> None:
     slept = {"n": 0}
 
     def fake_sleep(_s):
@@ -139,7 +198,7 @@ def test_v2_fallback_sleeps_when_stale(monkeypatch) -> None:
     )
     assert slept["n"] == 1
     assert out is not None
-    assert out["still250_source"] == "rest_sleep_fallback"
+    assert out["still250_source"] == "rest_sleep"
     assert out["still_there_250ms"] is True
 
 
@@ -221,6 +280,9 @@ def test_gates_and_clip_unchanged() -> None:
     src = Path("scripts/paper_maker.py").read_text(encoding="utf-8")
     live = Path("scripts/micro_live.py").read_text(encoding="utf-8")
     assert "apply_still250_send_gate" in src
+    assert "_align_join_book_to_still250" in src
+    assert 'source = "ws_age"' not in src
+    assert "fresh_books" not in src
     assert "PAIR_MAX = 0.90" in src
     assert "CLIP_DEFAULT = 10.0" in src
     assert "trial_clip" in live

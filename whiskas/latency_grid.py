@@ -1,7 +1,7 @@
 """MICRO latency-grid helpers. No clip/pair/still250-gate changes.
 
-v1 = token cache + parallel REST books (current).
-v2 = still250 from WS book age ≤250ms; else sleep+GET fallback.
+v1 = token cache + parallel REST books.
+v2 = sit/requote WS only. still250 send-gate is REST sleep+GET (not ws_age).
 v3 = Rust sketch only if post_ack_ms p50 > 500 after v1/v2.
 """
 
@@ -107,12 +107,19 @@ class BookAgeCache:
                 pass
 
     def set_tokens(self, token_up: str, token_down: str) -> None:
-        with self._lock:
-            before = len(self._want)
-            self._want.add(str(token_up))
-            self._want.add(str(token_down))
-            grew = len(self._want) > before
-        if grew:
+        """Subscribe only the current window pair. Accumulating 46–68 books filled the WS buffer."""
+        new = {str(token_up), str(token_down)}
+        with self._cv:
+            changed = new != self._want
+            self._want = set(new)
+            if changed:
+                for tid in list(self._books):
+                    if tid not in self._want:
+                        self._books.pop(tid, None)
+                        self._recv_ts.pop(tid, None)
+                self._gen += 1
+                self._cv.notify_all()
+        if changed:
             self._schedule_resub()
         elif self._ws is not None:
             self._subscribe()
@@ -205,7 +212,7 @@ class BookAgeCache:
             return int(self._gen)
 
     def bbo(self, token_up: str, token_down: str) -> dict[str, Any] | None:
-        """Latest cached BBO. Not age-gated — sit/requote uses this, still250 uses fresh_books."""
+        """Latest cached BBO. Sit/requote only. still250 send-gate is REST, not this cache."""
         from whiskas.paper import best_ask, best_bid
 
         with self._lock:
@@ -235,6 +242,8 @@ class BookAgeCache:
         if not token_id or not isinstance(book, dict):
             return
         with self._cv:
+            if self._want and str(token_id) not in self._want:
+                return
             self._books[str(token_id)] = book
             self._recv_ts[str(token_id)] = time.time()
             self._recv_n += 1

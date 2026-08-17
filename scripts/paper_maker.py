@@ -241,6 +241,7 @@ def snapshot_maker(
         rec["book_age_up_ms"] = (still or {}).get("book_age_up_ms")
         rec["book_age_down_ms"] = (still or {}).get("book_age_down_ms")
     attach_layers(rec, still=still, clip=float(clip), pair_max=float(pair_max))
+    _align_join_book_to_still250(rec)
     if str(rec.get("reason") or "") == "rest":
         if rec.get("still_there_250ms") is None:
             rec["still_there_250ms"] = False
@@ -255,6 +256,21 @@ def snapshot_maker(
     return rec, next_state
 
 
+def _align_join_book_to_still250(rec: dict[str, Any]) -> None:
+    """Send-gate and join use the REST still250 book, not the t0 snapshot vs a WS 250."""
+    if rec.get("bid_up_250") is None or rec.get("bid_down_250") is None:
+        return
+    rec["bid_up"] = rec["bid_up_250"]
+    rec["bid_down"] = rec["bid_down_250"]
+    rec["ask_up"] = rec.get("ask_up_250")
+    rec["ask_down"] = rec.get("ask_down_250")
+    if rec.get("bid_sum_250") is not None:
+        rec["bid_sum"] = rec["bid_sum_250"]
+    if rec.get("min_size_250") is not None:
+        rec["min_bid_size"] = rec["min_size_250"]
+    rec["join_book_source"] = rec.get("still250_source") or "still250"
+
+
 def _probe_still250(
     *,
     tokens: dict[str, str],
@@ -264,31 +280,18 @@ def _probe_still250(
     latency_variant: str | None = None,
     book_cache: Any = None,
 ) -> dict[str, Any] | None:
-    """still250 = bid_sum<=pair_max and min_size>=clip. v2 may use WS age ≤250ms."""
-    from whiskas.latency_grid import V2
+    """still250 = REST book 250ms later, same venue as join. WS is sit/requote only.
 
+    12:20 live 0.81 was skipped because WS age said 0.97. Do not use ws_age for the send gate.
+    latency_variant / book_cache kept for call-site compatibility; they do not pick the book.
+    """
+    _ = (latency_variant, book_cache)
     t0 = time.time()
-    source = "rest_sleep"
     extra: dict[str, Any] = {}
     if books is not None:
         book_up = books.get("Up") or {}
         book_down = books.get("Down") or {}
         source = "injected"
-    elif latency_variant == V2 and book_cache is not None:
-        fresh = book_cache.fresh_books(tokens["Up"], tokens["Down"], max_age_sec=STILL_PROBE_SEC)
-        if fresh:
-            book_up = fresh["Up"]
-            book_down = fresh["Down"]
-            source = "ws_age"
-            extra["book_age_up_ms"] = fresh.get("age_up_ms")
-            extra["book_age_down_ms"] = fresh.get("age_down_ms")
-        else:
-            time.sleep(STILL_PROBE_SEC)
-            try:
-                book_up, book_down = fetch_books_parallel(tokens["Up"], tokens["Down"])
-            except Exception:
-                return None
-            source = "rest_sleep_fallback"
     else:
         time.sleep(STILL_PROBE_SEC)
         try:

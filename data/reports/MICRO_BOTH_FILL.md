@@ -1,6 +1,6 @@
 # How mo-money both-fills (and what we change)
 
-Generated: 2026-08-17 09:56 UTC
+Generated: 2026-08-17 16:00 UTC
 Clip 5. pair≤0.90. No pair>1. still250-false still SEND YOK.
 
 ## Mo-money is not magic — they sit
@@ -34,6 +34,7 @@ They look like “every window both-fill” because the **window** completes ove
 | 08:27 | Up 0.26 > ask 0.23 | **yes** `would_be_taker_blocked` | no |
 | 07:59 | 0.52/0.17 vs ask 0.84/0.18, bid_sum 0.69, depth 52 | no | **yes** |
 | 12:07 | still250 WS 0.01/0.83; live Down 0.73 ≥ ask 0.64 | **yes** live taker gate | no |
+| 12:20 | live REST 0.81 / 1-tick; WS 250 said 0.97 | **yes** (old `ws_age` gate) | REST still250 would send |
 
 Logs: `would_be_taker_blocked`, `both_fill`, `one_leg_taker`, `off_touch`, `n_requote`.
 
@@ -41,3 +42,9 @@ Logs: `would_be_taker_blocked`, `both_fill`, `one_leg_taker`, `off_touch`, `n_re
 
 First send: still250 hole + live pair≤0.90 + live join < live ask + 1 tick + clip 5. Join prices are live REST, not the 250ms WS snapshot.
 Once resting, off-touch requote wakes on CLOB market WS book updates (`wait_change` / `bbo`), not only the 1s poll. Max 8 requotes/window. `requote_gap` (100ms) stays on the book — it does not flatten. pair>0.92 still exits. This is time-in-queue, not directional chase.
+
+## Book source (2026-08-17 12:20 / 15:17)
+
+- **still250 for send is REST + 250ms only.** WS `ws_age` / socket `bid_*_250` do **not** gate the first send. 12:20 live REST was 0.81 (1-tick) while WS 250 said 0.97 — that miss was a two-book bug, not a missing hole.
+- **Join prices are REST live** (`join_source=live`). After the probe, REST 250 BBO is copied onto the join book so send-gate and join see the same venue.
+- **WS is sit/requote only.** Subscribe the **current** BTC 5m Up+Down pair (2 tokens). Do not accumulate every window — that filled the send buffer (`slow consumer`) and made `ws_n_want` 46–68.
