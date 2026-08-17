@@ -16,7 +16,7 @@ from scripts.micro_live import (
     send_rest_both,
     trial_clip,
 )
-from whiskas.measure_layers import apply_still250_send_gate, guard_maker_join, guard_still250_send
+from whiskas.measure_layers import apply_still250_send_gate, guard_maker_join, guard_min_spread, guard_still250_send
 from whiskas.micro_report import adverse_action, fee_estimated_net_pnl, layer_records
 
 
@@ -80,11 +80,12 @@ def test_join_at_or_through_ask_blocks_send() -> None:
         "ask_up_250": 0.44,
         "ask_down_250": 0.57,
     }
-    assert guard_maker_join(locked) == "join_crosses_ask"
+    assert guard_maker_join(locked) == "would_be_taker_blocked"
     out = send_rest_both(None, dict(locked), {"Up": "u", "Down": "d"}, clip=5)
     assert out["live_order"] is False
     assert out["real_fill"] is None
-    assert out.get("send_blocked") == "join_crosses_ask"
+    assert out.get("send_blocked") == "would_be_taker_blocked"
+    assert out.get("would_be_taker_blocked") is True
     crossed = {
         **locked,
         "bid_sum": 0.89,
@@ -98,7 +99,7 @@ def test_join_at_or_through_ask_blocks_send() -> None:
         "ask_up_250": 0.23,
         "ask_down_250": 0.78,
     }
-    assert guard_maker_join(crossed) == "join_crosses_ask"
+    assert guard_maker_join(crossed) == "would_be_taker_blocked"
     both_ok = {
         **locked,
         "bid_sum": 0.69,
@@ -171,7 +172,8 @@ def test_clip_cap_without_g5() -> None:
     assert "create_fok_buy" in src
     assert "MICRO_LIVE_24H" in src or "write_24h" in src
     assert "still250_false" in src
-    assert "join_crosses_ask" in Path("whiskas/measure_layers.py").read_text()
+    assert "would_be_taker_blocked" in Path("whiskas/measure_layers.py").read_text()
+    assert "REQUOTE_MAX" in Path("whiskas/measure_layers.py").read_text()
     assert "off_touch" in src
     assert "inventory_flat" in src
     assert "still_ms" in src
@@ -334,3 +336,96 @@ def test_paper_still250_gate_shared() -> None:
     idx_rich = src.find('reason="rich_cancel"')
     assert 0 < idx_adv < idx_rich
     assert after_send_manage is not None
+
+
+def test_tape_windows_maker_stability() -> None:
+    """07:14 and 08:27 blocked; 07:59 still sends. 2-tick spread would kill 07:59."""
+    w_0714 = {
+        "reason": "rest",
+        "still_there_250ms": True,
+        "bid_sum_250": 0.87,
+        "bid_up_250": 0.30,
+        "bid_down_250": 0.57,
+        "ask_up_250": 0.44,
+        "ask_down_250": 0.57,
+        "min_bid_size": 5,
+        "clip": 5,
+    }
+    w_0827 = {
+        "reason": "rest",
+        "still_there_250ms": True,
+        "bid_sum_250": 0.89,
+        "bid_up_250": 0.26,
+        "bid_down_250": 0.63,
+        "ask_up_250": 0.23,
+        "ask_down_250": 0.78,
+        "min_bid_size": 9.9,
+        "clip": 5,
+    }
+    w_0759 = {
+        "reason": "rest",
+        "still_there_250ms": True,
+        "bid_sum_250": 0.69,
+        "bid_up_250": 0.52,
+        "bid_down_250": 0.17,
+        "ask_up_250": 0.84,
+        "ask_down_250": 0.18,
+        "min_bid_size": 52,
+        "clip": 5,
+    }
+    apply_still250_send_gate(w_0714)
+    apply_still250_send_gate(w_0827)
+    apply_still250_send_gate(w_0759)
+    assert w_0714["would_send"] is False
+    assert w_0714["would_be_taker_blocked"] is True
+    assert w_0827["would_send"] is False
+    assert w_0827["would_be_taker_blocked"] is True
+    assert w_0759["would_send"] is True
+    assert w_0759["send_blocked"] is None
+    assert guard_min_spread(w_0759) is None
+    assert guard_min_spread(w_0759, min_spread=0.02) == "thin_spread"
+
+
+def test_requote_when_cheap_off_touch(monkeypatch) -> None:
+    cancelled: list[str] = []
+    posted: list[tuple[float, float]] = []
+
+    def fake_fetch(_client, oid: str):
+        return {
+            "order_id": oid,
+            "status": "open",
+            "filled_size": 0.0,
+            "rested_size": 5.0,
+            "price": 0.40 if oid == "up" else 0.40,
+            "outcome": "Up" if oid == "up" else "Down",
+        }
+
+    def fake_cancel(_client, oid: str):
+        cancelled.append(oid)
+        return {"order_id": oid, "status": "cancelled"}
+
+    def fake_pair(_client, **kwargs):
+        posted.append((kwargs["price_up"], kwargs["price_down"]))
+        return [
+            {"order_id": "up2", "outcome": "Up", "status": "open", "filled_size": 0.0, "rested_size": 5.0, "price": kwargs["price_up"]},
+            {"order_id": "dn2", "outcome": "Down", "status": "open", "filled_size": 0.0, "rested_size": 5.0, "price": kwargs["price_down"]},
+        ]
+
+    monkeypatch.setattr("scripts.micro_live.fetch_order", fake_fetch)
+    monkeypatch.setattr("scripts.micro_live.cancel_order", fake_cancel)
+    monkeypatch.setattr("scripts.micro_live.create_gtc_buy_pair", fake_pair)
+    rec = {"token_up": "u", "token_down": "d", "bid_sum": 0.80}
+    orders = [
+        {"order_id": "up", "outcome": "Up", "price": 0.40, "filled_size": 0.0, "rested_size": 5.0},
+        {"order_id": "dn", "outcome": "Down", "price": 0.40, "filled_size": 0.0, "rested_size": 5.0},
+    ]
+    book = {"bid_up": 0.41, "bid_down": 0.39, "ask_up": 0.50, "ask_down": 0.48, "bid_sum": 0.80, "min_bid_size": 20}
+    out, why = manage_open(None, rec, orders, clip=5, book_now=book, n_requote=0)
+    assert why == "requote"
+    assert rec["n_requote"] == 1
+    assert rec["off_touch"] is True
+    assert posted == [(0.41, 0.39)]
+    assert set(cancelled) == {"up", "dn"}
+    assert [o["order_id"] for o in out] == ["up2", "dn2"]
+    _out2, why2 = manage_open(None, rec, orders, clip=5, book_now=book, n_requote=8)
+    assert why2 == "off_touch"

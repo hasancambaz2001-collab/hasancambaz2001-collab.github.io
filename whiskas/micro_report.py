@@ -328,6 +328,7 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "still_ms": rec.get("still_ms"),
         "send_blocked": rec.get("send_blocked"),
         "would_send": rec.get("would_send"),
+        "would_be_taker_blocked": rec.get("would_be_taker_blocked"),
         "latency_variant": rec.get("latency_variant"),
     }
     still = {
@@ -375,5 +376,9 @@ def layer_records(rec: dict[str, Any]) -> dict[str, dict[str, Any]]:
             "s1_edge": rec.get("s1_edge"),
             "both_fill": rec.get("both_fill"),
             "one_leg": rec.get("one_leg"),
+            "one_leg_taker": rec.get("one_leg_taker"),
+            "off_touch": rec.get("off_touch"),
+            "would_be_taker_blocked": rec.get("would_be_taker_blocked"),
+            "n_requote": rec.get("n_requote"),
         }
     return out

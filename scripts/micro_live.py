@@ -42,9 +42,12 @@ from whiskas.clob_orders import (
 from whiskas.config import load_config
 from whiskas.live_config import G5_FLAG, G6_FLAG, LIVE_READY
 from whiskas.measure_layers import (
+    MIN_SPREAD,
+    REQUOTE_MAX,
     apply_still250_send_gate,
     attach_layers,
     guard_maker_join,
+    guard_min_spread,
     guard_still250_send,
 )
 from whiskas.micro_report import (
@@ -234,7 +237,9 @@ def _best_bid_join_prices(rec: dict[str, Any]) -> tuple[float, float] | None:
         return None
     if float(up) + float(down) > PAIR_MAX + 1e-12:
         return None
-    if guard_maker_join(rec) == "join_crosses_ask":
+    if guard_maker_join(rec) == "would_be_taker_blocked":
+        return None
+    if guard_min_spread(rec) == "thin_spread":
         return None
     return float(up), float(down)
 
@@ -281,6 +286,10 @@ def _block_send(rec: dict[str, Any], reason: str, *, clip: float) -> dict[str, A
     rec.setdefault("residual", None)
     rec.setdefault("fill_role", None)
     rec.setdefault("s1_edge", rec.get("bid_sum") or rec.get("intent_bid_sum"))
+    rec["would_be_taker_blocked"] = reason == "would_be_taker_blocked"
+    rec.setdefault("both_fill", None)
+    rec.setdefault("one_leg_taker", None)
+    rec.setdefault("off_touch", None)
     return rec
 
 
@@ -309,14 +318,16 @@ def _reread_book(rec: dict[str, Any]) -> dict[str, Any]:
         return out
     try:
         book_up, book_down = fetch_books_parallel(str(rec["token_up"]), str(rec["token_down"]))
-        bu, _ = best_bid(book_up)
+        bu, su = best_bid(book_up)
         au, _ = best_ask(book_up)
-        bd, _ = best_bid(book_down)
+        bd, sd = best_bid(book_down)
         ad, _ = best_ask(book_down)
         out["bid_up"] = bu
         out["ask_up"] = au
         out["bid_down"] = bd
         out["ask_down"] = ad
+        if su is not None and sd is not None:
+            out["min_bid_size"] = min(float(su), float(sd))
     except Exception:
         return out
     if out.get("bid_up") is not None and out.get("bid_down") is not None:
@@ -353,6 +364,14 @@ def _stamp_fill_fields(rec: dict[str, Any], orders: list[dict[str, Any]], *, cli
     filled_n = sum(1 for o in orders if float(o.get("filled_size") or 0.0) > 0)
     rec["both_fill"] = filled_n >= 2
     rec["one_leg"] = filled_n == 1
+    rec["one_leg_taker"] = bool(
+        rec["one_leg"]
+        and any(str(o.get("trader_side") or o.get("fill_role") or "").lower() == "taker" for o in orders)
+    )
+    if rec.get("adverse_action") == "off_touch" or rec.get("adverse") == "off_touch":
+        rec["off_touch"] = True
+    rec.setdefault("off_touch", False)
+    rec.setdefault("would_be_taker_blocked", rec.get("send_blocked") == "would_be_taker_blocked")
     rec["pair_gt_1_trade"] = False
 
 
@@ -368,7 +387,8 @@ def send_rest_both(
     still_block = guard_still250_send(rec)
     book_block = _guard_rest(rec, clip=clip)
     maker_block = guard_maker_join(rec, require_ask=True)
-    guard = still_block or book_block or maker_block
+    spread_block = guard_min_spread(rec, require_ask=True)
+    guard = still_block or book_block or maker_block or spread_block
     if guard:
         return _block_send(rec, guard, clip=clip)
     prices = _best_bid_join_prices(rec)
@@ -482,6 +502,70 @@ def _unpaired_notional(orders: list[dict[str, Any]], *, clip: float) -> float:
     return float(px) * float(filled[0].get("filled_size") or 0.0)
 
 
+def _requote_block(book: dict[str, Any], *, clip: float, n_requote: int) -> str | None:
+    """Requote only while maker-only, bid_sum<=0.90, 1-tick spread, depth>=clip, n<8."""
+    if int(n_requote) >= int(REQUOTE_MAX):
+        return "requote_max"
+    bid_sum = book.get("bid_sum")
+    if bid_sum is None or float(bid_sum) > PAIR_MAX + 1e-12:
+        return "requote_rich"
+    min_sz = book.get("min_bid_size")
+    if min_sz is not None and float(min_sz) + 1e-12 < float(clip):
+        return "thin_bid"
+    probe = {
+        "bid_up": book.get("bid_up"),
+        "bid_down": book.get("bid_down"),
+        "ask_up": book.get("ask_up"),
+        "ask_down": book.get("ask_down"),
+    }
+    return guard_maker_join(probe, require_ask=True) or guard_min_spread(probe, require_ask=True)
+
+
+def _try_requote(
+    client: Any,
+    rec: dict[str, Any],
+    leftover: list[dict[str, Any]],
+    book: dict[str, Any],
+    *,
+    clip: float,
+    n_requote: int,
+) -> tuple[list[dict[str, Any]] | None, str]:
+    block = _requote_block(book, clip=clip, n_requote=n_requote)
+    if block:
+        return None, block
+    token_up = rec.get("token_up")
+    token_down = rec.get("token_down")
+    px_up = book.get("bid_up")
+    px_down = book.get("bid_down")
+    if not token_up or not token_down or px_up is None or px_down is None:
+        return None, "not_best_bid"
+    cancel_open(client, leftover, reason="requote")
+    timings: dict[str, Any] = {}
+    try:
+        posted = create_gtc_buy_pair(
+            client,
+            token_up=str(token_up),
+            price_up=float(px_up),
+            token_down=str(token_down),
+            price_down=float(px_down),
+            size=float(clip),
+            timings=timings,
+        )
+    except Exception:
+        rec["adverse_action"] = "requote_failed"
+        rec["off_touch"] = True
+        rec["n_requote"] = n_requote
+        return [], "requote_failed"
+    rec["n_requote"] = int(n_requote) + 1
+    rec["adverse_action"] = "requote"
+    rec["off_touch"] = True
+    rec["join_bid_up"] = float(px_up)
+    rec["join_bid_down"] = float(px_down)
+    rec["sign_ms"] = timings.get("sign_ms")
+    rec["post_ack_ms"] = timings.get("post_ack_ms")
+    return posted, "requote"
+
+
 def manage_open(
     client: Any,
     rec: dict[str, Any],
@@ -490,6 +574,7 @@ def manage_open(
     clip: float,
     book_now: dict[str, Any] | None = None,
     force_flatten: bool = False,
+    n_requote: int = 0,
 ) -> tuple[list[dict[str, Any]], str | None]:
     """One-leg/adverse FIRST, then off-touch, then rich_cancel. Complete only if fill+opp<=0.90."""
     refreshed = _refresh_orders(client, orders)
@@ -560,6 +645,12 @@ def manage_open(
                 off = True
                 break
         if off:
+            rec["off_touch"] = True
+            if not filled:
+                posted, rq = _try_requote(client, rec, leftover, book, clip=clip, n_requote=n_requote)
+                if posted:
+                    _stamp_fill_fields(rec, posted, clip=clip)
+                    return posted, "requote"
             cancelled = cancel_open(client, leftover, reason="off_touch")
             rec["adverse_action"] = "off_touch"
             _stamp_fill_fields(rec, filled + cancelled, clip=clip)
@@ -597,17 +688,18 @@ def after_send_manage(
     *,
     clip: float,
     sleep_s: float = POST_ACK_SEC,
+    n_requote: int = 0,
 ) -> tuple[list[dict[str, Any]], str | None]:
-    """Immediate one-leg if MATCHED; then 200–500ms off-touch cancel both."""
+    """Immediate one-leg if MATCHED; then 200–500ms off-touch (requote if still cheap+maker)."""
     why: str | None = None
     filled_n = sum(1 for o in orders if float(o.get("filled_size") or 0.0) > 0)
     if filled_n == 1:
-        orders, why = manage_open(client, rec, orders, clip=clip)
+        orders, why = manage_open(client, rec, orders, clip=clip, n_requote=n_requote)
         if why in _pop_reasons():
             return orders, why
     if sleep_s > 0:
         time.sleep(min(0.5, max(0.2, float(sleep_s))))
-    return manage_open(client, rec, orders, clip=clip)
+    return manage_open(client, rec, orders, clip=clip, n_requote=n_requote)
 
 
 def run_send(*, seconds: float, interval: float) -> dict[str, Any]:
@@ -699,13 +791,15 @@ def _run_send_loop(
             meta = open_meta.get(ot0) or {}
             age = time.time() - float(meta.get("rest_ts") or time.time())
             ended = int(ot0) != int(t0)
-            force = ended or age > UNPAIRED_TIMEOUT_SEC + 1e-12
+            one_leg_inv = not inventory_flat(inventory.get(ot0))
+            force = ended or (one_leg_inv and age > UNPAIRED_TIMEOUT_SEC + 1e-12)
             orders, why = manage_open(
                 client,
                 rec if int(ot0) == int(t0) else {**rec, "token_up": meta.get("token_up"), "token_down": meta.get("token_down")},
                 open_windows[ot0],
                 clip=clip,
                 force_flatten=force,
+                n_requote=int(meta.get("n_requote") or 0),
             )
             inventory[ot0] = _inv_from_orders(orders)
             if why in {"rich_complete", "pair_gt_1_refused", "unpaired_timeout", "cancel_missing_opp"} and ot0 not in loss_charged:
@@ -716,6 +810,9 @@ def _run_send_loop(
                 open_meta.pop(ot0, None)
             else:
                 open_windows[ot0] = orders
+                if why == "requote":
+                    meta["n_requote"] = int(rec.get("n_requote") or meta.get("n_requote") or 0)
+                    open_meta[ot0] = meta
         can_rest = (
             rec.get("reason") == "rest"
             and rec.get("would_send") is True
@@ -729,7 +826,7 @@ def _run_send_loop(
             rec = send_rest_both(client, rec, tokens, clip=clip)
             if rec.get("live_order") and rec.get("real_fill"):
                 orders = list((rec["real_fill"] or {}).get("orders") or [])
-                orders, why = after_send_manage(client, rec, orders, clip=clip)
+                orders, why = after_send_manage(client, rec, orders, clip=clip, n_requote=0)
                 rec["real_fill"] = {
                     "orders": orders,
                     "filled_size": sum(float(o.get("filled_size") or 0.0) for o in orders),
@@ -748,6 +845,7 @@ def _run_send_loop(
                         "rest_ts": time.time(),
                         "token_up": rec.get("token_up"),
                         "token_down": rec.get("token_down"),
+                        "n_requote": int(rec.get("n_requote") or 0),
                     }
         rec["pair_gt_1_trade"] = False
         rec["daily_loss_usd"] = daily_loss

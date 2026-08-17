@@ -1,4 +1,10 @@
-from whiskas.measure_layers import attach_layers, guard_maker_join, guard_still250_send, still250_ok
+from whiskas.measure_layers import (
+    attach_layers,
+    guard_maker_join,
+    guard_min_spread,
+    guard_still250_send,
+    still250_ok,
+)
 
 
 def test_still250_is_cheap_and_deep_not_level_eaten() -> None:
@@ -43,7 +49,7 @@ def test_layers_unmixed_on_rest() -> None:
     rec["bid_down_250"] = 0.30
     rec["ask_up_250"] = 0.57
     rec["ask_down_250"] = 0.44
-    assert guard_maker_join(rec) == "join_crosses_ask"
+    assert guard_maker_join(rec) == "would_be_taker_blocked"
 
 
 def test_skip_logs_skip_reason_and_null_real_fill() -> None:

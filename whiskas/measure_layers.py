@@ -11,6 +11,10 @@ from typing import Any
 
 PAIR_MAX = 0.90
 CLIP_DEFAULT = 10.0
+MIN_SPREAD = 0.01  # 1 tick. 2 ticks would have blocked the 07:59 both-maker.
+PREFER_BID_SUM = 0.85  # optional preference only; not a send gate
+ASK_FAR = 0.05  # optional "asks far" note; not a send gate
+REQUOTE_MAX = 8
 SKIP_REASONS = {
     "rich_bid_sum",
     "thin_bid",
@@ -133,7 +137,24 @@ def guard_maker_join(rec: dict[str, Any], *, require_ask: bool = False) -> str |
     if ask_up is None or ask_down is None:
         return "missing_ask" if require_ask else None
     if float(up) + 1e-12 >= float(ask_up) or float(down) + 1e-12 >= float(ask_down):
-        return "join_crosses_ask"
+        return "would_be_taker_blocked"
+    return None
+
+
+def guard_min_spread(rec: dict[str, Any], *, min_spread: float = MIN_SPREAD, require_ask: bool = False) -> str | None:
+    """First send: each leg ask−bid >= 1 tick. Depth stays clip via still250 / thin_bid."""
+    up = rec.get("bid_up_250", rec.get("bid_up"))
+    down = rec.get("bid_down_250", rec.get("bid_down"))
+    ask_up = rec.get("ask_up_250", rec.get("ask_up"))
+    ask_down = rec.get("ask_down_250", rec.get("ask_down"))
+    if up is None or down is None:
+        return "not_best_bid" if require_ask else None
+    if ask_up is None or ask_down is None:
+        return "missing_ask" if require_ask else None
+    if (float(ask_up) - float(up)) + 1e-12 < float(min_spread):
+        return "thin_spread"
+    if (float(ask_down) - float(down)) + 1e-12 < float(min_spread):
+        return "thin_spread"
     return None
 
 
@@ -141,6 +162,12 @@ def apply_still250_send_gate(rec: dict[str, Any], *, pair_max: float = PAIR_MAX)
     blocked = guard_still250_send(rec, pair_max=pair_max)
     if blocked is None:
         blocked = guard_maker_join(rec)
+    if blocked is None:
+        blocked = guard_min_spread(rec)
+    rec["would_be_taker_blocked"] = blocked == "would_be_taker_blocked"
     rec["send_blocked"] = blocked
     rec["would_send"] = blocked is None and str(rec.get("reason") or "") == "rest"
+    rec.setdefault("both_fill", None)
+    rec.setdefault("one_leg_taker", None)
+    rec.setdefault("off_touch", None)
     return rec
