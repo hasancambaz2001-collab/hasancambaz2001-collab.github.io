@@ -377,11 +377,14 @@ def test_tape_windows_maker_stability() -> None:
     apply_still250_send_gate(w_0827)
     apply_still250_send_gate(w_0759)
     assert w_0714["would_send"] is False
+    assert w_0714["send_blocked"] == "would_be_taker_blocked"
     assert w_0714["would_be_taker_blocked"] is True
     assert w_0827["would_send"] is False
+    assert w_0827["send_blocked"] == "would_be_taker_blocked"
     assert w_0827["would_be_taker_blocked"] is True
     assert w_0759["would_send"] is True
     assert w_0759["send_blocked"] is None
+    assert w_0759["would_be_taker_blocked"] is False
     assert guard_min_spread(w_0759) is None
     assert guard_min_spread(w_0759, min_spread=0.02) == "thin_spread"
 
@@ -429,3 +432,75 @@ def test_requote_when_cheap_off_touch(monkeypatch) -> None:
     assert [o["order_id"] for o in out] == ["up2", "dn2"]
     _out2, why2 = manage_open(None, rec, orders, clip=5, book_now=book, n_requote=8)
     assert why2 == "off_touch"
+
+
+def test_requote_does_not_chase_taker_or_rich(monkeypatch) -> None:
+    """Off-touch is rejoin, not force-fill. pair>0.90 or join≥ask → cancel, do not press."""
+    cancelled: list[str] = []
+    posted: list[tuple[float, float]] = []
+
+    def fake_fetch(_client, oid: str):
+        return {
+            "order_id": oid,
+            "status": "open",
+            "filled_size": 0.0,
+            "rested_size": 5.0,
+            "price": 0.40 if oid == "up" else 0.40,
+            "outcome": "Up" if oid == "up" else "Down",
+        }
+
+    def fake_cancel(_client, oid: str):
+        cancelled.append(oid)
+        return {"order_id": oid, "status": "cancelled"}
+
+    def fake_pair(_client, **kwargs):
+        posted.append((kwargs["price_up"], kwargs["price_down"]))
+        return [
+            {"order_id": "up2", "outcome": "Up", "status": "open", "filled_size": 0.0, "rested_size": 5.0, "price": kwargs["price_up"]},
+            {"order_id": "dn2", "outcome": "Down", "status": "open", "filled_size": 0.0, "rested_size": 5.0, "price": kwargs["price_down"]},
+        ]
+
+    monkeypatch.setattr("scripts.micro_live.fetch_order", fake_fetch)
+    monkeypatch.setattr("scripts.micro_live.cancel_order", fake_cancel)
+    monkeypatch.setattr("scripts.micro_live.create_gtc_buy_pair", fake_pair)
+    orders = [
+        {"order_id": "up", "outcome": "Up", "price": 0.40, "filled_size": 0.0, "rested_size": 5.0},
+        {"order_id": "dn", "outcome": "Down", "price": 0.40, "filled_size": 0.0, "rested_size": 5.0},
+    ]
+    locked = {"token_up": "u", "token_down": "d", "bid_sum": 0.80}
+    book_taker = {
+        "bid_up": 0.57,
+        "bid_down": 0.30,
+        "ask_up": 0.57,
+        "ask_down": 0.44,
+        "bid_sum": 0.87,
+        "min_bid_size": 20,
+    }
+    _out, why = manage_open(None, locked, orders, clip=5, book_now=book_taker, n_requote=0)
+    assert why == "off_touch"
+    assert posted == []
+    assert set(cancelled) == {"up", "dn"}
+    cancelled.clear()
+    rich = {"token_up": "u", "token_down": "d", "bid_sum": 0.93}
+    book_rich = {
+        "bid_up": 0.50,
+        "bid_down": 0.43,
+        "ask_up": 0.55,
+        "ask_down": 0.48,
+        "bid_sum": 0.93,
+        "min_bid_size": 20,
+    }
+    _out2, why2 = manage_open(None, rich, orders, clip=5, book_now=book_rich, n_requote=0)
+    assert why2 == "off_touch"
+    assert posted == []
+    src = Path("scripts/micro_live.py").read_text()
+    assert "UNPAIRED_TIMEOUT_SEC = 45.0" in src
+    assert "one_leg_inv and age > UNPAIRED_TIMEOUT_SEC" in src
+    assert "pair_gt_1_trade" in src
+    assert "MICRO_TRIAL_CLIP = 5.0" in src
+    assert "create_fok_buy" in src
+    layers = Path("whiskas/measure_layers.py").read_text()
+    assert 'return "would_be_taker_blocked"' in layers
+    assert "MIN_SPREAD = 0.01" in layers
+    assert "REQUOTE_MAX = 8" in layers
+    assert "PREFER_BID_SUM = 0.85" in layers
