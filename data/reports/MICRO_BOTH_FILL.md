@@ -21,8 +21,8 @@ They look like “every window both-fill” because the **window** completes ove
 
 1. **Stay on the book while still cheap + maker.** Requote off-touch to the new best bid, max 8, only if bid_sum≤0.90 and join < ask and 1-tick spread. Do not cancel both at 250ms if the book is still a rest.
 2. **45s timeout only when unpaired (one-leg).** Both-unfilled may sit until window end / rich / requote-max.
-3. **Do not post a taker.** join ≥ ask → `would_be_taker_blocked`.
-4. **First send: still250 + 1-tick spread each leg + depth≥clip.** 2 ticks would have blocked 07:59 (Down spread 0.01).
+3. **Do not post a taker.** Live join ≥ live ask → `would_be_taker_blocked`. still250 is hole-stayed (sum+depth) only — do not post `bid_*_250`.
+4. **First send: still250 + live 1-tick spread each leg + depth≥clip.** 2 ticks would have blocked 07:59 (Down spread 0.01). REST reread immediately before post.
 5. **Prefer (not gate) bid_sum≤0.85 or asks far (≥0.05).** Mo p90 cheap pair is 0.84. Hard 0.85 would drop some 0.86–0.90 rests; leave as preference.
 6. **Clip 5 stays.** Their size p50=60 helps queue, but the tape gap is **time-in-book**, not clip 67.
 
@@ -33,10 +33,11 @@ They look like “every window both-fill” because the **window** completes ove
 | 07:14 | Down join 0.57 = ask 0.57 | **yes** `would_be_taker_blocked` | no |
 | 08:27 | Up 0.26 > ask 0.23 | **yes** `would_be_taker_blocked` | no |
 | 07:59 | 0.52/0.17 vs ask 0.84/0.18, bid_sum 0.69, depth 52 | no | **yes** |
+| 12:07 | still250 WS 0.01/0.83; live Down 0.73 ≥ ask 0.64 | **yes** live taker gate | no |
 
 Logs: `would_be_taker_blocked`, `both_fill`, `one_leg_taker`, `off_touch`, `n_requote`.
 
 ## Event-driven sit (not a faster server)
 
-First send is unchanged: still250 + pair≤0.90 + join < ask + 1 tick + clip 5.
+First send: still250 hole + live pair≤0.90 + live join < live ask + 1 tick + clip 5. Join prices are live REST, not the 250ms WS snapshot.
 Once resting, off-touch requote wakes on CLOB market WS book updates (`wait_change` / `bbo`), not only the 1s poll. Max 8 requotes/window. `requote_gap` (100ms) stays on the book — it does not flatten. pair>0.92 still exits. This is time-in-queue, not directional chase.

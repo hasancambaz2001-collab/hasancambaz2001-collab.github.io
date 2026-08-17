@@ -3,6 +3,7 @@ from whiskas.measure_layers import (
     guard_maker_join,
     guard_min_spread,
     guard_still250_send,
+    join_bbo,
     still250_ok,
 )
 
@@ -49,6 +50,16 @@ def test_layers_unmixed_on_rest() -> None:
     rec["bid_down_250"] = 0.30
     rec["ask_up_250"] = 0.57
     rec["ask_down_250"] = 0.44
+    assert guard_maker_join(rec) == "would_be_taker_blocked"
+    rec["bid_up"] = 0.16
+    rec["bid_down"] = 0.73
+    rec["ask_up"] = 0.44
+    rec["ask_down"] = 0.64
+    rec["bid_up_250"] = 0.01
+    rec["bid_down_250"] = 0.83
+    rec["ask_up_250"] = 0.17
+    rec["ask_down_250"] = 0.99
+    assert join_bbo(rec)[:2] == (0.16, 0.73)
     assert guard_maker_join(rec) == "would_be_taker_blocked"
 
 

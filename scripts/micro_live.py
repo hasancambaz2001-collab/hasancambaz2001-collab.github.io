@@ -49,6 +49,7 @@ from whiskas.measure_layers import (
     guard_maker_join,
     guard_min_spread,
     guard_still250_send,
+    join_bbo,
 )
 from whiskas.micro_report import (
     FILL_LOG,
@@ -232,9 +233,8 @@ def _guard_rest(rec: dict[str, Any], *, clip: float) -> str | None:
 
 
 def _best_bid_join_prices(rec: dict[str, Any]) -> tuple[float, float] | None:
-    """Join still250 / snapshot best bids only. Never post off-touch or through the ask."""
-    up = rec.get("bid_up_250", rec.get("bid_up"))
-    down = rec.get("bid_down_250", rec.get("bid_down"))
+    """Join live best bids. still250 is hole-stayed only — never post bid_*_250 when live exists."""
+    up, down, _ask_up, _ask_down = join_bbo(rec)
     if up is None or down is None:
         return None
     if float(up) + float(down) > PAIR_MAX + 1e-12:
@@ -243,6 +243,7 @@ def _best_bid_join_prices(rec: dict[str, Any]) -> tuple[float, float] | None:
         return None
     if guard_min_spread(rec) == "thin_spread":
         return None
+    rec["join_source"] = "live" if rec.get("bid_up") is not None and rec.get("bid_down") is not None else "still250_fallback"
     return float(up), float(down)
 
 
@@ -322,12 +323,10 @@ def _book_from_ws(book_cache: Any, token_up: Any, token_down: Any) -> dict[str, 
     return got or {}
 
 
-def _reread_book(rec: dict[str, Any], book_cache: Any = None) -> dict[str, Any]:
+def _reread_book_rest(rec: dict[str, Any]) -> dict[str, Any]:
+    """REST BBO for first-send join. Do not use WS cache here — 12:07 WS 250 was 0.01/0.83."""
     from whiskas.paper import best_ask, best_bid
 
-    ws = _book_from_ws(book_cache, rec.get("token_up"), rec.get("token_down"))
-    if ws:
-        return ws
     out: dict[str, Any] = {}
     if not rec.get("token_up") or not rec.get("token_down"):
         return out
@@ -349,6 +348,25 @@ def _reread_book(rec: dict[str, Any], book_cache: Any = None) -> dict[str, Any]:
         out["bid_sum"] = float(out["bid_up"]) + float(out["bid_down"])
     out["source"] = "rest"
     return out
+
+
+def _reread_book(rec: dict[str, Any], book_cache: Any = None) -> dict[str, Any]:
+    """Sit/requote may use WS. First send uses _reread_book_rest."""
+    ws = _book_from_ws(book_cache, rec.get("token_up"), rec.get("token_down"))
+    if ws:
+        return ws
+    return _reread_book_rest(rec)
+
+
+def _overlay_live_book(rec: dict[str, Any], book: dict[str, Any]) -> None:
+    if not book:
+        return
+    for key in ("bid_up", "bid_down", "ask_up", "ask_down", "bid_sum", "min_bid_size"):
+        if book.get(key) is not None:
+            rec[key] = book[key]
+    if rec.get("bid_up") is not None and rec.get("bid_down") is not None:
+        rec["bid_sum"] = float(rec["bid_up"]) + float(rec["bid_down"])
+    rec["join_book_source"] = book.get("source") or "reread"
 
 
 def _refresh_orders(client: Any, orders: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -398,13 +416,16 @@ def send_rest_both(
     *,
     clip: float,
 ) -> dict[str, Any]:
-    """GTC both legs at best bid, one post_orders call. still250 false → no send. No pair>1."""
+    """GTC both legs at live best bid. still250 = hole stayed, not the join price. No pair>1."""
     rec["s1_edge"] = rec.get("intent_bid_sum", rec.get("bid_sum"))
     still_block = guard_still250_send(rec)
+    if still_block:
+        return _block_send(rec, still_block, clip=clip)
+    _overlay_live_book(rec, _reread_book_rest(rec))
     book_block = _guard_rest(rec, clip=clip)
     maker_block = guard_maker_join(rec, require_ask=True)
     spread_block = guard_min_spread(rec, require_ask=True)
-    guard = still_block or book_block or maker_block or spread_block
+    guard = book_block or maker_block or spread_block
     if guard:
         return _block_send(rec, guard, clip=clip)
     prices = _best_bid_join_prices(rec)

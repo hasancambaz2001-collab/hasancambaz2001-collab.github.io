@@ -68,7 +68,7 @@ def test_join_at_or_through_ask_blocks_send() -> None:
         "reason": "rest",
         "bid_sum": 0.86,
         "bid_up": 0.30,
-        "bid_down": 0.56,
+        "bid_down": 0.57,
         "min_bid_size": 5,
         "clip": 5,
         "still_there_250ms": True,
@@ -229,6 +229,18 @@ def test_adverse_and_layers_do_not_invent_fill() -> None:
 def test_join_best_bid_and_inventory_flat() -> None:
     assert _best_bid_join_prices({"bid_up_250": 0.37, "bid_down_250": 0.51}) == (0.37, 0.51)
     assert _best_bid_join_prices({"bid_up_250": 0.56, "bid_down_250": 0.40}) is None
+    live_over_stale = {
+        "bid_up": 0.52,
+        "bid_down": 0.17,
+        "ask_up": 0.84,
+        "ask_down": 0.18,
+        "bid_up_250": 0.01,
+        "bid_down_250": 0.83,
+        "ask_up_250": 0.17,
+        "ask_down_250": 0.99,
+    }
+    assert _best_bid_join_prices(live_over_stale) == (0.52, 0.17)
+    assert live_over_stale.get("join_source") == "live"
     assert inventory_flat({"Up": 0.0, "Down": 0.0}) is True
     assert inventory_flat({"Up": 5.0, "Down": 5.0}) is True
     assert inventory_flat({"Up": 0.0, "Down": 5.0}) is False
@@ -348,6 +360,10 @@ def test_tape_windows_maker_stability() -> None:
         "bid_down_250": 0.57,
         "ask_up_250": 0.44,
         "ask_down_250": 0.57,
+        "bid_up": 0.30,
+        "bid_down": 0.57,
+        "ask_up": 0.44,
+        "ask_down": 0.57,
         "min_bid_size": 5,
         "clip": 5,
     }
@@ -359,6 +375,10 @@ def test_tape_windows_maker_stability() -> None:
         "bid_down_250": 0.63,
         "ask_up_250": 0.23,
         "ask_down_250": 0.78,
+        "bid_up": 0.26,
+        "bid_down": 0.63,
+        "ask_up": 0.23,
+        "ask_down": 0.78,
         "min_bid_size": 9.9,
         "clip": 5,
     }
@@ -370,20 +390,102 @@ def test_tape_windows_maker_stability() -> None:
         "bid_down_250": 0.17,
         "ask_up_250": 0.84,
         "ask_down_250": 0.18,
+        "bid_up": 0.52,
+        "bid_down": 0.17,
+        "ask_up": 0.84,
+        "ask_down": 0.18,
         "min_bid_size": 52,
+        "clip": 5,
+    }
+    w_1207 = {
+        "reason": "rest",
+        "still_there_250ms": True,
+        "bid_sum_250": 0.84,
+        "bid_up_250": 0.01,
+        "bid_down_250": 0.83,
+        "ask_up_250": 0.17,
+        "ask_down_250": 0.99,
+        "bid_sum": 0.89,
+        "bid_up": 0.16,
+        "bid_down": 0.73,
+        "ask_up": 0.44,
+        "ask_down": 0.64,
+        "min_bid_size": 100,
         "clip": 5,
     }
     apply_still250_send_gate(w_0714)
     apply_still250_send_gate(w_0827)
     apply_still250_send_gate(w_0759)
+    apply_still250_send_gate(w_1207)
     assert w_0714["would_send"] is False
     assert w_0714["would_be_taker_blocked"] is True
     assert w_0827["would_send"] is False
     assert w_0827["would_be_taker_blocked"] is True
     assert w_0759["would_send"] is True
     assert w_0759["send_blocked"] is None
+    assert w_1207["would_send"] is False
+    assert w_1207["would_be_taker_blocked"] is True
     assert guard_min_spread(w_0759) is None
     assert guard_min_spread(w_0759, min_spread=0.02) == "thin_spread"
+
+
+def test_stale_still250_prices_do_not_send(monkeypatch) -> None:
+    """12:07: still250 hole ok, WS 250 was 0.01/0.83, live Down 0.73 >= ask 0.64."""
+    monkeypatch.setattr("scripts.micro_live._reread_book_rest", lambda _rec: {})
+    rec = {
+        "reason": "rest",
+        "bid_sum": 0.89,
+        "bid_up": 0.16,
+        "bid_down": 0.73,
+        "ask_up": 0.44,
+        "ask_down": 0.64,
+        "min_bid_size": 100,
+        "clip": 5,
+        "still_there_250ms": True,
+        "bid_sum_250": 0.84,
+        "bid_up_250": 0.01,
+        "bid_down_250": 0.83,
+        "ask_up_250": 0.17,
+        "ask_down_250": 0.99,
+    }
+    out = send_rest_both(None, rec, {"Up": "u", "Down": "d"}, clip=5)
+    assert out["live_order"] is False
+    assert out["real_fill"] is None
+    assert out.get("send_blocked") == "would_be_taker_blocked"
+    assert out.get("would_be_taker_blocked") is True
+
+
+def test_send_posts_live_bids_not_still250(monkeypatch) -> None:
+    posted: list[tuple[float, float]] = []
+
+    def fake_pair(_client, **kwargs):
+        posted.append((kwargs["price_up"], kwargs["price_down"]))
+        raise RuntimeError("stop_after_prices")
+
+    monkeypatch.setattr("scripts.micro_live._reread_book_rest", lambda _rec: {})
+    monkeypatch.setattr("scripts.micro_live.create_gtc_buy_pair", fake_pair)
+    rec = {
+        "reason": "rest",
+        "bid_sum": 0.69,
+        "bid_up": 0.52,
+        "bid_down": 0.17,
+        "ask_up": 0.84,
+        "ask_down": 0.18,
+        "min_bid_size": 52,
+        "clip": 5,
+        "still_there_250ms": True,
+        "bid_sum_250": 0.84,
+        "bid_up_250": 0.01,
+        "bid_down_250": 0.83,
+        "ask_up_250": 0.17,
+        "ask_down_250": 0.99,
+    }
+    out = send_rest_both("client", rec, {"Up": "u", "Down": "d"}, clip=5)
+    assert posted == [(0.52, 0.17)]
+    assert out.get("join_bid_up") == 0.52
+    assert out.get("join_bid_down") == 0.17
+    assert out.get("join_source") == "live"
+    assert out.get("live_order") is False
 
 
 def test_requote_when_cheap_off_touch(monkeypatch) -> None:

@@ -115,7 +115,10 @@ def attach_layers(
 
 
 def guard_still250_send(rec: dict[str, Any], *, pair_max: float = PAIR_MAX) -> str | None:
-    """SEND YOK unless still250 is true and bid_sum_250 <= pair_max. Shared by paper + live."""
+    """SEND YOK unless still250 is true and bid_sum_250 <= pair_max. Shared by paper + live.
+
+    still250 is hole-stayed only (sum+depth). Join prices use join_bbo (live first).
+    """
     if rec.get("still_there_250ms") is not True:
         return "still250_false"
     bid_250 = rec.get("bid_sum_250")
@@ -126,12 +129,22 @@ def guard_still250_send(rec: dict[str, Any], *, pair_max: float = PAIR_MAX) -> s
     return None
 
 
+def join_bbo(rec: dict[str, Any]) -> tuple[Any, Any, Any, Any]:
+    """Live bid/ask for join + taker + spread. 250ms is fallback only if live bids are missing.
+
+    Do not mix live bids with 250 asks. 12:07 posted bid_*_250 (0.01/0.83) into a
+    live book (0.16/0.73 ask 0.64) and became a one-leg taker.
+    """
+    up = rec.get("bid_up")
+    down = rec.get("bid_down")
+    if up is not None and down is not None:
+        return up, down, rec.get("ask_up"), rec.get("ask_down")
+    return rec.get("bid_up_250"), rec.get("bid_down_250"), rec.get("ask_up_250"), rec.get("ask_down_250")
+
+
 def guard_maker_join(rec: dict[str, Any], *, require_ask: bool = False) -> str | None:
     """SEND YOK if a join bid is at or through the ask. Maker GTC only. No clip/pair change."""
-    up = rec.get("bid_up_250", rec.get("bid_up"))
-    down = rec.get("bid_down_250", rec.get("bid_down"))
-    ask_up = rec.get("ask_up_250", rec.get("ask_up"))
-    ask_down = rec.get("ask_down_250", rec.get("ask_down"))
+    up, down, ask_up, ask_down = join_bbo(rec)
     if up is None or down is None:
         return "not_best_bid" if require_ask else None
     if ask_up is None or ask_down is None:
@@ -143,10 +156,7 @@ def guard_maker_join(rec: dict[str, Any], *, require_ask: bool = False) -> str |
 
 def guard_min_spread(rec: dict[str, Any], *, min_spread: float = MIN_SPREAD, require_ask: bool = False) -> str | None:
     """First send: each leg ask−bid >= 1 tick. Depth stays clip via still250 / thin_bid."""
-    up = rec.get("bid_up_250", rec.get("bid_up"))
-    down = rec.get("bid_down_250", rec.get("bid_down"))
-    ask_up = rec.get("ask_up_250", rec.get("ask_up"))
-    ask_down = rec.get("ask_down_250", rec.get("ask_down"))
+    up, down, ask_up, ask_down = join_bbo(rec)
     if up is None or down is None:
         return "not_best_bid" if require_ask else None
     if ask_up is None or ask_down is None:
