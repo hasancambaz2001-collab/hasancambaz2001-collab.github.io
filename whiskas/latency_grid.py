@@ -110,6 +110,7 @@ class BookAgeCache:
         """Subscribe only the current window pair. Accumulating 46–68 books filled the WS buffer."""
         new = {str(token_up), str(token_down)}
         with self._cv:
+            old = set(self._want)
             changed = new != self._want
             self._want = set(new)
             if changed:
@@ -119,7 +120,7 @@ class BookAgeCache:
                         self._recv_ts.pop(tid, None)
                 self._gen += 1
                 self._cv.notify_all()
-        if changed:
+        if changed and old:
             self._schedule_resub()
         elif self._ws is not None:
             self._subscribe()
@@ -304,6 +305,7 @@ class BookAgeCache:
         def on_open(ws: Any) -> None:
             self._ws = ws
             self._ws_ok = True
+            self._last_error = None
             self._subscribe(ws)
 
         def on_message(_ws: Any, message: str) -> None:

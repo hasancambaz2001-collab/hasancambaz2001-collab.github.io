@@ -47,9 +47,11 @@ def test_set_tokens_replaces_want_set() -> None:
         cache.set_tokens("u1", "d1")
         assert cache._want == {"u1", "d1"}
         assert cache.stats()["ws_n_want"] == 2
+        assert cache._resub_timer is None
         cache.set_tokens("u2", "d2")
         assert cache._want == {"u2", "d2"}
         assert cache.stats()["ws_n_want"] == 2
+        assert cache._resub_timer is not None
         assert "u1" not in cache._books
         cache._handle(
             {
