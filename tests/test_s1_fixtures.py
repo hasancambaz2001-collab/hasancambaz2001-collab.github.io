@@ -54,3 +54,12 @@ def test_pair_gt1_refused() -> None:
     book = json.loads((FIXTURE_DIR / "0759.json").read_text())["book"]
     book = {**book, "bid_sum": 1.02, "bid_sum_250": 1.02}
     assert first_send_decision(book) == ("BLOCK", "pair_gt_1_refused")
+
+
+def test_capital_max_lock() -> None:
+    from scripts.check_invariants import REQUIRED, check_config, load_flat_yaml
+
+    cfg = load_flat_yaml(REQUIRED)
+    assert cfg["capital_max"] == "5000"
+    assert cfg["clip"] == "5"
+    assert check_config(REQUIRED) == []

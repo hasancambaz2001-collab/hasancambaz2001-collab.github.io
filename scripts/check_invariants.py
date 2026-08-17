@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assert S1 config locks: clip==5, pair_gt1 false. Not a sender."""
+"""Assert S1 config locks: clip==5, pair_gt1 false, capital_max==5000. Not a sender."""
 
 from __future__ import annotations
 
@@ -57,6 +57,25 @@ def check_config(path: Path) -> list[str]:
                 errors.append(f"{path}: pair_max={pair_max} > 1 forbidden")
         except ValueError:
             errors.append(f"{path}: pair_max not numeric ({pair_max})")
+
+    capital = cfg.get("capital_max")
+    if path == REQUIRED:
+        if capital is None:
+            errors.append(f"{path}: missing capital_max")
+        else:
+            try:
+                if abs(float(capital) - 5000.0) > 1e-12:
+                    errors.append(f"{path}: capital_max=={capital} want 5000")
+                if float(capital) > 5000.0 + 1e-12:
+                    errors.append(f"{path}: capital_max={capital} > 5000 forbidden")
+            except ValueError:
+                errors.append(f"{path}: capital_max not numeric ({capital})")
+    elif capital is not None:
+        try:
+            if float(capital) > 5000.0 + 1e-12:
+                errors.append(f"{path}: capital_max={capital} > 5000 forbidden")
+        except ValueError:
+            errors.append(f"{path}: capital_max not numeric ({capital})")
     return errors
 
 
@@ -74,7 +93,7 @@ def main() -> int:
             print(err)
         print("check_invariants FAIL")
         return 1
-    print("check_invariants PASS clip==5 pair_gt1=false")
+    print("check_invariants PASS clip==5 pair_gt1=false capital_max==5000")
     return 0
 
 

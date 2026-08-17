@@ -5,6 +5,7 @@ clip: 5
 pair_max: 0.90
 pair_gt1: false
 pair_gt_1_trade: false
+capital_max: 5000
 maker_only: true
 join_must_be_lt_ask: true
 still250_on_first_send: true
