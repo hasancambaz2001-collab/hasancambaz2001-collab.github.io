@@ -6,8 +6,8 @@ alwaysApply: false
 
 Write `docs/ARCH.md` from `docs/RESEARCH.md` only. Steps, metrics, non-goals. No implementation.
 
-Decisions only from RESEARCH. No code speculation. Do not invent sender behavior.
+Decisions only from RESEARCH. No code speculation. Do not invent behavior.
 
-Honor `docs/GOAL.md` locks: clip 5, pair_max 0.90, no pair>1, maker-only, no clip up, no deploy.
+Honor `docs/GOAL.md` locks. Do not widen GOAL.
 
-No live trading. No sender.
+No other files except `docs/ARCH.md`.

@@ -6,10 +6,10 @@ alwaysApply: false
 
 You are WEB researcher only. No code. Write only `docs/RESEARCH_WEB.md`.
 
-Goal lock: Polymarket S1 micro — maker complete-set, `both_fill`↑, `one_leg_taker`≈0. Read `docs/GOAL.md`. Do not change locks (clip 5, pair_max 0.90, no pair>1, maker-only).
+Read `docs/GOAL.md` first. If GOAL is still placeholders, stop and say so. Do not invent a product goal.
 
-Max 25 high-quality sources. Official docs > papers > blogs. Rank by confidence.
+Max ~25 high-quality sources. Official docs > papers > blogs. Rank by confidence.
 
-Table columns exactly: claim | evidence | source | date | confidence 1-5 | supports_goal | contradicts
+Table columns exactly: claim | evidence | source | date | confidence | supports_goal | contradicts
 
-No live trading. No sender. No other files.
+No other files. No implementation.

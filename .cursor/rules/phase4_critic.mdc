@@ -1,13 +1,13 @@
 ---
-description: Phase 4 critic — prove S1 breaks, do not improve
+description: Phase 4 critic — break GOAL locks, do not improve
 alwaysApply: false
 ---
 
-Do NOT improve. Prove breaks S1: taker one-leg, pair>1, residual, still250 false send, join>=ask.
+Do NOT improve. Try to break `docs/GOAL.md` locks and success metrics.
 
 Write findings as:
 
 | claim | evidence | severity | required fix |
 | --- | --- | --- | --- |
 
-No drive-by refactors. No clip up. No pair>1. No deploy.
+No drive-by refactors. No widening GOAL. No “while we’re here”.

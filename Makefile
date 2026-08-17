@@ -1,4 +1,7 @@
-.PHONY: verify
+.PHONY: pipeline-init verify
+
+pipeline-init:
+	bash scripts/init_pipeline.sh
 
 verify:
-	./scripts/verify_s1.sh
+	bash scripts/verify.sh

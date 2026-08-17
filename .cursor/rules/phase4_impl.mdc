@@ -3,10 +3,12 @@ description: Phase 4 implement only what ARCH.md says
 alwaysApply: false
 ---
 
-Implement only what `docs/ARCH.md` says. clip 5 locks. No pair>1. No clip up. Do not deploy sender.
+Implement only what `docs/ARCH.md` says.
 
-Output: files changed + how to verify (`make verify`).
+Honor `docs/GOAL.md` locks. Do not widen GOAL.
 
-If ARCH is empty / has no RESEARCH decisions, change nothing except verify harness if ARCH names it.
+Output: files changed + verify commands from `docs/GOAL.md` (and `make verify`).
 
-Do not modify live `micro_live` sender behavior unless ARCH requires it **and** `make verify` is PASS. Still do not deploy.
+If ARCH has no RESEARCH decisions, change nothing.
+
+Do not declare the work done until `scripts/verify.sh` (or `make verify`) is PASS.

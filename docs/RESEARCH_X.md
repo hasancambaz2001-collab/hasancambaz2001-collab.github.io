@@ -1,6 +1,6 @@
 # RESEARCH_X
 
-Phase 1 X/Twitter only. No code. Primary posts + dates. Ignore pure hype without a mechanism.
+Phase 1 social/X only. No code. Primary posts + dates. Ignore hype without a mechanism.
 
-| claim | evidence | source | date | confidence 1-5 | supports_goal | contradicts |
+| claim | evidence | source | date | confidence | supports_goal | contradicts |
 | --- | --- | --- | --- | --- | --- | --- |

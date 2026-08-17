@@ -2,6 +2,10 @@
 
 ## Agent pipeline
 
-Research → gate → plan → build → verify. See [docs/PIPELINE.md](docs/PIPELINE.md).
+Phased research → plan → build → verify. See [docs/PIPELINE.md](docs/PIPELINE.md).
 
-Do not deploy the sender from this pipeline. `make verify` is not deploy. A human must type `deploy` explicitly.
+```bash
+make pipeline-init
+# fill docs/GOAL.md before phase 1
+make verify
+```

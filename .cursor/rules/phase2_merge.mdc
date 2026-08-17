@@ -13,6 +13,6 @@ Required sections:
 3) Weak/anecdotal
 4) Open questions
 
-List contradictions explicitly. Do not resolve by guessing.
+Surface contradictions explicitly. Do not resolve by guessing.
 
-No live trading. No sender. No implementation.
+No implementation. No other files except `docs/RESEARCH.md`.
