@@ -1,0 +1,25 @@
+{
+  "id": "0827",
+  "window": "08:27",
+  "expected": "BLOCK",
+  "expected_reason": "would_be_taker_blocked",
+  "note": "Up 0.26 > ask 0.23 → cross ask / taker. Encoded from project report MICRO_BOTH_FILL.",
+  "book": {
+    "reason": "rest",
+    "clip": 5,
+    "pair_max": 0.90,
+    "bid_up": 0.26,
+    "bid_down": 0.63,
+    "ask_up": 0.23,
+    "ask_down": 0.78,
+    "bid_sum": 0.89,
+    "min_bid_size": 5,
+    "still_there_250ms": true,
+    "bid_up_250": 0.26,
+    "bid_down_250": 0.63,
+    "ask_up_250": 0.23,
+    "ask_down_250": 0.78,
+    "bid_sum_250": 0.89,
+    "min_size_250": 5
+  }
+}

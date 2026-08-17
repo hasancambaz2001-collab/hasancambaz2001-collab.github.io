@@ -1,0 +1,14 @@
+---
+description: Phase 4 implement only what ARCH.md says
+alwaysApply: false
+---
+
+Implement only what `docs/ARCH.md` says.
+
+Honor `docs/GOAL.md` locks. Do not widen GOAL.
+
+Output: files changed + verify commands from `docs/GOAL.md` (and `make verify`).
+
+If ARCH has no RESEARCH decisions, change nothing.
+
+Do not declare the work done until `scripts/verify.sh` (or `make verify`) is PASS.

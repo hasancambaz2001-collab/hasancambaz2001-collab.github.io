@@ -1,0 +1,13 @@
+---
+description: Phase 4 critic — break GOAL locks, do not improve
+alwaysApply: false
+---
+
+Do NOT improve. Try to break `docs/GOAL.md` locks and success metrics.
+
+Write findings as:
+
+| claim | evidence | severity | required fix |
+| --- | --- | --- | --- |
+
+No drive-by refactors. No widening GOAL. No “while we’re here”.

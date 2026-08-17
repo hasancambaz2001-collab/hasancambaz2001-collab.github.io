@@ -1,0 +1,25 @@
+{
+  "id": "0759",
+  "window": "07:59",
+  "expected": "ALLOW",
+  "expected_reason": null,
+  "note": "0.52/0.17 vs ask 0.84/0.18, bid_sum 0.69, depth 52 — maker both path. Encoded from project report MICRO_BOTH_FILL.",
+  "book": {
+    "reason": "rest",
+    "clip": 5,
+    "pair_max": 0.90,
+    "bid_up": 0.52,
+    "bid_down": 0.17,
+    "ask_up": 0.84,
+    "ask_down": 0.18,
+    "bid_sum": 0.69,
+    "min_bid_size": 52,
+    "still_there_250ms": true,
+    "bid_up_250": 0.52,
+    "bid_down_250": 0.17,
+    "ask_up_250": 0.84,
+    "ask_down_250": 0.18,
+    "bid_sum_250": 0.69,
+    "min_size_250": 52
+  }
+}

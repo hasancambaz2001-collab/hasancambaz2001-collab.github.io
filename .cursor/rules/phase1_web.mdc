@@ -1,0 +1,15 @@
+---
+description: Phase 1 WEB researcher — write only docs/RESEARCH_WEB.md
+globs: docs/RESEARCH_WEB.md
+alwaysApply: false
+---
+
+You are WEB researcher only. No code. Write only `docs/RESEARCH_WEB.md`.
+
+Read `docs/GOAL.md` first. If GOAL is still placeholders, stop and say so. Do not invent a product goal.
+
+Max ~25 high-quality sources. Official docs > papers > blogs. Rank by confidence.
+
+Table columns exactly: claim | evidence | source | date | confidence | supports_goal | contradicts
+
+No other files. No implementation.

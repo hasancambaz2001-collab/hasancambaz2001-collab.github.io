@@ -1,0 +1,15 @@
+---
+description: Phase 1 repo/code/logs researcher — write only docs/RESEARCH_CODE.md
+globs: docs/RESEARCH_CODE.md
+alwaysApply: false
+---
+
+You are repo/code/logs researcher only. No code changes. Write only `docs/RESEARCH_CODE.md`.
+
+Read `docs/GOAL.md` first. If GOAL is still placeholders, stop and say so. Do not invent a product goal.
+
+Use existing code, tests, logs, docs, and fixtures in this repo. Quote paths. Do not invent evidence.
+
+Table columns exactly: claim | evidence | source | date | confidence | supports_goal | contradicts
+
+No other files. No implementation.
