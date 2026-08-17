@@ -78,6 +78,7 @@ class BookAgeCache:
         self._ws: Any = None
         self._recv_n = 0
         self._last_error = None
+        self._resub_timer: threading.Timer | None = None
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -88,6 +89,14 @@ class BookAgeCache:
 
     def stop(self) -> None:
         self._stop.set()
+        with self._lock:
+            timer = self._resub_timer
+            self._resub_timer = None
+        if timer is not None:
+            try:
+                timer.cancel()
+            except Exception:
+                pass
         ws = self._ws
         if ws is not None:
             try:
@@ -101,7 +110,9 @@ class BookAgeCache:
             self._want.add(str(token_up))
             self._want.add(str(token_down))
             grew = len(self._want) > before
-        if grew or self._ws is not None:
+        if grew:
+            self._schedule_resub()
+        elif self._ws is not None:
             self._subscribe()
 
     def stats(self) -> dict[str, Any]:
@@ -113,6 +124,29 @@ class BookAgeCache:
                 "ws_n_want": len(self._want),
                 "ws_error": self._last_error,
             }
+
+    def _schedule_resub(self) -> None:
+        """Server keeps the first subscribe; reconnect with the full want-set."""
+        with self._lock:
+            old = self._resub_timer
+            self._resub_timer = threading.Timer(0.4, self._reconnect)
+            timer = self._resub_timer
+        if old is not None:
+            try:
+                old.cancel()
+            except Exception:
+                pass
+        timer.daemon = True
+        timer.start()
+
+    def _reconnect(self) -> None:
+        ws = self._ws
+        if ws is None:
+            return
+        try:
+            ws.close()
+        except Exception:
+            pass
 
     def _subscribe(self, ws: Any | None = None) -> None:
         sock = ws if ws is not None else self._ws
