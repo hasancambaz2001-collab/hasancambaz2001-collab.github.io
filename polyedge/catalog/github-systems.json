@@ -1,0 +1,169 @@
+{
+  "as_of": "2026-08-17",
+  "disclaimer": "Stars are not P&L. Public code is not a money printer. CLOB V2 (2026-04-28) archived most V1 SDKs.",
+  "use": [
+    {
+      "repo": "Polymarket/py-sdk",
+      "url": "https://github.com/Polymarket/py-sdk",
+      "role": "official_sdk",
+      "why": "Unified Python SDK after CLOB V2. New bots should start here, not py-clob-client."
+    },
+    {
+      "repo": "Polymarket/ts-sdk",
+      "url": "https://github.com/Polymarket/ts-sdk",
+      "role": "official_sdk",
+      "why": "Unified TypeScript SDK for CLOB + Gamma + Data."
+    },
+    {
+      "repo": "Polymarket/py-clob-client-v2",
+      "url": "https://github.com/Polymarket/py-clob-client-v2",
+      "role": "official_sdk",
+      "why": "Still works but official note points new projects to py-sdk."
+    },
+    {
+      "repo": "Polymarket/polymarket-cli",
+      "url": "https://github.com/Polymarket/polymarket-cli",
+      "role": "official_ops",
+      "stars": 2849,
+      "why": "Official terminal. Ops and discovery, not an edge."
+    },
+    {
+      "repo": "warproxxx/poly-maker",
+      "url": "https://github.com/warproxxx/poly-maker",
+      "role": "market_maker",
+      "stars": 1449,
+      "why": "Best public CLOB V2 maker bot: post-only, inventory skew, reward-band quoting, paper mode, kill switch. This is how protocol yield is actually farmed."
+    },
+    {
+      "repo": "warproxxx/poly_data",
+      "url": "https://github.com/warproxxx/poly_data",
+      "role": "data",
+      "stars": 2275,
+      "why": "Market/order/trade ingestion. Research input, not a strategy."
+    },
+    {
+      "repo": "Jon-Becker/prediction-market-analysis",
+      "url": "https://github.com/Jon-Becker/prediction-market-analysis",
+      "role": "data",
+      "stars": 3756,
+      "why": "Largest public Polymarket+Kalshi historical dataset. Needed before you believe any backtest."
+    },
+    {
+      "repo": "evan-kolberg/prediction-market-backtesting",
+      "url": "https://github.com/evan-kolberg/prediction-market-backtesting",
+      "role": "backtest",
+      "stars": 1144,
+      "why": "Nautilus Trader extension. Use to kill bad ideas before they cost money."
+    },
+    {
+      "repo": "pmxt-dev/pmxt",
+      "url": "https://github.com/pmxt-dev/pmxt",
+      "role": "cross_venue",
+      "stars": 2085,
+      "why": "CCXT-style unified API for Polymarket + Kalshi. Infrastructure for cross-venue arb, not the arb itself."
+    },
+    {
+      "repo": "P-x-J/polymarket-arbitrage-bot",
+      "url": "https://github.com/P-x-J/polymarket-arbitrage-bot",
+      "role": "scanner",
+      "stars": 39,
+      "why": "Honest binary + categorical completeness scanner. Alert-only. Does not pretend live HFT."
+    },
+    {
+      "repo": "0xalberto/polymarket-arbitrage-bot",
+      "url": "https://github.com/0xalberto/polymarket-arbitrage-bot",
+      "role": "scanner",
+      "stars": 63,
+      "why": "Same family: single-market and multi-market completeness search."
+    },
+    {
+      "repo": "ImMike/polymarket-arbitrage",
+      "url": "https://github.com/ImMike/polymarket-arbitrage",
+      "role": "cross_venue",
+      "stars": 244,
+      "why": "Polymarket↔Kalshi matcher + bundle arb. Useful skeleton. Default taker_fee_bps=0 is wrong after 2026 fees — do not run live as-is."
+    },
+    {
+      "repo": "yangyuan-zhen/PolyWeather",
+      "url": "https://github.com/yangyuan-zhen/PolyWeather",
+      "role": "info_edge",
+      "stars": 270,
+      "why": "Serious weather stack (DEB ensemble, settlement stations). Execution/sizing is not in the public repo. AGPL + paid product."
+    },
+    {
+      "repo": "idlepraxis/polymarket-weather-bot",
+      "url": "https://github.com/idlepraxis/polymarket-weather-bot",
+      "role": "info_edge",
+      "stars": 22,
+      "why": "Smaller open weather bot. Paper first; NYC/London/Tokyo are crowded."
+    },
+    {
+      "repo": "aarora4/Awesome-Prediction-Market-Tools",
+      "url": "https://github.com/aarora4/Awesome-Prediction-Market-Tools",
+      "role": "directory",
+      "stars": 680,
+      "why": "Directory. Many listings are commercial front-ends, not edges."
+    }
+  ],
+  "study_not_copy": [
+    {
+      "repo": "Polymarket/poly-market-maker",
+      "url": "https://github.com/Polymarket/poly-market-maker",
+      "why": "Official keeper, Bands/AMM, pre-V2. Strategy ideas only."
+    },
+    {
+      "repo": "Polymarket/agents",
+      "url": "https://github.com/Polymarket/agents",
+      "stars": 3771,
+      "why": "Archived. LLM agents are not an edge."
+    },
+    {
+      "repo": "HarrierOnChain/Prediction-Markets-Trading-Bot-Toolkits",
+      "url": "https://github.com/HarrierOnChain/Prediction-Markets-Trading-Bot-Toolkits",
+      "stars": 397,
+      "why": "Rust multi-strategy marketing + managed waitlist. Read adapters; do not treat Telegram PnL as evidence."
+    },
+    {
+      "repo": "sterlingcrispin/nothing-ever-happens",
+      "url": "https://github.com/sterlingcrispin/nothing-ever-happens",
+      "stars": 982,
+      "why": "Meme: buy NO on everything. Author says entertainment."
+    },
+    {
+      "repo": "ent0n29/polybot",
+      "url": "https://github.com/ent0n29/polybot",
+      "stars": 931,
+      "why": "Claims HFT reverse-engineering. Treat as study material, not a turnkey printer."
+    }
+  ],
+  "avoid": [
+    {
+      "pattern": "SEO keyword-stuffed READMEs repeating 'polymarket bot' 20+ times",
+      "examples": [
+        "radioman/polymarket-arbitrage-trading-bot",
+        "Benjam1nCup/Polymarket-trading-bot-python-V2",
+        "GuillermoEguilaz/Polymarket-Weather-Bot",
+        "frappepress/polymarket-reverse-arbitrage-bot"
+      ],
+      "why": "Star-farm / affiliate bait. Often empty, simulated, or V1-broken."
+    },
+    {
+      "pattern": "Telegram copy-whale bots that want your private key or 'one tap copy'",
+      "examples": ["mothparkzo6249/TG-Polymarket-bot"],
+      "why": "Adverse selection + custody risk. Leaderboards are survivorship."
+    },
+    {
+      "pattern": "Archived V1 SDKs on production",
+      "examples": [
+        "Polymarket/py-clob-client",
+        "Polymarket/clob-client",
+        "Polymarket/rs-clob-client"
+      ],
+      "why": "Officially non-functional after CLOB V2 cutover."
+    },
+    {
+      "pattern": "Geo-relay / no-KYC / no-VPN trading proxies",
+      "why": "Terms and sanctions risk. Not an edge."
+    }
+  ]
+}
