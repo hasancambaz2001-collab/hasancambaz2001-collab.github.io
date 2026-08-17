@@ -1,0 +1,545 @@
+{
+  "generated_at": "2026-08-17 12:42 UTC",
+  "config": {
+    "bankroll_usdc": 2000.0,
+    "holding_frac": 0.15,
+    "max_markets": 6,
+    "min_daily_rate": 15.0,
+    "include_short_crypto": false
+  },
+  "infrastructure": {
+    "polymarket-client": true,
+    "pmxt_key": false,
+    "poly_data": false,
+    "prediction_market_analysis": false,
+    "catalog_source": "polymarket-client"
+  },
+  "slots": [
+    {
+      "question": "Will Jynxzi Win the 2026 Esports Content Creator of the Year Award?",
+      "slug": "will-jynxzi-win-the-2026-esports-content-creator-of-the-year-award-20260806165627996",
+      "condition_id": "0x0b195383be8b1312e52874ac5b840d9542663c5be0ce0f71e66e3668dc3990b0",
+      "url": "https://polymarket.com/market/will-jynxzi-win-the-2026-esports-content-creator-of-the-year-award-20260806165627996",
+      "daily_rate": 157.0,
+      "min_size": 20.0,
+      "max_spread": 4.5,
+      "liquidity": 2838.4117,
+      "volume_24h": 3851.45,
+      "fee_rate": 0.05,
+      "rebate_rate": 0.15,
+      "holding": false,
+      "score": {
+        "condition_id": "0x0b195383be8b1312e52874ac5b840d9542663c5be0ce0f71e66e3668dc3990b0",
+        "reward_density": 5.5313,
+        "rebate_pool": 10.6878,
+        "spread": 0.02,
+        "extremity": 0.26,
+        "score": 3.6713,
+        "skip_reason": ""
+      },
+      "quotes": {
+        "yes": {
+          "token": "52668138869570310496842080612299795592906425727438729736354321737613073302452",
+          "side": "BUY",
+          "outcome": "YES",
+          "price": 0.61,
+          "size": 190.48
+        },
+        "no": {
+          "token": "31349778214228772408363891829642075408132018406882511613534028096040403100029",
+          "side": "BUY",
+          "outcome": "NO",
+          "price": 0.35,
+          "size": 190.48
+        },
+        "fair_value": 0.63,
+        "half_spread": 0.02,
+        "locked_edge": 0.04,
+        "capital_usdc": 182.8608,
+        "reward_score": 58.7901,
+        "two_sided": true,
+        "notes": []
+      },
+      "est_daily_reward": 10.115,
+      "est_daily_rebate": 0.689,
+      "est_holding_daily": 0.0,
+      "kalshi": [],
+      "skip_reason": ""
+    },
+    {
+      "question": "Will Estral Esports Win Circuito Desafiante 2026 Split 2",
+      "slug": "will-estral-esports-win-circuito-desafiante-2026-split-2-20260727190556724",
+      "condition_id": "0x0b97e52a22b02d3e67202aaba02d1015bf9d6b84c914667cbba7903ffc4ac203",
+      "url": "https://polymarket.com/market/will-estral-esports-win-circuito-desafiante-2026-split-2-20260727190556724",
+      "daily_rate": 191.0,
+      "min_size": 20.0,
+      "max_spread": 4.5,
+      "liquidity": 4285.5049,
+      "volume_24h": 5391.162781,
+      "fee_rate": 0.05,
+      "rebate_rate": 0.15,
+      "holding": false,
+      "score": {
+        "condition_id": "0x0b97e52a22b02d3e67202aaba02d1015bf9d6b84c914667cbba7903ffc4ac203",
+        "reward_density": 4.4569,
+        "rebate_pool": 14.354,
+        "spread": 0.01,
+        "extremity": 0.29,
+        "score": 3.4142,
+        "skip_reason": ""
+      },
+      "quotes": {
+        "yes": {
+          "token": "98845344108232066361192338501214421509097326906782147065710298229897373226115",
+          "side": "BUY",
+          "outcome": "YES",
+          "price": 0.62,
+          "size": 186.05
+        },
+        "no": {
+          "token": "24871173507043014598895637812716430930094256041113965887317581517224836832776",
+          "side": "BUY",
+          "outcome": "NO",
+          "price": 0.33,
+          "size": 186.05
+        },
+        "fair_value": 0.645,
+        "half_spread": 0.02,
+        "locked_edge": 0.05,
+        "capital_usdc": 176.7475,
+        "reward_score": 36.7506,
+        "two_sided": true,
+        "notes": []
+      },
+      "est_daily_reward": 7.877,
+      "est_daily_rebate": 0.592,
+      "est_holding_daily": 0.0,
+      "kalshi": [],
+      "skip_reason": ""
+    },
+    {
+      "question": "Will Linke win 35-39 seats in the 2026 Berlin state elections?",
+      "slug": "will-linke-win-35-39-seats-in-the-2026-berlin-state-elections-20260805192827917",
+      "condition_id": "0x09f514f374b5ce8713b94f7e9a05402f65fe5a6aed976b96065863048a95cf82",
+      "url": "https://polymarket.com/market/will-linke-win-35-39-seats-in-the-2026-berlin-state-elections-20260805192827917",
+      "daily_rate": 60.0,
+      "min_size": 20.0,
+      "max_spread": 5.5,
+      "liquidity": 2945.6719,
+      "volume_24h": 50.79,
+      "fee_rate": 0.04,
+      "rebate_rate": 0.25,
+      "holding": false,
+      "score": {
+        "condition_id": "0x09f514f374b5ce8713b94f7e9a05402f65fe5a6aed976b96065863048a95cf82",
+        "reward_density": 2.0369,
+        "rebate_pool": 0.2819,
+        "spread": 0.01,
+        "extremity": 0.11,
+        "score": 1.6116,
+        "skip_reason": ""
+      },
+      "quotes": {
+        "yes": {
+          "token": "42675782742063113259665134093824193201745656600077840787966378185469793802069",
+          "side": "BUY",
+          "outcome": "YES",
+          "price": 0.42,
+          "size": 269.66
+        },
+        "no": {
+          "token": "52283224083851745252163649380664648586617226600575065573894837801226871855902",
+          "side": "BUY",
+          "outcome": "NO",
+          "price": 0.53,
+          "size": 269.66
+        },
+        "fair_value": 0.445,
+        "half_spread": 0.02,
+        "locked_edge": 0.05,
+        "capital_usdc": 256.177,
+        "reward_score": 80.2294,
+        "two_sided": true,
+        "notes": []
+      },
+      "est_daily_reward": 5.218,
+      "est_daily_rebate": 0.025,
+      "est_holding_daily": 0.0,
+      "kalshi": [],
+      "skip_reason": ""
+    },
+    {
+      "question": "Microstrategy delisted from MSCI index by December 31?",
+      "slug": "microstrategy-delisted-from-msci-index-by-december-31",
+      "condition_id": "0x1f2f8b7de407213b780d16021977b90cea238c9787d07957133569ac83aa0b3b",
+      "url": "https://polymarket.com/market/microstrategy-delisted-from-msci-index-by-december-31",
+      "daily_rate": 300.00052,
+      "min_size": 20.0,
+      "max_spread": 3.5,
+      "liquidity": 11632.9432,
+      "volume_24h": 112.22,
+      "fee_rate": 0.04,
+      "rebate_rate": 0.25,
+      "holding": false,
+      "score": {
+        "condition_id": "0x1f2f8b7de407213b780d16021977b90cea238c9787d07957133569ac83aa0b3b",
+        "reward_density": 2.5789,
+        "rebate_pool": 0.2301,
+        "spread": 0.01,
+        "extremity": 0.59,
+        "score": 1.5163,
+        "skip_reason": ""
+      },
+      "quotes": {
+        "yes": {
+          "token": "114857043492613614973270979337500273592827573151892176432532240088586398012963",
+          "side": "BUY",
+          "outcome": "YES",
+          "price": 0.77,
+          "size": 150.94
+        },
+        "no": {
+          "token": "60316009896902202779580480392506718387438109895130129317220467818156088562180",
+          "side": "BUY",
+          "outcome": "NO",
+          "price": 0.18,
+          "size": 150.94
+        },
+        "fair_value": 0.795,
+        "half_spread": 0.01575,
+        "locked_edge": 0.05,
+        "capital_usdc": 143.393,
+        "reward_score": 12.3216,
+        "two_sided": true,
+        "notes": []
+      },
+      "est_daily_reward": 3.698,
+      "est_daily_rebate": 0.003,
+      "est_holding_daily": 0.0,
+      "kalshi": [],
+      "skip_reason": ""
+    },
+    {
+      "question": "Will Arknights: Endfield win Best Mobile Game at the 2026 Game Awards?",
+      "slug": "will-arknights-endfield-win-best-mobile-game-at-the-2026-game-awards-1785857781977",
+      "condition_id": "0x21acf82868ab9c7a1b4ec72b2439893f40df6167fc9d7453f6d96a4c6d6c7fb7",
+      "url": "https://polymarket.com/market/will-arknights-endfield-win-best-mobile-game-at-the-2026-game-awards-1785857781977",
+      "daily_rate": 56.0,
+      "min_size": 20.0,
+      "max_spread": 4.5,
+      "liquidity": 3881.7455,
+      "volume_24h": 185.0,
+      "fee_rate": 0.05,
+      "rebate_rate": 0.25,
+      "holding": false,
+      "score": {
+        "condition_id": "0x21acf82868ab9c7a1b4ec72b2439893f40df6167fc9d7453f6d96a4c6d6c7fb7",
+        "reward_density": 1.4426,
+        "rebate_pool": 1.4106,
+        "spread": 0.02,
+        "extremity": 0.22,
+        "score": 0.9402,
+        "skip_reason": ""
+      },
+      "quotes": {
+        "yes": {
+          "token": "95583919590555984464312446897071186826264888635400154190080252278073140644639",
+          "side": "BUY",
+          "outcome": "YES",
+          "price": 0.37,
+          "size": 307.69
+        },
+        "no": {
+          "token": "81984169056162970974921315004398764148776777269361549928928217010905949153453",
+          "side": "BUY",
+          "outcome": "NO",
+          "price": 0.59,
+          "size": 307.69
+        },
+        "fair_value": 0.39,
+        "half_spread": 0.02,
+        "locked_edge": 0.04,
+        "capital_usdc": 295.3824,
+        "reward_score": 94.966,
+        "two_sided": true,
+        "notes": []
+      },
+      "est_daily_reward": 4.261,
+      "est_daily_rebate": 0.107,
+      "est_holding_daily": 0.0,
+      "kalshi": [],
+      "skip_reason": ""
+    },
+    {
+      "question": "Will Anthony Albanese be Prime Minister of Australia after the next election?",
+      "slug": "will-anthony-albanese-be-prime-minister-of-australia-after-the-next-election-20260610170605300",
+      "condition_id": "0x1b79d38eaa46ca614c80ad8567b83f515c07427aa097e526f97b8ccb3740ae73",
+      "url": "https://polymarket.com/market/will-anthony-albanese-be-prime-minister-of-australia-after-the-next-election-20260610170605300",
+      "daily_rate": 103.0,
+      "min_size": 20.0,
+      "max_spread": 5.5,
+      "liquidity": 8763.6718,
+      "volume_24h": 0.0,
+      "fee_rate": 0.04,
+      "rebate_rate": 0.25,
+      "holding": false,
+      "score": {
+        "condition_id": "0x1b79d38eaa46ca614c80ad8567b83f515c07427aa097e526f97b8ccb3740ae73",
+        "reward_density": 1.1753,
+        "rebate_pool": 0.0,
+        "spread": 0.01,
+        "extremity": 0.19,
+        "score": 0.8864,
+        "skip_reason": ""
+      },
+      "quotes": {
+        "yes": {
+          "token": "69213562690101735156501998596681994993151358097122036858310980906612080202023",
+          "side": "BUY",
+          "outcome": "YES",
+          "price": 0.38,
+          "size": 296.3
+        },
+        "no": {
+          "token": "51070457602719753892837958010310320305540247264412647997394160355742935011099",
+          "side": "BUY",
+          "outcome": "NO",
+          "price": 0.57,
+          "size": 296.3
+        },
+        "fair_value": 0.405,
+        "half_spread": 0.02,
+        "locked_edge": 0.05,
+        "capital_usdc": 281.485,
+        "reward_score": 88.1554,
+        "two_sided": true,
+        "notes": []
+      },
+      "est_daily_reward": 3.308,
+      "est_daily_rebate": 0.0,
+      "est_holding_daily": 0.0,
+      "kalshi": [],
+      "skip_reason": ""
+    }
+  ],
+  "skipped": [
+    {
+      "question": "Will the highest temperature in Los Angeles be between 76-77°F on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 235.0
+    },
+    {
+      "question": "Israel closes its airspace by August 31?",
+      "reason": "resolves-within-48h",
+      "daily": 201.99872
+    },
+    {
+      "question": "Will Tarsier Pharma's market cap be less than $250M at market close on IPO day?",
+      "reason": "resolves-within-48h",
+      "daily": 200.0
+    },
+    {
+      "question": "Will the highest temperature in Paris be 29°C on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 200.0
+    },
+    {
+      "question": "Will Charlie Crist win the St. Petersburg mayoral election?",
+      "reason": "resolves-within-48h",
+      "daily": 152.0
+    },
+    {
+      "question": "Will Sol1xd Win the 2026 Soloq Challenge (High Elo)",
+      "reason": "thin-book",
+      "liq": 163.9288
+    },
+    {
+      "question": "Will the highest temperature in Chicago be between 78-79°F on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 117.0
+    },
+    {
+      "question": "Will the highest temperature in Austin be between 102-103°F on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 115.0
+    },
+    {
+      "question": "Will the median home value in NYC be between $636,000 and $663,000 on September 30?",
+      "reason": "thin-book",
+      "liq": 704.0091
+    },
+    {
+      "question": "Will Ted Cruz post 160-179 posts from August 11 to August 18, 2026?",
+      "reason": "mentions-clock",
+      "daily": 111.0
+    },
+    {
+      "question": "Will the highest temperature in Amsterdam be 21°C on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 109.0
+    },
+    {
+      "question": "Will Scott Singer be the FL-25 Republican nominee?",
+      "reason": "resolves-within-48h",
+      "daily": 108.0
+    },
+    {
+      "question": "Will the highest temperature in Seattle be between 78-79°F on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 111.0
+    },
+    {
+      "question": "Will Google have the best Text-to-Video AI at the end of September 2026?",
+      "reason": "thin-book",
+      "liq": 2385.1188
+    },
+    {
+      "question": "Will the highest temperature in Miami be between 96-97°F on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 101.0
+    },
+    {
+      "question": "Will the highest temperature in Warsaw be 24°C on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 103.0
+    },
+    {
+      "question": "Will Robin Peguero be the FL-27 Democratic nominee?",
+      "reason": "resolves-within-48h",
+      "daily": 92.0
+    },
+    {
+      "question": "Will the highest temperature in Warsaw be 25°C on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 95.0
+    },
+    {
+      "question": "Will Diego González (Santos Laguna) record the most assists in the 2027 Liga MX Clausura?",
+      "reason": "thin-book",
+      "liq": 118.22563
+    },
+    {
+      "question": "Will USD be between 1.8M and 1.9M Iranian rials on August 31?",
+      "reason": "thin-book",
+      "liq": 1911.1593
+    },
+    {
+      "question": "Will Belinda Keiser be the FL-22 Republican nominee?",
+      "reason": "resolves-within-48h",
+      "daily": 71.0
+    },
+    {
+      "question": "Will JHC win the 2026 Alagoas gubernatorial election?",
+      "reason": "thin-book",
+      "liq": 561.6792
+    },
+    {
+      "question": "Will OpenAI have the best Code Arena | WebDev AI at the end of September 2026?",
+      "reason": "thin-book",
+      "liq": 1662.0534
+    },
+    {
+      "question": "Will the highest temperature in Milan be 30°C on August 17?",
+      "reason": "resolves-within-48h",
+      "daily": 63.0
+    },
+    {
+      "question": "Will the Republican Party win the FL-07 House seat?",
+      "reason": "thin-book",
+      "liq": 1981.2914
+    },
+    {
+      "question": "Will Dan Green be the Republican nominee for FL-09?",
+      "reason": "resolves-within-48h",
+      "daily": 58.0
+    },
+    {
+      "question": "Will the highest temperature in Austin be between 100-101°F on August 18?",
+      "reason": "resolves-within-48h",
+      "daily": 58.0
+    },
+    {
+      "question": "Will the highest temperature in Toronto be 27°C on August 18?",
+      "reason": "resolves-within-48h",
+      "daily": 56.0
+    },
+    {
+      "question": "Will the highest temperature in Karachi be 32°C on August 19?",
+      "reason": "resolves-within-48h",
+      "daily": 56.0
+    },
+    {
+      "question": "Will voter turnout be between 60% and 70% in the first round of the 2026 Zambian presidential elections?",
+      "reason": "resolves-within-48h",
+      "daily": 57.0
+    },
+    {
+      "question": "Will Denny Hamlin win the 2026 NASCAR Cup Series championship?",
+      "reason": "thin-book",
+      "liq": 2310.0998
+    },
+    {
+      "question": "Will Marcye Scott win the 2026 GA-13 special election?",
+      "reason": "resolves-within-48h",
+      "daily": 53.0
+    },
+    {
+      "question": "Will Microsoft AI have the best Text-to-Image AI at the end of October 2026?",
+      "reason": "thin-book",
+      "liq": 1116.9759
+    },
+    {
+      "question": "Will Apple (AAPL) hit (LOW) $296 Week of August 17 2026?",
+      "reason": "same-week-expiry",
+      "daily": 50.0
+    },
+    {
+      "question": "Will there be 4-5 Rampages at The International 2026?",
+      "reason": "thin-book",
+      "liq": 153.7642
+    },
+    {
+      "question": "Will Airbnb, Inc. (ABNB) hit (HIGH) $190 Week of August 17 2026?",
+      "reason": "same-week-expiry",
+      "daily": 50.0
+    },
+    {
+      "question": "Will Meta Platforms, Inc. (META) hit (LOW) $580 Week of August 17 2026?",
+      "reason": "same-week-expiry",
+      "daily": 50.0
+    },
+    {
+      "question": "Will Gold (XAUUSD) hit (LOW) $4,250 Week of August 17 2026?",
+      "reason": "same-week-expiry",
+      "daily": 50.0
+    },
+    {
+      "question": "Will Micron Technology, Inc. (MU) hit (LOW) $960 Week of August 17 2026?",
+      "reason": "same-week-expiry",
+      "daily": 50.0
+    },
+    {
+      "question": "Will Amazon.com, Inc. (AMZN) hit (HIGH) $268 Week of August 17 2026?",
+      "reason": "same-week-expiry",
+      "daily": 50.0
+    }
+  ],
+  "totals": {
+    "markets_considered": 80,
+    "slots": 6,
+    "capital_locked_usdc": 1336.05,
+    "capital_left_usdc": 363.95,
+    "est_daily_usd": 35.893,
+    "est_daily_on_locked_pct": 2.687,
+    "note": "Estimates assume you keep two-sided in-band quotes and win a liquidity share. Inventory can erase this."
+  },
+  "instructions": [
+    "Mod varsayılanı KAĞIT. Emir gitmez.",
+    "Her markette YES ve NO için post-only BUY (maker). Ask'i geçme.",
+    "İki bacak da fill olursa merge: kilitli edge = 1 - p_yes - p_no.",
+    "Tek bacak fill = envanter. Karşı tarafı daha agresif al veya REDUCE_ONLY sat.",
+    "Haber/jump: kotasyonu çek. Daily-loss kill kullan.",
+    "Canlı için POLYEDGE_LIVE=1 + resmi SDK kimliği. Geo-bypass yok.",
+    "est_daily_* rekabet payı sezgiselidir, garanti değildir."
+  ]
+}

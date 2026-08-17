@@ -102,7 +102,23 @@ Holding örnekleri: 2028 başkanlık adayları, 2026 Kongre balance of power, Pu
 
 “Botu aç, arb yağsın” 2026’da yok. Ya protokol ödemesini farm edersin, ya ince bir bilgi kenarın vardır, ya da boşluk için milisaniye beklersin.
 
-## 5. Sizin için somut sıra
+## 5. Kurulan sistem (`polyedge farm`)
+
+Resmi `polymarket-client` (`list_current_rewards` + `list_markets` + `get_prices`) ile kâğıt farm planı üretir:
+
+- İki taraflı post-only BUY YES / BUY NO (poly-maker kotasyonu)
+- Quadratic reward skoru, rebate havuzu, extremity cezası
+- Elenecekler: 5dk crypto TWAP, 1.5¢ HFT band, mentions/tweet saati, 48s içi settlement, $2500 altı defter
+- İsteğe bağlı: `PMXT_API_KEY` + `--kalshi`, `POLY_DATA_DIR`, `PMA_DATA_DIR`
+
+```bash
+pip install -r polyedge/requirements.txt
+PYTHONPATH=polyedge/src python3 -m polyedge farm --bankroll 2000
+```
+
+Canlı execution için paper önce [warproxxx/poly-maker](https://github.com/warproxxx/poly-maker). Bu repo emir imzalamaz.
+
+## 6. Sizin için somut sıra
 
 1. Yasal olarak trade edebildiğinizden emin olun. Bypass yok.
 2. `polyedge scan` çalıştırın. LP tablosundaki **yüksek $/gün + düşük likidite** satırlar farm adayıdır. Completeness/Dutch çoğu günde boş kalması **normal ve sağlıklı**.
@@ -111,7 +127,7 @@ Holding örnekleri: 2028 başkanlık adayları, 2026 Kongre balance of power, Pu
 5. Hava/spor ancak **kendi kalibrasyonunuz** 30–60 gün paper’da market’i yendikten sonra.
 6. Canlı size: kaybetmeyi göze aldığınız miktar. Daily-loss kill. Haber anında quote çek.
 
-## 6. Bu tarayıcının bilerek yapmadığı
+## 7. Bu tarayıcının bilerek yapmadığı
 
 - Emir / imza / private key
 - Geo-block veya KYC aşma

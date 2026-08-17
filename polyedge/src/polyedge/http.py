@@ -22,9 +22,12 @@ def request_json(
     payload: Optional[Any] = None,
     timeout: float = 30.0,
     retries: int = 3,
+    extra_headers: Optional[dict[str, str]] = None,
 ) -> Any:
     body = None
     headers = dict(DEFAULT_HEADERS)
+    if extra_headers:
+        headers.update(extra_headers)
     if payload is not None:
         body = json.dumps(payload).encode("utf-8")
         headers["Content-Type"] = "application/json"

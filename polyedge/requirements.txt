@@ -1,0 +1,4 @@
+# Core farm uses the official SDK when present; scanners work with stdlib only.
+polymarket-client>=0.6.0
+# Optional:
+# pmxt>=2.50.0

@@ -1,0 +1,14 @@
+{
+  "bankroll_usdc": 2000,
+  "holding_frac": 0.15,
+  "max_markets": 6,
+  "min_daily_rate": 15,
+  "max_min_size": 250,
+  "min_max_spread": 3.0,
+  "include_short_crypto": false,
+  "include_same_day": false,
+  "include_mentions": false,
+  "min_liquidity": 2500,
+  "min_hours_to_end": 48,
+  "notes": "Short-window crypto TWAP (5m/15m) has the fattest August reward pools and the worst inventory toxicity. Leave it off unless you have sub-second cancel and a dedicated tape."
+}
