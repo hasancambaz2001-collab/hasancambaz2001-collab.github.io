@@ -176,6 +176,8 @@ def snapshot_maker(
             rec["book_get_ms"] = (time.time() - t_books) * 1000.0
             if book_cache is not None and hasattr(book_cache, "set_tokens"):
                 book_cache.set_tokens(tok["Up"], tok["Down"])
+            if book_cache is not None and hasattr(book_cache, "stats"):
+                rec.update(book_cache.stats())
     except Exception as exc:
         rec["error"] = f"clob:{exc}"
         rec["reason"] = "clob_error"

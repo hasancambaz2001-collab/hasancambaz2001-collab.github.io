@@ -33,6 +33,14 @@ def test_percentile_and_summarize() -> None:
     assert summary["p50"] == 200
 
 
+def test_set_tokens_accumulates() -> None:
+    cache = BookAgeCache()
+    cache.set_tokens("u1", "d1")
+    cache.set_tokens("u2", "d2")
+    assert cache._want == {"u1", "d1", "u2", "d2"}
+    assert cache.stats()["ws_n_want"] == 4
+
+
 def test_book_age_fresh_and_stale() -> None:
     cache = BookAgeCache()
     cache._handle(

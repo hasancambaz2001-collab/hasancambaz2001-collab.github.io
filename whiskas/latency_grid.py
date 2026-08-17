@@ -76,6 +76,8 @@ class BookAgeCache:
         self._stop = threading.Event()
         self._ws_ok = False
         self._ws: Any = None
+        self._recv_n = 0
+        self._last_error = None
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -95,13 +97,35 @@ class BookAgeCache:
 
     def set_tokens(self, token_up: str, token_down: str) -> None:
         with self._lock:
-            self._want = {str(token_up), str(token_down)}
-        ws = self._ws
-        if ws is not None:
-            try:
-                ws.send(json.dumps({"type": "market", "assets_ids": [str(token_up), str(token_down)]}))
-            except Exception:
-                pass
+            before = len(self._want)
+            self._want.add(str(token_up))
+            self._want.add(str(token_down))
+            grew = len(self._want) > before
+        if grew or self._ws is not None:
+            self._subscribe()
+
+    def stats(self) -> dict[str, Any]:
+        with self._lock:
+            return {
+                "ws_ok": bool(self._ws_ok),
+                "ws_n_books": len(self._books),
+                "ws_recv_n": int(self._recv_n),
+                "ws_n_want": len(self._want),
+                "ws_error": self._last_error,
+            }
+
+    def _subscribe(self, ws: Any | None = None) -> None:
+        sock = ws if ws is not None else self._ws
+        if sock is None:
+            return
+        with self._lock:
+            ids = list(self._want)
+        if not ids:
+            return
+        try:
+            sock.send(json.dumps({"type": "market", "assets_ids": ids, "custom_feature_enabled": True}))
+        except Exception as exc:
+            self._last_error = type(exc).__name__
 
     def age_ms(self, token_id: str) -> float | None:
         with self._lock:
@@ -134,6 +158,7 @@ class BookAgeCache:
         with self._lock:
             self._books[str(token_id)] = book
             self._recv_ts[str(token_id)] = time.time()
+            self._recv_n += 1
 
     def _handle(self, payload: Any) -> None:
         rows = payload if isinstance(payload, list) else [payload]
@@ -174,38 +199,62 @@ class BookAgeCache:
             from websocket import WebSocketApp
         except ImportError:
             self._ws_ok = False
+            self._last_error = "ImportError"
             return
         while not self._stop.is_set():
             try:
                 self._loop_ws(WebSocketApp)
-            except Exception:
+            except Exception as exc:
+                self._last_error = type(exc).__name__
                 time.sleep(1.0)
 
     def _loop_ws(self, WebSocketApp: Any) -> None:
         def on_open(ws: Any) -> None:
             self._ws = ws
             self._ws_ok = True
-            with self._lock:
-                ids = list(self._want)
-            if ids:
-                ws.send(json.dumps({"type": "market", "assets_ids": ids}))
+            self._subscribe(ws)
 
         def on_message(_ws: Any, message: str) -> None:
+            if not message or message == "PONG":
+                return
             try:
                 self._handle(json.loads(message))
             except Exception:
                 return
 
+        def on_error(_ws: Any, err: Any) -> None:
+            self._last_error = str(err)[:160]
+            self._ws_ok = False
+
         def on_close(_ws: Any, *_a: Any) -> None:
             self._ws_ok = False
 
-        ws = WebSocketApp(WS_URL, on_open=on_open, on_message=on_message, on_close=on_close)
+        ws = WebSocketApp(
+            WS_URL,
+            on_open=on_open,
+            on_message=on_message,
+            on_error=on_error,
+            on_close=on_close,
+        )
         self._ws = ws
+        ping = threading.Thread(target=self._ping_loop, name="clob-book-ping", daemon=True)
+        ping.start()
         try:
             ws.run_forever(ping_interval=20, ping_timeout=10)
         finally:
             self._ws = None
             self._ws_ok = False
+
+    def _ping_loop(self) -> None:
+        while not self._stop.is_set():
+            sock = self._ws
+            if sock is not None and self._ws_ok:
+                try:
+                    sock.send("PING")
+                except Exception:
+                    pass
+            if self._stop.wait(10.0):
+                break
 
 
 def infer_variant(rec: dict[str, Any]) -> str | None:
@@ -245,11 +294,14 @@ def variant_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
     for rec in intents:
         src = str(rec.get("still250_source") or "unknown")
         sources[src] = sources.get(src, 0) + 1
+    ws_age = [r for r in intents if r.get("still250_source") == "ws_age"]
     return {
         "n_intent": len(intents),
         "n_sent": len(sent),
         "n_would_send": sum(1 for r in intents if r.get("would_send") is True),
         "n_still250_true": sum(1 for r in intents if r.get("still_there_250ms") is True),
+        "n_ws_age": len(ws_age),
+        "still_ms_ws_age": summarize_ms(_floats(ws_age, "still_ms")),
         "still250_source": sources,
         "still_ms": summarize_ms(_floats(intents, "still_ms")),
         "book_get_ms": summarize_ms(_floats(intents, "book_get_ms")),
@@ -330,23 +382,25 @@ def render_grid_md(result: dict[str, Any], *, path: str = "") -> str:
         "",
         "## Rank (post_ack_ms p50, then p95)",
         "",
-        "| rank | variant | n_intent | n_sent | post_ack p50 | post_ack p95 | still_ms p50 | still_ms p95 | still250_source |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---|",
+        "| rank | variant | n_intent | n_sent | n_ws_age | post_ack p50 | post_ack p95 | still_ms p50 | still_ms p95 | still_ms ws_age p50 | still250_source |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for row in result.get("variants") or []:
         post = row["post_ack_ms"]
         still = row["still_ms"]
         src = ",".join(f"{k}:{v}" for k, v in sorted((row.get("still250_source") or {}).items()))
         lines.append(
-            "| {rank} | {variant} | {n_intent} | {n_sent} | {p50} | {p95} | {s50} | {s95} | {src} |".format(
+            "| {rank} | {variant} | {n_intent} | {n_sent} | {n_ws} | {p50} | {p95} | {s50} | {s95} | {w50} | {src} |".format(
                 rank=row.get("rank"),
                 variant=row.get("variant"),
                 n_intent=row.get("n_intent"),
                 n_sent=row.get("n_sent"),
+                n_ws=row.get("n_ws_age"),
                 p50=_fmt(post.get("p50")),
                 p95=_fmt(post.get("p95")),
                 s50=_fmt(still.get("p50")),
                 s95=_fmt(still.get("p95")),
+                w50=_fmt((row.get("still_ms_ws_age") or {}).get("p50")),
                 src=src or "—",
             )
         )
