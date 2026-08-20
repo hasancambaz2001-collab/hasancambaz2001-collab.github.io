@@ -1,0 +1,164 @@
+{
+  "generated": "2026-08-16 18:59 UTC",
+  "clip": 10.0,
+  "pair_max": 0.9,
+  "from_ts": 1786713600,
+  "to_ts": 1786906500,
+  "download": true,
+  "n_slugs_downloaded": 960,
+  "n_slugs_one_leg": 832,
+  "n_slugs_joined": 128,
+  "n_rest": 169,
+  "n_rest_recorder": 905,
+  "n_rest_joined": 24907,
+  "n_leader_s1": 128,
+  "n_leader_s1_downloaded": 128,
+  "n_agree": 107,
+  "cover": 0.8359375,
+  "cover_bosona": 0.8865979381443299,
+  "cover_mo": 0.8736842105263158,
+  "cover_min_info": 0.8,
+  "edge_proxy_fee0": 419.6999321905117,
+  "edge_proxy_rebate": 429.5627181905117,
+  "rebate_usd": 9.862786000000009,
+  "notion": 1270.3000678094877,
+  "worst_day": {
+    "day": "2026-08-16",
+    "edge": 419.6999321905117,
+    "notion": 1270.3000678094877,
+    "edge_over_notion": 0.33039432400743274
+  },
+  "worst_day_ok": true,
+  "fill_risk_averse": {
+    "fill_ratio": 0.10164835164835165,
+    "n_rest": 364,
+    "n_complete_fills": 37,
+    "scenario": "pessimistic"
+  },
+  "fill_prob": {
+    "fill_ratio": 0.10714285714285714,
+    "n_rest": 364,
+    "n_complete_fills": 39,
+    "scenario": "base"
+  },
+  "paper_live": {
+    "n_rest": 718,
+    "fill_band": "0.1226 residual-sim",
+    "still250": "65/80=0.8125",
+    "fill_sim": 0.12256267409470752,
+    "n_rows": 16243,
+    "note": "paper residual-sim only. not hist queue. not live CLOB fill."
+  },
+  "one_leg_sample": [
+    {
+      "slug": "btc-updown-5m-1786713600",
+      "n_ticks": 148409,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.999,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786713900",
+      "n_ticks": 116327,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.999,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786714200",
+      "n_ticks": 203847,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.75,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786714500",
+      "n_ticks": 240772,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.98,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786714800",
+      "n_ticks": 232483,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.99,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786715100",
+      "n_ticks": 217223,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.8,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786715400",
+      "n_ticks": 207311,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.63,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    },
+    {
+      "slug": "btc-updown-5m-1786715700",
+      "n_ticks": 158300,
+      "yes_bid_min": 0.0,
+      "yes_bid_max": 0.53,
+      "pair_edge": "skipped_one_leg",
+      "note": "PMData L2 is Yes-token only. No complement Down. Pair edge skipped."
+    }
+  ],
+  "day_notes": [
+    {
+      "series": "btc-5m",
+      "day": "2026-08-14",
+      "status": "cached",
+      "path": "data/parquet/pmdata/day/btc-5m_l2_2026-08-14.zip"
+    },
+    {
+      "series": "btc-5m",
+      "day": "2026-08-15",
+      "status": "cached",
+      "path": "data/parquet/pmdata/day/btc-5m_l2_2026-08-15.zip"
+    },
+    {
+      "series": "eth-5m",
+      "day": "2026-08-14",
+      "status": "cached",
+      "path": "data/parquet/pmdata/day/eth-5m_l2_2026-08-14.zip"
+    },
+    {
+      "series": "eth-5m",
+      "day": "2026-08-15",
+      "status": "cached",
+      "path": "data/parquet/pmdata/day/eth-5m_l2_2026-08-15.zip"
+    },
+    {
+      "slug_api_have": 128,
+      "slug_api_miss": 0,
+      "no_unlock_days": [
+        "2026-08-16"
+      ]
+    }
+  ],
+  "days_unlocked_this_run": false,
+  "pair_gt_1_trade": false,
+  "live_order": false,
+  "size_ok": false,
+  "g5_exists": false,
+  "live_ready_exists": false,
+  "source_joined": "joined_yes_l2_plus_dump_down",
+  "key_env": "PMDATA_API_KEY",
+  "report_written": true,
+  "g6_flag_written": true,
+  "g6_pass": true,
+  "fail_reasons": [],
+  "note": "G6-fast historical twin. Not live fill proof. Not G5. Not LIVE_READY. G6-fast replaces week-long wait for calibration evidence; micro live still needed before size"
+}

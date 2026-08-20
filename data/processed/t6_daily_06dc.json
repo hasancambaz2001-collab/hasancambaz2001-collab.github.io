@@ -1,0 +1,103 @@
+{
+  "n_daily_slugs": 13,
+  "n_directional_resolved": 8,
+  "hits": 4,
+  "hit_rate": 0.5,
+  "hit_min": 0.58,
+  "n_min": 20,
+  "gate": "UNCLEAR",
+  "r7_daily_t6": false,
+  "samples": [
+    {
+      "slug": "bitcoin-up-or-down-on-august-17-2026",
+      "guess": "Up",
+      "winner": null,
+      "aligned": false
+    },
+    {
+      "slug": "ethereum-up-or-down-on-august-17-2026",
+      "guess": "Up",
+      "winner": null,
+      "aligned": false
+    },
+    {
+      "slug": "solana-up-or-down-on-august-16-2026",
+      "guess": "Up",
+      "winner": null,
+      "aligned": false
+    },
+    {
+      "slug": "bitcoin-up-or-down-on-august-16-2026",
+      "guess": "Up",
+      "winner": null,
+      "aligned": false
+    },
+    {
+      "slug": "xrp-up-or-down-on-august-16-2026",
+      "guess": "Down",
+      "winner": null,
+      "aligned": false
+    },
+    {
+      "slug": "solana-up-or-down-on-august-15-2026",
+      "guess": "Down",
+      "winner": "Down",
+      "hit": true,
+      "aligned": true
+    },
+    {
+      "slug": "ethereum-up-or-down-on-august-15-2026",
+      "guess": "Up",
+      "winner": "Up",
+      "hit": true,
+      "aligned": true
+    },
+    {
+      "slug": "bitcoin-up-or-down-on-august-15-2026",
+      "guess": "Up",
+      "winner": "Up",
+      "hit": true,
+      "aligned": true
+    },
+    {
+      "slug": "xrp-up-or-down-on-august-15-2026",
+      "guess": "Down",
+      "winner": "Down",
+      "hit": true,
+      "aligned": true
+    },
+    {
+      "slug": "ethereum-up-or-down-on-august-14-2026",
+      "guess": "Down",
+      "winner": "Up",
+      "hit": false,
+      "aligned": true
+    },
+    {
+      "slug": "solana-up-or-down-on-august-14-2026",
+      "guess": "Up",
+      "winner": "Down",
+      "hit": false,
+      "aligned": true
+    },
+    {
+      "slug": "xrp-up-or-down-on-august-14-2026",
+      "guess": "Down",
+      "winner": "Up",
+      "hit": false,
+      "aligned": true
+    },
+    {
+      "slug": "bitcoin-up-or-down-on-august-14-2026",
+      "guess": "Up",
+      "winner": "Down",
+      "hit": false,
+      "aligned": true
+    }
+  ],
+  "note": "No ATM directional taker invent. R7 only if hit-rate>=58% and n>=20 with spot alignment.",
+  "r6_bid_max": 0.99,
+  "live": false,
+  "generated": "2026-08-16 17:41 UTC",
+  "r7_written": false
+}

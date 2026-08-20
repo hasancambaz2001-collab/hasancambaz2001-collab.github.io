@@ -1,0 +1,11 @@
+{
+  "book": "S1",
+  "primary": "paper_maker",
+  "ask_fok_primary": false,
+  "pair_gt_1_trade": false,
+  "clip": 10.0,
+  "label": "clip10",
+  "n": 209,
+  "usd": 797.5973991534728,
+  "pnl_from_paper_intends": false
+}

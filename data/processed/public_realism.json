@@ -1,0 +1,274 @@
+[
+  {
+    "label": "bosona",
+    "dump": "data/dumps/bosona_activity.json",
+    "n_s1_slugs": 8,
+    "fee_sample_clip10": [
+      {
+        "slug": "btc-updown-5m-1786892100",
+        "pair": 0.6853509902136367,
+        "maker_clip10": 3.1464900978636337,
+        "taker_clip10": 2.8311500978636337,
+        "drag": 0.31533999999999995
+      },
+      {
+        "slug": "btc-updown-5m-1786890900",
+        "pair": 0.7333610486110496,
+        "maker_clip10": 2.6663895138895044,
+        "taker_clip10": 2.3412695138895043,
+        "drag": 0.3251200000000001
+      },
+      {
+        "slug": "btc-updown-5m-1786895100",
+        "pair": 0.8679799087172464,
+        "maker_clip10": 1.320200912827536,
+        "taker_clip10": 0.9763009128275361,
+        "drag": 0.3439
+      },
+      {
+        "slug": "btc-updown-5m-1786873500",
+        "pair": 0.8704206900169777,
+        "maker_clip10": 1.2957930998302225,
+        "taker_clip10": 0.9516730998302225,
+        "drag": 0.34412
+      },
+      {
+        "slug": "btc-updown-5m-1786889100",
+        "pair": 0.7281386747721821,
+        "maker_clip10": 2.718613252278179,
+        "taker_clip10": 2.3944732522781793,
+        "drag": 0.3241399999999999
+      },
+      {
+        "slug": "btc-updown-5m-1786886100",
+        "pair": 0.7006188627563495,
+        "maker_clip10": 2.9938113724365047,
+        "taker_clip10": 2.6751913724365046,
+        "drag": 0.3186200000000001
+      },
+      {
+        "slug": "btc-updown-5m-1786893000",
+        "pair": 0.6474539709745806,
+        "maker_clip10": 3.5254602902541943,
+        "taker_clip10": 3.218960290254194,
+        "drag": 0.3065000000000002
+      },
+      {
+        "slug": "btc-updown-5m-1786888200",
+        "pair": 0.6387825035496183,
+        "maker_clip10": 3.612174964503817,
+        "taker_clip10": 3.307834964503817,
+        "drag": 0.30433999999999983
+      }
+    ],
+    "mean_maker_clip10": 2.659866687985449,
+    "mean_taker_clip10": 2.337106687985449,
+    "mean_drag": 0.32276,
+    "dump_tape_lines": 252,
+    "live_tape_lines": 160,
+    "time_in_window_n": 252,
+    "time_in_window_mean": 0.5841402116402117,
+    "competitor_flow": {
+      "mo-money": 0,
+      "bosona": 252,
+      "06dc": 0,
+      "whiskas": 0
+    },
+    "settlements": [
+      {
+        "slug": "btc-updown-5m-1786892100",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786890900",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786895100",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786873500",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786889100",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786886100",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786893000",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786888200",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      }
+    ],
+    "n_gamma_found": 0,
+    "note": "Gamma may return 0 for purged old 5m \u2014 use dump-native tape."
+  },
+  {
+    "label": "mo-money",
+    "dump": "/workspace/data/raw/mobo_mo-money_activity.jsonl",
+    "n_s1_slugs": 8,
+    "fee_sample_clip10": [
+      {
+        "slug": "btc-updown-5m-1786873500",
+        "pair": 0.8982928763315524,
+        "maker_clip10": 1.0170712366844759,
+        "taker_clip10": 0.6706912366844758,
+        "drag": 0.34638
+      },
+      {
+        "slug": "btc-updown-5m-1786869000",
+        "pair": 0.2484827731087305,
+        "maker_clip10": 7.515172268912695,
+        "taker_clip10": 7.362852268912695,
+        "drag": 0.15232000000000046
+      },
+      {
+        "slug": "btc-updown-5m-1786890900",
+        "pair": 0.7060758225950041,
+        "maker_clip10": 2.939241774049959,
+        "taker_clip10": 2.6194817740499587,
+        "drag": 0.31976000000000004
+      },
+      {
+        "slug": "btc-updown-5m-1786892100",
+        "pair": 0.7513811173457666,
+        "maker_clip10": 2.4861888265423335,
+        "taker_clip10": 2.1578288265423335,
+        "drag": 0.32836
+      },
+      {
+        "slug": "btc-updown-5m-1786893000",
+        "pair": 0.7368343712267559,
+        "maker_clip10": 2.631656287732441,
+        "taker_clip10": 2.305896287732441,
+        "drag": 0.3257599999999998
+      },
+      {
+        "slug": "btc-updown-15m-1786871700",
+        "pair": 0.7332394008728118,
+        "maker_clip10": 2.667605991271882,
+        "taker_clip10": 2.342505991271882,
+        "drag": 0.32509999999999994
+      },
+      {
+        "slug": "btc-updown-5m-1786870500",
+        "pair": 0.5818334734614247,
+        "maker_clip10": 4.181665265385753,
+        "taker_clip10": 3.892865265385753,
+        "drag": 0.28880000000000017
+      },
+      {
+        "slug": "btc-updown-5m-1786889700",
+        "pair": 0.6807297036071627,
+        "maker_clip10": 3.1927029639283733,
+        "taker_clip10": 2.8783829639283733,
+        "drag": 0.31431999999999993
+      }
+    ],
+    "mean_maker_clip10": 3.328913076813489,
+    "mean_taker_clip10": 3.028813076813489,
+    "mean_drag": 0.30010000000000003,
+    "dump_tape_lines": 190,
+    "live_tape_lines": 160,
+    "time_in_window_n": 190,
+    "time_in_window_mean": 0.6578245614035088,
+    "competitor_flow": {
+      "mo-money": 190,
+      "bosona": 0,
+      "06dc": 0,
+      "whiskas": 0
+    },
+    "settlements": [
+      {
+        "slug": "btc-updown-5m-1786873500",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786869000",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786890900",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786892100",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786893000",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-15m-1786871700",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786870500",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      },
+      {
+        "slug": "btc-updown-5m-1786889700",
+        "found": false,
+        "outcome": null,
+        "closed": null,
+        "note": "purged_or_missing"
+      }
+    ],
+    "n_gamma_found": 0,
+    "note": "Gamma may return 0 for purged old 5m \u2014 use dump-native tape."
+  }
+]

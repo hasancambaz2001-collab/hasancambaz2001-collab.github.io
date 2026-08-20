@@ -1,0 +1,21 @@
+{
+  "name": "bosona",
+  "wallet": "0xc2ad03f79ca3f3c17d8c7de2612ce0c89b7d40ed",
+  "n_tape": 4000,
+  "n_two_leg": 186,
+  "n_cheap": 106,
+  "n_cover": 85,
+  "cover": 0.8018867924528302,
+  "n_maker_both": 93,
+  "n_all_maker": 50,
+  "pair_max": 0.9,
+  "clip": 10.0,
+  "maker_only": true,
+  "passed": true,
+  "source": "their_tape",
+  "pnl_from_paper_maker": false,
+  "dump": "/workspace/data/dumps/bosona_activity.json",
+  "pair_gt_1_trade": false,
+  "live": false,
+  "generated": "2026-08-16 18:35 UTC"
+}

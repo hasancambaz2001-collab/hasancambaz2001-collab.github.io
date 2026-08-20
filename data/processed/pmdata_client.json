@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "series": "btc-5m",
+  "type": "onchain_fills",
+  "from_ts": "2026-08-14T00:00:00+00:00",
+  "to_ts": "2026-08-15T00:00:00+00:00",
+  "path": "data/pmdata/btc-5m_onchain_fills_2026-08-14_2026-08-15.parquet",
+  "bytes": 98688170,
+  "rows": 2584205,
+  "days_used": [
+    {"day": "2026-08-14", "regime": "post_2026_08_14"},
+    {"day": "2026-08-15", "regime": "post_2026_08_14"}
+  ],
+  "days_skipped_no_unlock": [],
+  "key_env": "PMDATA_API_KEY",
+  "wrote_via": "pyarrow",
+  "new_days_unlocked": false
+}

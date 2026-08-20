@@ -1,0 +1,21 @@
+{
+  "name": "mo-money",
+  "wallet": "0x32ed2e546b187ca15e2841edc82b22c713cf8ec3",
+  "n_tape": 4000,
+  "n_two_leg": 205,
+  "n_cheap": 111,
+  "n_cover": 94,
+  "cover": 0.8468468468468469,
+  "n_maker_both": 88,
+  "n_all_maker": 48,
+  "pair_max": 0.9,
+  "clip": 10.0,
+  "maker_only": true,
+  "passed": true,
+  "source": "their_tape",
+  "pnl_from_paper_maker": false,
+  "dump": "/workspace/data/dumps/mo-money_activity.json",
+  "pair_gt_1_trade": false,
+  "live": false,
+  "generated": "2026-08-16 18:35 UTC"
+}

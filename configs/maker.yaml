@@ -1,0 +1,13 @@
+# 5m primary signal = maker paper. GET only. No live. No pair>1 taker.
+live: false
+live_order: false
+assets: [btc, eth, sol, xrp, doge]
+tfs: [5m, 15m]
+pair_max: 0.90
+cancel_above: 0.92
+clip: 10
+requote: 2
+interval: 2
+max_age_sec: 45
+pair_gt_1: false
+notes: "Rest BOTH iff bid_sum<=pair_max 0.90 and min bid size>=10. Requote/join best every <=2s. Cancel if bid_sum>cancel_above 0.92 or age>45s. One-leg eaten complete only if fill_px+opp_ask<=0.90 else cancel leftover. No clip bump on 5m/06dc. No R7."

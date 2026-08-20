@@ -1,0 +1,34 @@
+{
+  "generated": "2026-08-17 01:52 UTC",
+  "enough": {"v1_cache_parallel": true, "v2_ws_age": true},
+  "rust_sketch": false,
+  "rust_reason": "skip: post_ack_ms p50 missing or ≤500; no full Rust migrate",
+  "n_sent": 0,
+  "rank_note": "post_ack_ms missing on both; official send-clock rank is a tie",
+  "variants": [
+    {
+      "rank": 1,
+      "variant": "v1_cache_parallel",
+      "n_intent": 25,
+      "n_sent": 0,
+      "n_ws_age": 0,
+      "still_ms_p50": 370.4659938812256,
+      "still_ms_p95": 391.87560081481934,
+      "post_ack_ms_p50": null,
+      "post_ack_ms_p95": null
+    },
+    {
+      "rank": 2,
+      "variant": "v2_ws_age",
+      "n_intent": 115,
+      "n_sent": 0,
+      "n_ws_age": 26,
+      "still_ms_p50": 371.5100288391113,
+      "still_ms_p95": 413.04314136505127,
+      "still_ms_ws_age_p50": 0.011205673217773438,
+      "still_ms_ws_age_p95": 0.12564659118652344,
+      "post_ack_ms_p50": null,
+      "post_ack_ms_p95": null
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+live_orders: false
+live: false
+clip: 10.0
+interval: 1.0
+pair_max: 0.9
+cancel_above: 0.92
+assets:
+- btc
+- eth
+- sol
+- xrp
+- doge
+tfs:
+- 5m
+- 15m
+pair_gt_1_trade: false
+size_ok: false
+primary: paper_maker
+smart_copy:
+  shadow_only: true
+notes: LIVE_BLOCKED. do not live without G5 G6. No hand-edited LIVE_READY.
+status: LIVE_BLOCKED
+gates:
+  G1_bosona_cover: PASS
+  G2_mo_cover: PASS
+  G3_pair_gt1_trade: PASS
+  G4_shadow_path: PASS
+  G5_size_ok: FAIL
+  G6_fill_calibration: PASS
+  G7_accept_risk: FAIL

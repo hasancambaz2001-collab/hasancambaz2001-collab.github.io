@@ -1,0 +1,52 @@
+{
+  "generated": "2026-08-16 18:35 UTC",
+  "source": "paper_maker intended.jsonl",
+  "n_rows": 12793,
+  "first_ts": "2026-08-16T17:09:06.246063+00:00",
+  "last_ts": "2026-08-16T18:35:26.516515+00:00",
+  "rests": 580,
+  "skips": 11307,
+  "hold": 201,
+  "requote": 126,
+  "fill_sim": 73,
+  "complete": 1,
+  "filled_both": 72,
+  "pair_gt_1_cancel": 340,
+  "fill_pct": 0.12586206896551724,
+  "still_250ms_n": 0,
+  "still_250ms_true": 0,
+  "still_250ms_pct": null,
+  "reasons": {
+    "missing_bid": 1634,
+    "rich_bid_sum": 9370,
+    "thin_bid": 303,
+    "rest": 580,
+    "hold": 201,
+    "pair_gt_1": 340,
+    "rich_cancel": 139,
+    "filled_both": 72,
+    "requote": 126,
+    "rich_complete": 27,
+    "complete": 1
+  },
+  "days": [
+    {
+      "day": "2026-08-16",
+      "rest": 580,
+      "fill_sim": 73,
+      "skip": 11307,
+      "fill_pct": 0.12586206896551724
+    }
+  ],
+  "worst_day": {
+    "day": "2026-08-16",
+    "rest": 580,
+    "fill_sim": 73,
+    "skip": 11307,
+    "fill_pct": 0.12586206896551724
+  },
+  "live_order": false,
+  "g6_flag_written": false,
+  "g6_pass": false,
+  "note": "residual-sim fill on 2s paper poll. still@250ms not recorded on paper_maker. Not PnL. Does not write G6 flag. do not live without G5 G6"
+}

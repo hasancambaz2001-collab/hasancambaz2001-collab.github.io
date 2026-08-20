@@ -1,0 +1,24 @@
+# L2 twin + recorder. GET only. No live. No pair>1. size_ok stays false.
+live: false
+live_order: false
+pair_gt_1: false
+size_ok: false
+pair_max: 0.90
+cancel_above: 0.92
+clip: 10
+max_age_sec: 45
+requote: 2
+interval: 1
+assets: [btc, eth, sol, xrp, doge]
+tfs: [5m, 15m]
+strategy: S1_maker_complete_set
+fill_residual: post_regime_only
+parquet:
+  dataset: kachoio/polymarket-5-minute-crypto-up-down-markets
+  regime: pre_2026_08_14_DEBUG
+  note: Mar–May 2026. Policy wiring only. Not live parity.
+record:
+  out_dir: data/l2
+  regime: post_2026_08_14
+covers_06dc: false
+notes: 5m/15m only. Does NOT cover 06dc daily/monthly. 06dc truth = dump + paper_06dc + T6. pre-08-14 parquet is DEBUG only. Do not bump clip.

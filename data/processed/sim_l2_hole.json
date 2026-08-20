@@ -1,0 +1,57 @@
+{
+  "label": "SIM",
+  "real_fill": null,
+  "pair_max": 0.9,
+  "clip": 5.0,
+  "min_spread": 0.01,
+  "l2_yes_only": [
+    {
+      "file": "btc-5m_l2_2026-08-14.zip",
+      "present": true,
+      "bytes": 351355463,
+      "windows": 288,
+      "sample3_book_rows": 3730,
+      "sample3_pc_rows": 267285,
+      "bid_levels": 78,
+      "book_gap_s_p10": 0.01,
+      "book_gap_s_p50": 0.103,
+      "book_gap_s_p90": 0.6888000000000001,
+      "note": "Yes-token full depth only. Not bid_up+bid_down."
+    },
+    {
+      "file": "btc-5m_l2_2026-08-15.zip",
+      "present": true,
+      "bytes": 251147882,
+      "windows": 288,
+      "sample3_book_rows": 4139,
+      "sample3_pc_rows": 300043,
+      "bid_levels": 98,
+      "book_gap_s_p10": 0.009,
+      "book_gap_s_p50": 0.1,
+      "book_gap_s_p90": 0.6395,
+      "note": "Yes-token full depth only. Not bid_up+bid_down."
+    }
+  ],
+  "ticks_1s_both_legs": {
+    "source": "data/parquet/btc_ticks.parquet",
+    "rows": 4383804,
+    "markets": 15682,
+    "ts_min": "2026-03-24 22:10:00+00:00",
+    "ts_max": "2026-05-18 10:34:59+00:00",
+    "hole_seconds": 11618,
+    "hole_second_rate": 0.0026502097265297445,
+    "markets_with_any_hole": 4699,
+    "markets_with_any_hole_rate": 0.2996429026909833,
+    "n_hole_runs": 8542,
+    "run_s_p50": 1.0,
+    "run_s_p90": 2.0,
+    "run_s_p99": 5.0,
+    "run_s_max": 253,
+    "frac_runs_eq_1s": 0.8298993210021073,
+    "frac_runs_ge_2s": 0.17010067899789277,
+    "frac_runs_ge_5s": 0.010302036993678295,
+    "frac_runs_ge_10s": 0.0022243034418169046,
+    "frac_runs_ge_30s": 0.0007024116132053383,
+    "note": "1s grid cannot prove 250ms. run>=2s would pass still250. run==1s is ambiguous."
+  }
+}

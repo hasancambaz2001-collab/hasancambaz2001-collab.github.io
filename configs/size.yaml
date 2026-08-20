@@ -1,0 +1,5 @@
+# Scaffold only. No live. No --run. Do not bump clip.
+whiskas_clip: 21
+dc06_clip: 20
+bump: false
+notes: size_gate scaffold. Do not bump clip. BID_BUCKET is measure-only on 5m paper, not a size bump.

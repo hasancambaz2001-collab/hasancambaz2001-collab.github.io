@@ -1,0 +1,46 @@
+status: MICRO_LIVE_TRIAL
+generated: 2026-08-16 19:06 UTC
+live_orders: true
+live: false
+full_live_ready: false
+bundle_placed_orders: false
+micro_trial: true
+clip: 5.0
+max_clip: 5.0
+assets:
+- btc
+tfs:
+- 5m
+pair_max: 0.9
+cancel_above: 0.92
+pair_gt_1_trade: false
+size_ok: false
+max_daily_loss_usd: 25.0
+kill_switch: true
+max_open_windows: 2
+g5: FAIL
+g6: PASS
+executor:
+  gtc_both_only_if_bid_sum_le: 0.9
+  cancel_if_sum_gt: 0.92
+  complete_only_if_fill_plus_opp_ask_le: 0.9
+  log_layers:
+  - intent
+  - still250
+  - real_fill
+  stop_if_daily_loss_usd: 25.0
+  pair_gt_1_trade: false
+  bundle_sends_orders: false
+  default_this_run: measurement_and_yaml_only
+  send_requires:
+  - --send --i-accept-micro-risk (or --send-live-orders-now --i-accept-micro-risk)
+  - MICRO_LIVE_TRIAL.yaml
+  - G6_fill_calibrated.flag
+  - local CLOB keys
+  clob_path: scripts/micro_live.py
+  auth_from: env or configs/.env.clob
+  print_keys: false
+notes: "MICRO trial permit only. Bundle does not send orders. Not LIVE_READY. Not\
+  \ full ladder. This trial clip 5 only (no clip 10/67). pair_gt_1_trade=false. micro\
+  \ trial \u2260 full live. real_fill only after orders sent. CLOB path: scripts/micro_live.py.\
+  \ AUTH_ABSENT => no send, no fake real_fill."

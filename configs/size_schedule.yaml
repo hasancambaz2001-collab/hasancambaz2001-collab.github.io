@@ -1,0 +1,9 @@
+size_ok: false
+paper_clip: 10
+pair_gt_1_trade: false
+ladder:
+  now: 10.0
+  after_parity: null
+  target_p50: 64.0448
+notes: 10 -> after_parity -> target_p50 (~67). after_parity and target are recorded,
+  not armed.

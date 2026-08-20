@@ -1,0 +1,45 @@
+{
+  "gate": "PASS",
+  "reason": "cover \u226580% of pair<0.90 two-leg 5m/15m: mo-money 85% (94/111), bosona 80% (85/106)",
+  "pair_max": 0.9,
+  "clip": 10.0,
+  "maker_only": true,
+  "cover_min": 0.8,
+  "pnl_from_paper_maker": false,
+  "wallets": [
+    {
+      "name": "mo-money",
+      "wallet": "0x32ed2e546b187ca15e2841edc82b22c713cf8ec3",
+      "n_tape": 4000,
+      "n_two_leg": 205,
+      "n_cheap": 111,
+      "n_cover": 94,
+      "cover": 0.8468468468468469,
+      "n_maker_both": 88,
+      "n_all_maker": 48,
+      "pair_max": 0.9,
+      "clip": 10.0,
+      "maker_only": true,
+      "passed": true,
+      "source": "their_tape",
+      "pnl_from_paper_maker": false
+    },
+    {
+      "name": "bosona",
+      "wallet": "0xc2ad03f79ca3f3c17d8c7de2612ce0c89b7d40ed",
+      "n_tape": 4000,
+      "n_two_leg": 186,
+      "n_cheap": 106,
+      "n_cover": 85,
+      "cover": 0.8018867924528302,
+      "n_maker_both": 93,
+      "n_all_maker": 50,
+      "pair_max": 0.9,
+      "clip": 10.0,
+      "maker_only": true,
+      "passed": true,
+      "source": "their_tape",
+      "pnl_from_paper_maker": false
+    }
+  ]
+}

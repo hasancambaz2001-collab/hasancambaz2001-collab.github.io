@@ -1,0 +1,1866 @@
+{
+  "status": "GREEN",
+  "gate": 15000.0,
+  "official_pnl": 211013.5806407136,
+  "official_vol": 12349105.308808003,
+  "official_source": "data-api /v1/leaderboard timePeriod=ALL + lb-api/profit window=all",
+  "profile": "https://polymarket.com/@x-moneyforwhiskas",
+  "wallet": "0x3048d65321be3497164cdfc2996f94f98a2e7537",
+  "n_activity": 444044,
+  "n_closed": 30985,
+  "n_windows": 16072,
+  "types": {
+    "TRADE": 428106,
+    "REDEEM": 15808,
+    "MAKER_REBATE": 62,
+    "TAKER_REBATE": 61,
+    "REWARD": 7
+  },
+  "sides": {
+    "other:BUY": 3,
+    "other:SELL": 1,
+    "btc5:BUY": 428094,
+    "btc5:SELL": 8
+  },
+  "cash": {
+    "other": {
+      "TRADE": 11.781868,
+      "TRADE_BUY": 9.804818000000001,
+      "TRADE_SELL": 1.97705,
+      "MAKER_REBATE": 9293.8515,
+      "REDEEM": 0.0,
+      "TAKER_REBATE": 39175.468,
+      "REWARD": 292.0139
+    },
+    "all": {
+      "TRADE": 6144842.899307136,
+      "TRADE_BUY": 6144824.939037136,
+      "TRADE_SELL": 17.96027,
+      "REDEEM": 6223064.028970981,
+      "MAKER_REBATE": 9293.8515,
+      "TAKER_REBATE": 39175.468,
+      "REWARD": 292.0139
+    },
+    "btc5": {
+      "TRADE": 6144831.117439136,
+      "TRADE_BUY": 6144815.134219135,
+      "REDEEM": 6223064.028970981,
+      "TRADE_SELL": 15.98322
+    }
+  },
+  "activity_redeem_minus_buy_all": 78239.08993384521,
+  "activity_flow_all": 127018.38360384479,
+  "activity_flow_btc5": 78264.87797184568,
+  "closed_realized_all": 82809.32659999958,
+  "closed_realized_btc5": 82814.70529999958,
+  "closed_realized_other": -5.378700000001118,
+  "closed_identity_sum": 83226.77633821976,
+  "closed_identity_mismatch_n": 9733,
+  "closed_other": [
+    {
+      "slug": "nhl-car-las-2026-06-09",
+      "outcome": "Hurricanes",
+      "avgPrice": 0.7062,
+      "totalBought": 2.8571,
+      "realizedPnl": -0.0337,
+      "curPrice": 1.0
+    },
+    {
+      "slug": "bitcoin-up-or-down-june-12-2026-8am-et",
+      "outcome": "Up",
+      "avgPrice": 0.001,
+      "totalBought": 5000.0,
+      "realizedPnl": -5.345,
+      "curPrice": 0.0
+    }
+  ],
+  "window_fee0_usdc": 76971.96019299998,
+  "window_fee0_px": 210876.56259251322,
+  "embedded_taker_fees": 133936.56883951323,
+  "formula_all_buy_as_taker": 180487.57627,
+  "formula_taker_only": 133907.49799,
+  "fake_fee_on_makers": 46580.07827999999,
+  "official_minus_fee0_px": 137.01804820037796,
+  "official_minus_fee0_usdc": 134041.62044771362,
+  "trade_size_sum": 12345473.877275372,
+  "official_vol_minus_size": 3631.431532630697,
+  "dump_first_ts": 1781055312,
+  "dump_last_ts": 1786887379,
+  "maker_n": 190324,
+  "taker_n": 237770,
+  "maker_pct": 0.4445762925657904,
+  "taker_embed": 133906.88417015056,
+  "taker_formula": 133907.49799,
+  "fee_model": "C * 0.07 * p * (1-p) on taker fills only; not flat 1.5%; BUY is not always taker",
+  "non_btc_top": [
+    [
+      "slug:",
+      130
+    ],
+    [
+      "MAKER_REBATE",
+      62
+    ],
+    [
+      "TAKER_REBATE",
+      61
+    ],
+    [
+      "REWARD",
+      7
+    ],
+    [
+      "TRADE",
+      4
+    ],
+    [
+      "slug:nhl-car-las-2026-06-09",
+      2
+    ],
+    [
+      "slug:bitcoin-up-or-down-june-12-2026-8am-et",
+      2
+    ],
+    [
+      "slug:bitcoin-up-or-down-june-10-2026-12am-et",
+      1
+    ],
+    [
+      "REDEEM",
+      1
+    ]
+  ],
+  "non_btc_rows": [
+    {
+      "type": "TRADE",
+      "slug": "nhl-car-las-2026-06-09",
+      "side": "BUY",
+      "size": 2.857141,
+      "price": 0.699999755,
+      "usdc": 2.017988,
+      "outcome": "Hurricanes"
+    },
+    {
+      "type": "TRADE",
+      "slug": "nhl-car-las-2026-06-09",
+      "side": "SELL",
+      "size": 2.85,
+      "price": 0.7,
+      "usdc": 1.97705,
+      "outcome": "Hurricanes"
+    },
+    {
+      "type": "TRADE",
+      "slug": "bitcoin-up-or-down-june-10-2026-12am-et",
+      "side": "BUY",
+      "size": 5.0,
+      "price": 0.47,
+      "usdc": 2.43718,
+      "outcome": "Up"
+    },
+    {
+      "type": "TRADE",
+      "slug": "bitcoin-up-or-down-june-12-2026-8am-et",
+      "side": "BUY",
+      "size": 5000.0,
+      "price": 0.001,
+      "usdc": 5.34965,
+      "outcome": "Up"
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1.6639,
+      "price": 0.0,
+      "usdc": 1.6639,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1.2642,
+      "price": 0.0,
+      "usdc": 1.2642,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 10.2222,
+      "price": 0.0,
+      "usdc": 10.2222,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 20.672,
+      "price": 0.0,
+      "usdc": 20.672,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 76.6318,
+      "price": 0.0,
+      "usdc": 76.6318,
+      "outcome": ""
+    },
+    {
+      "type": "REDEEM",
+      "slug": "bitcoin-up-or-down-june-12-2026-8am-et",
+      "side": "",
+      "size": 0.0,
+      "price": 0.0,
+      "usdc": 0.0,
+      "outcome": "Down"
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 190.2034,
+      "price": 0.0,
+      "usdc": 190.2034,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 35.0744,
+      "price": 0.0,
+      "usdc": 35.0744,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 46.5048,
+      "price": 0.0,
+      "usdc": 46.5048,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 25.0535,
+      "price": 0.0,
+      "usdc": 25.0535,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 48.16,
+      "price": 0.0,
+      "usdc": 48.16,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 23.0314,
+      "price": 0.0,
+      "usdc": 23.0314,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 46.9821,
+      "price": 0.0,
+      "usdc": 46.9821,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 20.8033,
+      "price": 0.0,
+      "usdc": 20.8033,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 2.3096,
+      "price": 0.0,
+      "usdc": 2.3096,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 6.5501,
+      "price": 0.0,
+      "usdc": 6.5501,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 54.8263,
+      "price": 0.0,
+      "usdc": 54.8263,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 33.7156,
+      "price": 0.0,
+      "usdc": 33.7156,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 26.3231,
+      "price": 0.0,
+      "usdc": 26.3231,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 32.9248,
+      "price": 0.0,
+      "usdc": 32.9248,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 54.2448,
+      "price": 0.0,
+      "usdc": 54.2448,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 97.2236,
+      "price": 0.0,
+      "usdc": 97.2236,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 94.1407,
+      "price": 0.0,
+      "usdc": 94.1407,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 234.0489,
+      "price": 0.0,
+      "usdc": 234.0489,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 123.6216,
+      "price": 0.0,
+      "usdc": 123.6216,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 74.3329,
+      "price": 0.0,
+      "usdc": 74.3329,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 98.4738,
+      "price": 0.0,
+      "usdc": 98.4738,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 72.162,
+      "price": 0.0,
+      "usdc": 72.162,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 110.2013,
+      "price": 0.0,
+      "usdc": 110.2013,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 125.38,
+      "price": 0.0,
+      "usdc": 125.38,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 101.9881,
+      "price": 0.0,
+      "usdc": 101.9881,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 80.9566,
+      "price": 0.0,
+      "usdc": 80.9566,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 135.1369,
+      "price": 0.0,
+      "usdc": 135.1369,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 112.0276,
+      "price": 0.0,
+      "usdc": 112.0276,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 99.1633,
+      "price": 0.0,
+      "usdc": 99.1633,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 83.9939,
+      "price": 0.0,
+      "usdc": 83.9939,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 99.3351,
+      "price": 0.0,
+      "usdc": 99.3351,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 88.4974,
+      "price": 0.0,
+      "usdc": 88.4974,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 78.958,
+      "price": 0.0,
+      "usdc": 78.958,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 185.5338,
+      "price": 0.0,
+      "usdc": 185.5338,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 143.8174,
+      "price": 0.0,
+      "usdc": 143.8174,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 97.5355,
+      "price": 0.0,
+      "usdc": 97.5355,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 154.8256,
+      "price": 0.0,
+      "usdc": 154.8256,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 92.1696,
+      "price": 0.0,
+      "usdc": 92.1696,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 191.9755,
+      "price": 0.0,
+      "usdc": 191.9755,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 88.9376,
+      "price": 0.0,
+      "usdc": 88.9376,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 161.2879,
+      "price": 0.0,
+      "usdc": 161.2879,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 88.7187,
+      "price": 0.0,
+      "usdc": 88.7187,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 202.789,
+      "price": 0.0,
+      "usdc": 202.789,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 94.4705,
+      "price": 0.0,
+      "usdc": 94.4705,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1296.97,
+      "price": 0.0,
+      "usdc": 1296.97,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 161.2986,
+      "price": 0.0,
+      "usdc": 161.2986,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 79.9163,
+      "price": 0.0,
+      "usdc": 79.9163,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 159.9757,
+      "price": 0.0,
+      "usdc": 159.9757,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 64.988,
+      "price": 0.0,
+      "usdc": 64.988,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 231.0308,
+      "price": 0.0,
+      "usdc": 231.0308,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 109.3054,
+      "price": 0.0,
+      "usdc": 109.3054,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 111.7036,
+      "price": 0.0,
+      "usdc": 111.7036,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 254.3136,
+      "price": 0.0,
+      "usdc": 254.3136,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 610.6304,
+      "price": 0.0,
+      "usdc": 610.6304,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 156.0672,
+      "price": 0.0,
+      "usdc": 156.0672,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1336.2673,
+      "price": 0.0,
+      "usdc": 1336.2673,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1500.0,
+      "price": 0.0,
+      "usdc": 1500.0,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 257.8908,
+      "price": 0.0,
+      "usdc": 257.8908,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1540.9873,
+      "price": 0.0,
+      "usdc": 1540.9873,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 352.8142,
+      "price": 0.0,
+      "usdc": 352.8142,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1348.0193,
+      "price": 0.0,
+      "usdc": 1348.0193,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 347.5897,
+      "price": 0.0,
+      "usdc": 347.5897,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1362.5314,
+      "price": 0.0,
+      "usdc": 1362.5314,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 424.4833,
+      "price": 0.0,
+      "usdc": 424.4833,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 588.1035,
+      "price": 0.0,
+      "usdc": 588.1035,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 145.4175,
+      "price": 0.0,
+      "usdc": 145.4175,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 671.3926,
+      "price": 0.0,
+      "usdc": 671.3926,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 136.8725,
+      "price": 0.0,
+      "usdc": 136.8725,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1647.0378,
+      "price": 0.0,
+      "usdc": 1647.0378,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 261.885,
+      "price": 0.0,
+      "usdc": 261.885,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1442.6895,
+      "price": 0.0,
+      "usdc": 1442.6895,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 271.5838,
+      "price": 0.0,
+      "usdc": 271.5838,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1408.1068,
+      "price": 0.0,
+      "usdc": 1408.1068,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 239.1708,
+      "price": 0.0,
+      "usdc": 239.1708,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1366.6584,
+      "price": 0.0,
+      "usdc": 1366.6584,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 249.7832,
+      "price": 0.0,
+      "usdc": 249.7832,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1266.89,
+      "price": 0.0,
+      "usdc": 1266.89,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 248.924,
+      "price": 0.0,
+      "usdc": 248.924,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 550.3552,
+      "price": 0.0,
+      "usdc": 550.3552,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 138.6459,
+      "price": 0.0,
+      "usdc": 138.6459,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 631.9908,
+      "price": 0.0,
+      "usdc": 631.9908,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 127.0515,
+      "price": 0.0,
+      "usdc": 127.0515,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 480.4769,
+      "price": 0.0,
+      "usdc": 480.4769,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 81.1946,
+      "price": 0.0,
+      "usdc": 81.1946,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 278.7524,
+      "price": 0.0,
+      "usdc": 278.7524,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 34.2168,
+      "price": 0.0,
+      "usdc": 34.2168,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1688.8163,
+      "price": 0.0,
+      "usdc": 1688.8163,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 214.2863,
+      "price": 0.0,
+      "usdc": 214.2863,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 428.2169,
+      "price": 0.0,
+      "usdc": 428.2169,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 109.447,
+      "price": 0.0,
+      "usdc": 109.447,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 696.9728,
+      "price": 0.0,
+      "usdc": 696.9728,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 172.4123,
+      "price": 0.0,
+      "usdc": 172.4123,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1173.7666,
+      "price": 0.0,
+      "usdc": 1173.7666,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 213.1598,
+      "price": 0.0,
+      "usdc": 213.1598,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 172.6021,
+      "price": 0.0,
+      "usdc": 172.6021,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1120.2209,
+      "price": 0.0,
+      "usdc": 1120.2209,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1073.5854,
+      "price": 0.0,
+      "usdc": 1073.5854,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 245.7205,
+      "price": 0.0,
+      "usdc": 245.7205,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1766.2057,
+      "price": 0.0,
+      "usdc": 1766.2057,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 249.1656,
+      "price": 0.0,
+      "usdc": 249.1656,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 19.5735,
+      "price": 0.0,
+      "usdc": 19.5735,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1416.652,
+      "price": 0.0,
+      "usdc": 1416.652,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 119.56,
+      "price": 0.0,
+      "usdc": 119.56,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 38.1387,
+      "price": 0.0,
+      "usdc": 38.1387,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 585.8703,
+      "price": 0.0,
+      "usdc": 585.8703,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 143.5438,
+      "price": 0.0,
+      "usdc": 143.5438,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 59.0679,
+      "price": 0.0,
+      "usdc": 59.0679,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 364.304,
+      "price": 0.0,
+      "usdc": 364.304,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 280.214,
+      "price": 0.0,
+      "usdc": 280.214,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 9.7085,
+      "price": 0.0,
+      "usdc": 9.7085,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 676.9876,
+      "price": 0.0,
+      "usdc": 676.9876,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 103.9824,
+      "price": 0.0,
+      "usdc": 103.9824,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 40.9572,
+      "price": 0.0,
+      "usdc": 40.9572,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1064.5547,
+      "price": 0.0,
+      "usdc": 1064.5547,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 228.891,
+      "price": 0.0,
+      "usdc": 228.891,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 117.6237,
+      "price": 0.0,
+      "usdc": 117.6237,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1508.0159,
+      "price": 0.0,
+      "usdc": 1508.0159,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 474.8749,
+      "price": 0.0,
+      "usdc": 474.8749,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1407.599,
+      "price": 0.0,
+      "usdc": 1407.599,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 386.3889,
+      "price": 0.0,
+      "usdc": 386.3889,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 1302.2766,
+      "price": 0.0,
+      "usdc": 1302.2766,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 319.4316,
+      "price": 0.0,
+      "usdc": 319.4316,
+      "outcome": ""
+    },
+    {
+      "type": "REWARD",
+      "slug": "",
+      "side": "",
+      "size": 6.9444,
+      "price": 0.0,
+      "usdc": 6.9444,
+      "outcome": ""
+    },
+    {
+      "type": "TAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 504.0166,
+      "price": 0.0,
+      "usdc": 504.0166,
+      "outcome": ""
+    },
+    {
+      "type": "MAKER_REBATE",
+      "slug": "",
+      "side": "",
+      "size": 114.7315,
+      "price": 0.0,
+      "usdc": 114.7315,
+      "outcome": ""
+    }
+  ],
+  "sample20": [
+    {
+      "slug": "btc-updown-5m-1781314200",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1781314200",
+      "winner": "Down",
+      "q_up": 12.6,
+      "q_down": 9.99692,
+      "avg_up": 0.6065476190476191,
+      "avg_down": 0.37325316197388797,
+      "pair_cost": 0.979800781021507,
+      "redeem_up": 0.0,
+      "redeem_down": 9.99692,
+      "window_fee0_usdc": -1.3769620000000007,
+      "ui_closed_up": 12.6,
+      "ui_closed_down": 9.9969,
+      "ui_avg_up": 0.6065,
+      "ui_avg_down": 0.3732,
+      "ui_realizedPnl": -1.3769,
+      "diff_ui_minus_window": 6.200000000067263e-05
+    },
+    {
+      "slug": "btc-updown-5m-1781548200",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1781548200",
+      "winner": "Up",
+      "q_up": 22.0,
+      "q_down": 25.0,
+      "avg_up": 0.3292963636363636,
+      "avg_down": 0.4438832,
+      "pair_cost": 0.7731795636363636,
+      "redeem_up": 22.0,
+      "redeem_down": 0.0,
+      "window_fee0_usdc": 3.6584000000000003,
+      "ui_closed_up": 22.0,
+      "ui_closed_down": 25.0,
+      "ui_avg_up": 0.3292,
+      "ui_avg_down": 0.4438,
+      "ui_realizedPnl": 3.6585,
+      "diff_ui_minus_window": 9.999999999976694e-05
+    },
+    {
+      "slug": "btc-updown-5m-1781657400",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1781657400",
+      "winner": "Down",
+      "q_up": 0.0,
+      "q_down": 10.0,
+      "avg_up": NaN,
+      "avg_down": 0.849408,
+      "pair_cost": NaN,
+      "redeem_up": 0.0,
+      "redeem_down": 10.0,
+      "window_fee0_usdc": 1.5059199999999997,
+      "ui_closed_up": 0.0,
+      "ui_closed_down": 10.0,
+      "ui_avg_up": null,
+      "ui_avg_down": 0.8493999999999999,
+      "ui_realizedPnl": 1.5059,
+      "diff_ui_minus_window": -1.9999999999686935e-05
+    },
+    {
+      "slug": "btc-updown-5m-1782095100",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1782095100",
+      "winner": "Up",
+      "q_up": 207.83882200000002,
+      "q_down": 115.56,
+      "avg_up": 0.6006250025801243,
+      "avg_down": 0.5064001384562132,
+      "pair_cost": 1.1070251410363374,
+      "redeem_up": 207.838822,
+      "redeem_down": 0.0,
+      "window_fee0_usdc": 24.486029000000002,
+      "ui_closed_up": 207.8388,
+      "ui_closed_down": 115.56,
+      "ui_avg_up": 0.6006,
+      "ui_avg_down": 0.5063,
+      "ui_realizedPnl": 24.487400000000008,
+      "diff_ui_minus_window": 0.0013710000000060063
+    },
+    {
+      "slug": "btc-updown-5m-1782226500",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1782226500",
+      "winner": "Down",
+      "q_up": 324.819434,
+      "q_down": 391.959089,
+      "avg_up": 0.458371391657557,
+      "avg_down": 0.4704620843733005,
+      "pair_cost": 0.9288334760308575,
+      "redeem_up": 0.0,
+      "redeem_down": 391.959089,
+      "window_fee0_usdc": 58.669263,
+      "ui_closed_up": 324.8194,
+      "ui_closed_down": 391.959,
+      "ui_avg_up": 0.45830000000000004,
+      "ui_avg_down": 0.4704,
+      "ui_realizedPnl": 58.67160000000001,
+      "diff_ui_minus_window": 0.0023370000000113578
+    },
+    {
+      "slug": "btc-updown-5m-1782406500",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1782406500",
+      "winner": "Up",
+      "q_up": 332.79986999999994,
+      "q_down": 427.7008900000001,
+      "avg_up": 0.5703947390364066,
+      "avg_down": 0.4109590957362749,
+      "pair_cost": 0.9813538347726816,
+      "redeem_up": 332.79987,
+      "redeem_down": 0.0,
+      "window_fee0_usdc": -32.79499600000008,
+      "ui_closed_up": 332.7998,
+      "ui_closed_down": 427.7008,
+      "ui_avg_up": 0.5703,
+      "ui_avg_down": 0.4109,
+      "ui_realizedPnl": -32.79080000000002,
+      "diff_ui_minus_window": 0.0041960000000642594
+    },
+    {
+      "slug": "btc-updown-5m-1782720600",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1782720600",
+      "winner": "Down",
+      "q_up": 361.40000000000003,
+      "q_down": 353.56,
+      "avg_up": 0.4435587437742114,
+      "avg_down": 0.5599252743523023,
+      "pair_cost": 1.0034840181265137,
+      "redeem_up": 0.0,
+      "redeem_down": 353.56,
+      "window_fee0_usdc": -4.709310000000016,
+      "ui_closed_up": 361.4,
+      "ui_closed_down": 353.56,
+      "ui_avg_up": 0.44350000000000006,
+      "ui_avg_down": 0.5599,
+      "ui_realizedPnl": -4.706800000000015,
+      "diff_ui_minus_window": 0.0025100000000009004
+    },
+    {
+      "slug": "btc-updown-5m-1783038600",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1783038600",
+      "winner": "Down",
+      "q_up": 355.64818,
+      "q_down": 287.016664,
+      "avg_up": 0.3770795368614005,
+      "avg_down": 0.4561081024898262,
+      "pair_cost": 0.8331876393512267,
+      "redeem_up": 0.0,
+      "redeem_down": 287.016664,
+      "window_fee0_usdc": 21.99838699999998,
+      "ui_closed_up": 355.6481,
+      "ui_closed_down": 287.0166,
+      "ui_avg_up": 0.377,
+      "ui_avg_down": 0.4561,
+      "ui_realizedPnl": 22.0009,
+      "diff_ui_minus_window": 0.002513000000021748
+    },
+    {
+      "slug": "btc-updown-5m-1783539900",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1783539900",
+      "winner": "Down",
+      "q_up": 60.645476,
+      "q_down": 65.99846,
+      "avg_up": 0.2915894171561948,
+      "avg_down": 0.7586578686836026,
+      "pair_cost": 1.0502472858397973,
+      "redeem_up": 0.0,
+      "redeem_down": 65.99846,
+      "window_fee0_usdc": -1.7553699999999992,
+      "ui_closed_up": 60.6454,
+      "ui_closed_down": 65.9984,
+      "ui_avg_up": 0.2915,
+      "ui_avg_down": 0.7586,
+      "ui_realizedPnl": -1.7552999999999983,
+      "diff_ui_minus_window": 7.000000000090267e-05
+    },
+    {
+      "slug": "btc-updown-5m-1783649100",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1783649100",
+      "winner": "Down",
+      "q_up": 60.0,
+      "q_down": 120.0,
+      "avg_up": 0.1955385,
+      "avg_down": 0.70708975,
+      "pair_cost": 0.90262825,
+      "redeem_up": 0.0,
+      "redeem_down": 120.0,
+      "window_fee0_usdc": 23.416920000000005,
+      "ui_closed_up": 60.0,
+      "ui_closed_down": 120.0,
+      "ui_avg_up": 0.1955,
+      "ui_avg_down": 0.707,
+      "ui_realizedPnl": 23.417099999999998,
+      "diff_ui_minus_window": 0.0001799999999931856
+    },
+    {
+      "slug": "btc-updown-5m-1784369700",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1784369700",
+      "winner": "Down",
+      "q_up": 90.0,
+      "q_down": 144.39121799999998,
+      "avg_up": 0.4168,
+      "avg_down": 0.5661869892945982,
+      "pair_cost": 0.9829869892945982,
+      "redeem_up": 0.0,
+      "redeem_down": 144.391218,
+      "window_fee0_usdc": 25.126788999999988,
+      "ui_closed_up": 90.0,
+      "ui_closed_down": 144.3912,
+      "ui_avg_up": 0.4168,
+      "ui_avg_down": 0.5661,
+      "ui_realizedPnl": 25.127000000000002,
+      "diff_ui_minus_window": 0.00021100000001439412
+    },
+    {
+      "slug": "btc-updown-5m-1784823300",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1784823300",
+      "winner": "Down",
+      "q_up": 423.51820799999996,
+      "q_down": 509.789839,
+      "avg_up": 0.4346969280716261,
+      "avg_down": 0.49826868361728965,
+      "pair_cost": 0.9329656116889158,
+      "redeem_up": 0.0,
+      "redeem_down": 509.789839,
+      "window_fee0_usdc": 71.67546299999998,
+      "ui_closed_up": 423.5182,
+      "ui_closed_down": 509.7898,
+      "ui_avg_up": 0.4346,
+      "ui_avg_down": 0.4982,
+      "ui_realizedPnl": 71.6782,
+      "diff_ui_minus_window": 0.0027370000000246364
+    },
+    {
+      "slug": "btc-updown-5m-1784954700",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1784954700",
+      "winner": "Up",
+      "q_up": 372.46000000000004,
+      "q_down": 395.26267500000006,
+      "avg_up": 0.6305874993287869,
+      "avg_down": 0.3657656923968345,
+      "pair_cost": 0.9963531917256214,
+      "redeem_up": 372.46,
+      "redeem_down": 0.0,
+      "window_fee0_usdc": -6.982145999999943,
+      "ui_closed_up": 372.46,
+      "ui_closed_down": 395.2626,
+      "ui_avg_up": 0.6305,
+      "ui_avg_down": 0.3657,
+      "ui_realizedPnl": -6.980099999999993,
+      "diff_ui_minus_window": 0.0020459999999502543
+    },
+    {
+      "slug": "btc-updown-5m-1785066900",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1785066900",
+      "winner": "Down",
+      "q_up": 136.38,
+      "q_down": 124.19,
+      "avg_up": 0.22721014811555945,
+      "avg_down": 0.7518023190272969,
+      "pair_cost": 0.9790124671428564,
+      "redeem_up": 0.0,
+      "redeem_down": 124.19,
+      "window_fee0_usdc": -0.163250000000005,
+      "ui_closed_up": 136.38,
+      "ui_closed_down": 124.19,
+      "ui_avg_up": 0.2272,
+      "ui_avg_down": 0.7518,
+      "ui_realizedPnl": -0.1629000000000005,
+      "diff_ui_minus_window": 0.00035000000000451337
+    },
+    {
+      "slug": "btc-updown-5m-1785078300",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1785078300",
+      "winner": "Down",
+      "q_up": 389.41060899999997,
+      "q_down": 563.753332,
+      "avg_up": 0.36987076795332,
+      "avg_down": 0.45486271822159274,
+      "pair_cost": 0.8247334861749127,
+      "redeem_up": 0.0,
+      "redeem_down": 563.753332,
+      "window_fee0_usdc": 163.29135799999995,
+      "ui_closed_up": 389.4106,
+      "ui_closed_down": 563.7533,
+      "ui_avg_up": 0.3698,
+      "ui_avg_down": 0.4548,
+      "ui_realizedPnl": 163.2953,
+      "diff_ui_minus_window": 0.0039420000000518485
+    },
+    {
+      "slug": "btc-updown-5m-1785124200",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1785124200",
+      "winner": "Down",
+      "q_up": 460.209891,
+      "q_down": 646.097147,
+      "avg_up": 0.3740175306227828,
+      "avg_down": 0.6092988722019538,
+      "pair_cost": 0.9833164028247365,
+      "redeem_up": 0.0,
+      "redeem_down": 646.097147,
+      "window_fee0_usdc": 80.30431699999997,
+      "ui_closed_up": 460.2098,
+      "ui_closed_down": 646.0971,
+      "ui_avg_up": 0.37400000000000005,
+      "ui_avg_down": 0.6092,
+      "ui_realizedPnl": 80.3109,
+      "diff_ui_minus_window": 0.0065830000000346445
+    },
+    {
+      "slug": "btc-updown-5m-1785600000",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1785600000",
+      "winner": "Down",
+      "q_up": 234.63,
+      "q_down": 147.85818,
+      "avg_up": 0.24955316881899162,
+      "avg_down": 0.8637560735564309,
+      "pair_cost": 1.1133092423754225,
+      "redeem_up": 0.0,
+      "redeem_down": 147.85818,
+      "window_fee0_usdc": -38.407881,
+      "ui_closed_up": 234.63,
+      "ui_closed_down": 147.8581,
+      "ui_avg_up": 0.2495,
+      "ui_avg_down": 0.8637,
+      "ui_realizedPnl": -38.4074,
+      "diff_ui_minus_window": 0.0004810000000006198
+    },
+    {
+      "slug": "btc-updown-5m-1786397700",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1786397700",
+      "winner": "Down",
+      "q_up": 170.0,
+      "q_down": 139.72,
+      "avg_up": 0.5408678235294118,
+      "avg_down": 0.4656083595762954,
+      "pair_cost": 1.0064761831057072,
+      "redeem_up": 0.0,
+      "redeem_down": 139.72,
+      "window_fee0_usdc": -17.28233,
+      "ui_closed_up": 170.0,
+      "ui_closed_down": 139.72,
+      "ui_avg_up": 0.5408,
+      "ui_avg_down": 0.46560000000000007,
+      "ui_realizedPnl": -17.281800000000004,
+      "diff_ui_minus_window": 0.000529999999997699
+    },
+    {
+      "slug": "btc-updown-5m-1786700400",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1786700400",
+      "winner": "Down",
+      "q_up": 912.263231,
+      "q_down": 833.8031339999999,
+      "avg_up": 0.40516981770144356,
+      "avg_down": 0.7076309526080531,
+      "pair_cost": 1.1128007703094966,
+      "redeem_up": 0.0,
+      "redeem_down": 833.803134,
+      "window_fee0_usdc": -125.84329900000012,
+      "ui_closed_up": 912.2632,
+      "ui_closed_down": 833.8031,
+      "ui_avg_up": 0.4051,
+      "ui_avg_down": 0.7076,
+      "ui_realizedPnl": -125.834,
+      "diff_ui_minus_window": 0.0092990000001123
+    },
+    {
+      "slug": "btc-updown-5m-1786760400",
+      "profile_event": "https://polymarket.com/event/btc-updown-5m-1786760400",
+      "winner": "Up",
+      "q_up": 305.287776,
+      "q_down": 456.030622,
+      "avg_up": 0.7338051000116035,
+      "avg_down": 0.14518291273869763,
+      "pair_cost": 0.8789880127503011,
+      "redeem_up": 305.287776,
+      "redeem_down": 0.0,
+      "window_fee0_usdc": 15.058195000000012,
+      "ui_closed_up": 305.2877,
+      "ui_closed_down": 456.0306,
+      "ui_avg_up": 0.7338,
+      "ui_avg_down": 0.1451,
+      "ui_realizedPnl": 15.060000000000002,
+      "diff_ui_minus_window": 0.0018049999999902866
+    }
+  ],
+  "pair_max_table_usdc_filter": [
+    {
+      "pair_max": 0.94,
+      "filter": "pair_cost",
+      "n": 3198,
+      "pct_paired": 0.20991138825073843,
+      "fee0_usdc": 83774.40609399999,
+      "fee0_px": 103793.18855389066,
+      "per_window_usdc": 26.19587432582864,
+      "pair_pnl_broken_taker": 65314.07934345913
+    },
+    {
+      "pair_max": 0.95,
+      "filter": "pair_cost",
+      "n": 3719,
+      "pct_paired": 0.24410895963242535,
+      "fee0_usdc": 93699.777509,
+      "fee0_px": 118036.95787886946,
+      "per_window_usdc": 25.19488505216456,
+      "pair_pnl_broken_taker": 70059.52158877117
+    },
+    {
+      "pair_max": 0.96,
+      "filter": "pair_cost",
+      "n": 4388,
+      "pct_paired": 0.28802100426649163,
+      "fee0_usdc": 105369.768996,
+      "fee0_px": 135486.51443586778,
+      "per_window_usdc": 24.013165222424796,
+      "pair_pnl_broken_taker": 73759.24889351528
+    },
+    {
+      "pair_max": 0.97,
+      "filter": "pair_cost",
+      "n": 5159,
+      "pct_paired": 0.3386281588447653,
+      "fee0_usdc": 117574.44730500001,
+      "fee0_px": 155285.40130491287,
+      "per_window_usdc": 22.790162299864317,
+      "pair_pnl_broken_taker": 75521.93184632756
+    },
+    {
+      "pair_max": 0.98,
+      "filter": "pair_cost",
+      "n": 6056,
+      "pct_paired": 0.3975057433541188,
+      "fee0_usdc": 123567.58783,
+      "fee0_px": 170981.80043985066,
+      "per_window_usdc": 20.40415915290621,
+      "pair_pnl_broken_taker": 73616.16037110801
+    }
+  ],
+  "pair_max_table_price_filter": [
+    {
+      "pair_max": 0.94,
+      "filter": "pair_px",
+      "n": 4523,
+      "pct_paired": 0.29688217919264853,
+      "fee0_usdc": 107481.432838,
+      "fee0_px": 140028.6653178822,
+      "per_window_usdc": 23.763305955781558,
+      "pair_pnl_broken_taker": 73876.27702421261
+    },
+    {
+      "pair_max": 0.95,
+      "filter": "pair_px",
+      "n": 5324,
+      "pct_paired": 0.34945848375451266,
+      "fee0_usdc": 118223.22799,
+      "fee0_px": 159343.5742398649,
+      "per_window_usdc": 22.205715249812172,
+      "pair_pnl_broken_taker": 74783.06548755668
+    },
+    {
+      "pair_max": 0.96,
+      "filter": "pair_px",
+      "n": 6218,
+      "pct_paired": 0.40813915326550704,
+      "fee0_usdc": 126493.715911,
+      "fee0_px": 177278.5367108382,
+      "per_window_usdc": 20.343151481344485,
+      "pair_pnl_broken_taker": 71814.62308542099
+    },
+    {
+      "pair_max": 0.97,
+      "filter": "pair_px",
+      "n": 7191,
+      "pct_paired": 0.4720052510666229,
+      "fee0_usdc": 133106.80512600002,
+      "fee0_px": 196252.87324581432,
+      "per_window_usdc": 18.51019401001252,
+      "pair_pnl_broken_taker": 62972.94740577041
+    },
+    {
+      "pair_max": 0.98,
+      "filter": "pair_px",
+      "n": 8182,
+      "pct_paired": 0.537052838857893,
+      "fee0_usdc": 136788.63992199997,
+      "fee0_px": 210866.3610417049,
+      "per_window_usdc": 16.718240029577117,
+      "pair_pnl_broken_taker": 50735.450464221765
+    }
+  ],
+  "pair_px_quantiles": {
+    "p10": 0.8719274561139112,
+    "p25": 0.9295967060546708,
+    "p50": 0.9742945150060746,
+    "p75": 1.0166648421632634,
+    "p90": 1.0687296752118836
+  },
+  "pair_usdc_quantiles": {
+    "p10": 0.8931924117599007,
+    "p25": 0.9513442068243356,
+    "p50": 0.9961902041404709,
+    "p75": 1.0384157182973182,
+    "p90": 1.0894655378827431
+  },
+  "slug_overlap": {
+    "both": 15752,
+    "only_window": 320,
+    "only_closed": 0,
+    "gap_rp_minus_fee0_usdc": 1530.803294000025,
+    "abs_gap": 4999.5033400000075,
+    "only_window_payout": 0.0,
+    "only_window_cost": 4311.941812999999,
+    "only_window_fee0_usdc": -4311.941812999999
+  },
+  "notes": [
+    "PHASE1 'fee0' used usdcSize as cost. usdcSize already includes taker fees.",
+    "Official ALL pnl matches payout - size*price (gross, fees not subtracted).",
+    "closed-positions.realizedPnl is after-fee (avgPrice \u2248 usdc/size, 4 dp) and omits 320 unredeemed loser windows.",
+    "pair_max=0.9513 is p25 of fee-inclusive pair_cost. Do not write it into a bot."
+  ]
+}
