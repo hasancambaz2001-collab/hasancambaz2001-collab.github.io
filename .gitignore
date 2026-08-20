@@ -39,3 +39,9 @@ data/ops/*.flag
 !data/ops/G6_fill_calibrated.flag
 configs/.env.pmdata
 configs/generated/LIVE_READY.yaml
+# SSH keys — never commit
+do_ams3.txt
+do_ams3.pub.txt
+*.pem
+id_ed25519
+id_rsa
