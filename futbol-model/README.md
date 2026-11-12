@@ -102,3 +102,16 @@ Parametreler `65ac795` commit'inde donduruldu, kör test ondan sonra tek seferde
 - Hubáček ve ark. (2019) tarzı pi-ratings + gradient boosting ile ensemble denemesi.
 - Understat/FBref olay bazlı xG ile şut-xG'nin değiştirilmesi.
 - İddaa oran geçmişi toplanarak türev marketlerde piyasaya kalibre adil oran ile iddaa oranının karşılaştırılması.
+
+## 7. 2. tur: literatüre dayalı bahis hipotezleri (`strategies.py`)
+
+Protokol aynı. Parametreler 2005–2019'da seçildi ve `4a7a72d` commit'inde donduruldu. Kör test 2019–2026'da yapıldı. Bootstrap gün blokları ile, Bonferroni düzeltmesi daha önce denenen 5 strateji ve bu turdaki 3 strateji, yani toplam 8 strateji üzerinden uygulandı (α = 0.00625). Bir en iyi oranın Bet365 oranını %35'ten fazla aşması bayat veya hatalı fiyat sayıldı.
+
+| Hipotez | Ayarlama ROI | Kör test bahis | Kör test ROI | %95 GA | p | Anlamlı mı? |
+|---|---|---|---|---|---|---|
+| H1 Konsensüs boşluğu (Kaunitz ve ark. 2017): en iyi oran > Bet365 adil oranı ×1.05, oran ≤ 2.5 | +4.5% (2.420) | 96 | +19.1% | [−1.4, +38.2] | 0.033 | Hayır |
+| H2 Favori–sürpriz yanlılığı: adil olasılığı ≥ %80 olan favori, en iyi oran | +3.1% (2.271) | 1.197 | +0.8% | [−1.6, +3.0] | 0.27 | Hayır |
+| H3 Model+piyasa havuzu, Alt/Üst 2.5, avantaj > %4, en iyi oran | +4.7% (2.323) | 492 | +1.7% | [−7.0, +10.6] | 0.33 | Hayır |
+| H4 H1 × H2 | +2.6% | – | – | – | – | Ayarlamada elendi |
+
+Yorum: Üç strateji de kör testte pozitif kaldı, ancak hiçbiri Bonferroni sonrası anlamlı değil. H1'in bahis sayısı ayarlama dönemindeki 2.420'den 96'ya düştü. Bu, en iyi oranların konsensüsten sapmasının 2019 sonrası nadirleştiğine işaret ediyor; piyasa verimlileşmiş görünüyor. "En iyi oran" birden çok bahis sitesinde hesap gerektirir ve kazanan hesaplar limitlenir (Kaunitz ve ark. 2017'nin kendi deneyimi). Bu kâr gerçek dünyada büyük olasılıkla daha düşük olur.
