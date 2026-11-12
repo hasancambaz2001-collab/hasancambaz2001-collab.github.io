@@ -61,3 +61,44 @@ python3 holdout.py    # kör test, results/ altına yazar
 python3 predict.py --div T1 --home Galatasaray --away Fenerbahce
 python3 predict.py --div E0 --home Arsenal --away Chelsea --odds 1=2.10 X=3.50 2=3.60 O2.5=1.85 U2.5=2.00 KG_VAR=1.75
 ```
+
+## 4. Kör test sonuçları (2019-07-26 → 2026-09-03, 52.940 maç)
+
+Parametreler `65ac795` commit'inde donduruldu, kör test ondan sonra tek seferde koşuldu. Ayrıntılar: `results/holdout_results.json`, `results/holdout_accuracy.csv`, `results/holdout_bets.csv.gz`.
+
+**Tahmin doğruluğu, MS 1X2 (log-loss, düşük olan iyi):**
+
+| Kaynak | Log-loss | RPS |
+|---|---|---|
+| Tarihsel lig frekansı | 1.0775 | 0.2295 |
+| Model (Dixon-Coles + şut-xG) | 1.0199 | 0.2098 |
+| Bet365 (Shin ile marjsız) | 1.0027 | 0.2043 |
+| Model + piyasa havuzu | 1.0025 | 0.2043 |
+
+- Model 26 marketin hepsinde tarihsel frekansı geçti. Kazanç MS 1X2, handikap ve doğru skorda %5–6, korner 1X2'de %3.5, kartta %3. Tek/Çift ile "daha çok gol olan yarı" pratikte tahmin edilemiyor (%0.03–0.09).
+- Model **22 ligin hiçbirinde** Bet365'i geçemedi. En büyük fark Süper Lig'de (+0.025), en küçük fark 2. Bundesliga'da (+0.0095).
+- Piyasaya kalibre edilmiş gol beklentileri ("model + piyasa"), türetilmiş **her** markette saf modelden daha iyi. Örneğin doğru skorda log-loss 2.8734'ten 2.8466'ya, İY/MS'de 1.9039'dan 1.8858'e iniyor. Asıl kullanılabilir ürün budur.
+
+**Bahis simülasyonu (dondurulmuş kurallar, 1 birim sabit):**
+
+| Strateji | Bahis | ROI | %95 GA | ¼ Kelly kasa (1 →) |
+|---|---|---|---|---|
+| MS 1X2 · Bet365 | 4.414 | −11.6% | [−15.3, −8.1] | ≈0 |
+| Alt/Üst 2.5 · Bet365 | 21.502 | −6.4% | [−7.7, −5.0] | ≈0 |
+| Asya Handikap · Bet365 | 8.665 | −3.5% | [−5.4, −1.6] | ≈0 |
+| MS 1X2 · en iyi oran | 6.221 | −5.6% | [−8.7, −2.7] | ≈0 |
+| Alt/Üst 2.5 · en iyi oran | 33.359 | −2.8% | [−4.0, −1.8] | ≈0 |
+
+Önceden kaydedilen "bahis yapma" kararı kör testte doğrulandı. Bütün stratejiler istatistiksel olarak anlamlı zarar etti.
+
+## 5. Ne anlama geliyor?
+
+1. Kamuya açık gol, şut, korner ve kart verisiyle kurulan literatürün en iyi model ailesi, Bet365'in 1X2 ve Alt/Üst oranlarındaki bilgiyi aşamıyor. Bu sonuç literatürle uyumlu.
+2. Sistemin değeri bir **fiyatlama motoru** olmasıdır. Keskin piyasanın 1X2 ve A/Ü 2.5 oranları girilir, motor iddaanın bütün türev marketleri için tutarlı adil oranlar üretir (`predict.py --odds ...`). İddaa'nın türev market oranlarını bu adil oranlarla karşılaştırmak için iddaa oran geçmişi gerekir. Bu veri bu sette yok.
+3. Gerçek avantaj için gerekenler: piyasada henüz olmayan bilgi (kadro, sakatlık, olay bazlı xG), yavaş fiyatlanan türev marketler veya erken alınan değer. Ölçüt kapanış oranına karşı CLV olmalıdır.
+
+## 6. Sonraki adımlar
+- Pinnacle **kapanış** oranlarıyla CLV ölçümü (football-data'nın orijinal CSV'leri `PSCH/PSCD/PSCA` içerir; bu ortamda o siteye ağ erişimi yoktu).
+- Hubáček ve ark. (2019) tarzı pi-ratings + gradient boosting ile ensemble denemesi.
+- Understat/FBref olay bazlı xG ile şut-xG'nin değiştirilmesi.
+- İddaa oran geçmişi toplanarak türev marketlerde piyasaya kalibre adil oran ile iddaa oranının karşılaştırılması.

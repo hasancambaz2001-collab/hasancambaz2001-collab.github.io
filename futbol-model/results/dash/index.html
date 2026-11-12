@@ -1,0 +1,417 @@
+<meta name="dash-one-writer">
+<style>
+  .ib { display: flex; flex-direction: column; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+  .ib h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .ib h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; text-wrap: balance; }
+  .ib p { margin: 0; line-height: 1.55; max-width: 72ch; }
+  .ib-lede { font-size: var(--cds-font-size-body); }
+  .ib-muted { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .ib-sec { display: flex; flex-direction: column; gap: var(--cds-gap-md); min-width: 0; }
+  .ib-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--cds-gap-md); }
+  .ib-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-xs); min-width: 0; }
+  .ib-tile .ib-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .02em; }
+  .ib-tile .ib-v { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .ib-tile .ib-s { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ib-tile.ib-hl { border-color: var(--color-bad); }
+  .ib-chart { position: relative; min-height: 180px; width: 100%; }
+  .ib-chart svg { display: block; overflow: visible; }
+  .ib-chart text { font-family: var(--font-anthropic-sans); }
+  .ib-chart .tick text, .ib-lbl { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); }
+  .ib-chart .domain { stroke: var(--cds-chart-axis); }
+  .ib-chart .tick line { stroke: var(--cds-chart-grid); }
+  .ib-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); font-size: var(--cds-font-size-caption); line-height: 1.45; white-space: nowrap; z-index: 2; font-variant-numeric: tabular-nums; }
+  .ib-tip b { font-weight: var(--cds-font-weight-medium); }
+  .ib-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-lg); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ib-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .ib-sw { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+  .ib-sw.ib-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ib-tablewrap { overflow-x: auto; }
+  .ib table { border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; min-width: 100%; }
+  .ib th, .ib td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .ib th:first-child, .ib td:first-child { text-align: left; }
+  .ib th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); }
+  .ib .ib-neg { color: var(--color-bad); }
+  .ib .ib-pos { color: var(--color-ok); }
+  .ib-cal { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--cds-gap-md); }
+  .ib-callout { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+  .ib details { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+  .ib summary { cursor: pointer; font-weight: var(--cds-font-weight-medium); }
+  .ib details p, .ib details li { line-height: 1.55; max-width: 76ch; }
+  .ib details ul { padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+  [data-dash-source-state=refreshing] { opacity: .5; }
+</style>
+
+<div class="ib" lang="tr" data-read>
+  <header class="ib-sec" id="ozet">
+    <h1>Futbol modeli bahisçiyi yenebilir mi?</h1>
+    <p class="ib-lede"><b data-draw="nmatch" data-source="headline" data-field="n_matches" data-row="0">—</b> maçlık kör testte (<span data-draw="wstart" data-source="headline" data-field="window_start" data-row="0">—</span> – <span data-draw="wend" data-source="headline" data-field="window_end" data-row="0">—</span>) modelimiz her markette tarihsel ortalamadan daha iyi tahmin etti. Ama Bet365'in oranlarını geçemedi. Önceden dondurulan <b data-draw="nstrat" data-source="losing">—</b> bahis stratejisinin hepsi zarar etti.</p>
+    <p class="ib-muted">Parametreler, kör testten önce <span data-draw="commit" data-source="headline" data-field="frozen_commit" data-row="0">—</span> commit'iyle <span data-draw="frozenat" data-source="headline" data-field="frozen_at" data-row="0">—</span> tarihinde donduruldu. Ayarlama 2016/17–2018/19 sezonlarında yapıldı. Log-loss, gerçekleşen sonuca verilen olasılığın eksi logaritmasının ortalamasıdır. Düşük olan daha iyidir.</p>
+  </header>
+
+  <section class="ib-sec" id="dogruluk-ozet">
+    <h2>MS 1X2 tahmin doğruluğu (log-loss)</h2>
+    <div class="ib-tiles">
+      <div class="ib-tile"><span class="ib-k">Tarihsel ortalama (lig frekansı)</span><span class="ib-v" data-draw="llbase" data-source="headline" data-field="ll_base" data-row="0">—</span><span class="ib-s">Referans: hiçbir bilgi yok</span></div>
+      <div class="ib-tile"><span class="ib-k">Model (Dixon-Coles + şut-xG)</span><span class="ib-v" data-draw="llmodel" data-source="headline" data-field="ll_model" data-row="0">—</span><span class="ib-s">Bet365'e fark: <span data-draw="gap" data-source="gap1x2">—</span> (model geride)</span></div>
+      <div class="ib-tile"><span class="ib-k">Bet365 (Shin ile marjsız)</span><span class="ib-v" data-draw="llbook" data-source="headline" data-field="ll_bookmaker" data-row="0">—</span><span class="ib-s">Piyasanın kendisi</span></div>
+      <div class="ib-tile"><span class="ib-k">Model + piyasa havuzu</span><span class="ib-v" data-draw="llblend" data-source="headline" data-field="ll_model_mkt" data-row="0">—</span><span class="ib-s">Modelin ağırlığı ≈ 0 çıktı</span></div>
+      <div class="ib-tile ib-hl"><span class="ib-k">Her sonuca körlemesine oynamak</span><span class="ib-v" data-draw="allroi" data-source="headline" data-field="all_outcomes_roi_pct" data-row="0">—</span><span class="ib-s">Bet365 marjının maliyeti (ROI)</span></div>
+    </div>
+  </section>
+
+  <section class="ib-sec" id="stratejiler">
+    <h2>Dondurulan bahis stratejilerinin getirisi, %95 güven aralığıyla</h2>
+    <p class="ib-muted">Her nokta sabit 1 birim bahisle elde edilen ROI'dir; çizgi bootstrap %95 aralığıdır. Aralık sıfırı geçmiyorsa zarar şans eseri değildir. "En iyi oran", ~17 bahisçinin en yüksek oranıdır ve gerçekte erişilmesi zor bir üst sınırdır.</p>
+    <div class="ib-chart" id="roi-chart" data-draw="roi" data-source="betting"></div>
+    <div class="ib-tablewrap">
+      <table data-source="betting" data-row-key="strategy">
+        <thead><tr><th data-field="strategy">Strateji</th><th data-field="bets">Bahis</th><th data-field="roi_pct">ROI %</th><th data-field="ci_lo_pct">Alt %95</th><th data-field="ci_hi_pct">Üst %95</th><th data-field="avg_odds">Ort. oran</th><th data-field="hit_pct">İsabet %</th><th data-field="profit_units">Kâr (birim)</th><th data-field="kelly_final_bank">¼ Kelly kasa (1→)</th><th data-field="edge_threshold_pct">Min. avantaj %</th></tr></thead>
+        <tbody data-draw="bettable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ib-sec" id="kumulatif">
+    <h2>Kümülatif kâr/zarar (birim), 2019–2026</h2>
+    <div class="ib-legend" data-draw="curvelegend" data-source="curves"></div>
+    <div class="ib-chart" id="curve-chart" data-draw="curves" data-source="curves" style="min-height:300px"></div>
+  </section>
+
+  <section class="ib-sec" id="sezonlar">
+    <h2>Sezon sezon ROI (%)</h2>
+    <p class="ib-muted">2026/27 sadece ilk haftaları kapsar.</p>
+    <div class="ib-tablewrap">
+      <table id="season-table" data-source="seasons">
+        <thead data-draw="seasonhead"></thead>
+        <tbody data-draw="seasonbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ib-sec" id="marketler">
+    <h2>26 iddaa marketinde tarihsel ortalamaya göre kazanç (log-loss %)</h2>
+    <p class="ib-muted">Pozitif değer, modelin o markette lig frekansından daha iyi tahmin ettiğini gösterir. "Model + piyasa", gol beklentilerinin Bet365'in 1X2 ve Alt/Üst 2.5 oranlarına kalibre edilmiş halidir. Diğer bütün marketler bu kalibre edilmiş skor dağılımından türetilir. Korner ve kart için piyasa oranı olmadığından iki çubuk aynıdır.</p>
+    <div class="ib-legend">
+      <span><i class="ib-sw ib-dot" data-draw="swmodel"></i>Model</span>
+      <span><i class="ib-sw ib-dot" data-draw="swmkt"></i>Model + piyasa</span>
+    </div>
+    <div class="ib-chart" id="market-chart" data-draw="markets" data-source="accuracy" style="min-height:700px"></div>
+  </section>
+
+  <section class="ib-sec" id="ligler">
+    <h2>Lig bazında: modelin Bet365'ten ne kadar geride olduğu (MS 1X2 log-loss farkı)</h2>
+    <p class="ib-muted">Sıfırın sağı, bahisçinin daha iyi olduğu anlamına gelir. 22 ligin hiçbirinde model bahisçiyi geçemedi. Süper Lig en büyük farka sahip.</p>
+    <div class="ib-chart" id="league-chart" data-draw="leagues" data-source="leagues" style="min-height:560px"></div>
+  </section>
+
+  <section class="ib-sec" id="kalibrasyon">
+    <h2>Kalibrasyon: model %X dediğinde gerçekte ne oldu?</h2>
+    <p class="ib-muted">Her nokta, tahminlerin onda birlik bir dilimidir. Kesikli çapraz çizgi mükemmel kalibrasyonu gösterir. Model güçlü favorilerde temkinli kalıyor (favori %68 dediğinde gerçekleşme %73), uç Alt/Üst ve KG tahminlerinde ise fazla iddialı.</p>
+    <div class="ib-cal" id="cal-grid" data-draw="calib" data-source="calibration"></div>
+  </section>
+
+  <section class="ib-callout" id="karar">
+    <h2>Karar</h2>
+    <p>Kamuya açık skor, şut, korner ve kart verisiyle kurulan en iyi akademik model ailesi, Bet365'in oranlarını yenemiyor. Bu sonuç, oranların en iyi tahmin kaynağı olduğunu gösteren literatürle (Forrest, Goddard ve Simmons 2005; Štrumbelj ve Šikonja 2010) uyumlu.</p>
+    <p>Sistemin işe yarayan kısmı fiyatlama motorudur. Keskin bir piyasanın 1X2 ve Alt/Üst oranlarını girdi olarak alıp KG, doğru skor, İY/MS, handikap, korner ve kart gibi türev marketlerin adil olasılığını tutarlı biçimde üretir. Gerçek bir avantaj için piyasada henüz olmayan bilgi (kadro, sakatlık, xG), yavaş fiyatlanan türev marketler veya kapanış oranından önce alınan değer gerekir. Bu da bahis kapanış oranına karşı (CLV) ayrıca ölçülmelidir.</p>
+  </section>
+
+  <details id="yontem">
+    <summary>Yöntem, veri ve kör test protokolü</summary>
+    <ul>
+      <li><b>Veri:</b> Football-Data.co.uk; 22 Avrupa ligi ve Süper Lig, 2000–2026, 184 bin maç. Skor, ilk yarı, isabetli şut, korner, kart, Bet365 oranları ve ~17 bahisçinin en iyi oranı.</li>
+      <li><b>Gol modeli:</b> Dixon ve Coles (1997). Zaman sönümü ξ = 0,0018/gün (yarı ömür ≈ 385 gün; Ley ve ark. 2019 ile uyumlu). Takım etkilerinde ridge önseli (λ = 3). Hedef, golün %70'i ile isabetli şuttan türetilen sözde-xG'nin %30'unun karışımı (Wheatcroft 2020). Bir ülkenin bütün ligleri birlikte fit edilir, böylece küme düşen/çıkan takımlar geçmişini korur.</li>
+      <li><b>Yarılar:</b> Lig bazında ilk yarı gol payı ile bağımsız Poisson yarılar. İY/MS olasılıkları tam maç olasılıklarına yeniden ölçeklenir.</li>
+      <li><b>Korner ve kart:</b> Takım hücum/savunma etkili negatif binom modeli; ağır büzüştürme (korner λ = 120, kart λ = 50).</li>
+      <li><b>Piyasa:</b> 1X2 için Shin, ikili marketler için power yöntemiyle marj ayıklama. Log-lineer havuzla birleştirme (Egidi ve ark. 2018 yaklaşımı).</li>
+      <li><b>Walk-forward:</b> Her pazartesi model yalnızca o tarihten önceki maçlarla yeniden fit edilir ve sonraki 7 günü tahmin eder.</li>
+      <li><b>Protokol:</b> Tüm parametreler (ξ, ridge, şut ağırlığı, korner/kart, havuz ağırlıkları, avantaj eşikleri, oran tavanı) yalnızca 2016/17–2018/19'da seçildi. Ardından git'e commit'lendi ve 2019/20 sonrası tek seferde koşuldu. Doğrulamada hiçbir kural pozitif çıkmadığı için önceden kaydedilen karar "bahis yapma" idi.</li>
+      <li><b>Bahis:</b> Avantaj = p × oran − 1. Eşik geçilirse sabit 1 birim, oran ≤ 3. Kelly simülasyonunda ¼ Kelly ve bahis başına en fazla %2,5. Takımın pencere içindeki ağırlıklı maç sayısı 10'un altındaysa bahis yapılmaz.</li>
+      <li><b>Sınırlar:</b> Veride kapanış oranı yok, bu yüzden CLV ölçülemedi. Bet365 oranları maçtan 1–3 gün önce toplanır. İddaa oranları bu veride yok.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+  window.IB = {
+    n: (v) => +v,
+    fmtInt: (v) => String(Math.round(+v)),
+    fmtDec: (v, k = 4) => (+v).toFixed(k),
+    fmtPct: (v, k = 1) => (+v > 0 ? '+' : '') + (+v).toFixed(k) + '%',
+    ok: (id) => dash.data(id).status === 'ok',
+    placeholder(el, id) {
+      const s = dash.data(id).status;
+      el.replaceChildren();
+      if (s === 'error') { const p = document.createElement('p'); p.className = 'ib-muted'; p.textContent = 'Yüklenemedi'; el.append(p); }
+      else if (el.tagName !== 'TBODY' && el.tagName !== 'THEAD') el.textContent = '—';
+    },
+    tip(el) {
+      let t = el.querySelector(':scope > .ib-tip');
+      if (!t) { t = document.createElement('div'); t.className = 'ib-tip'; t.hidden = true; el.append(t); }
+      return {
+        show(lines, x, y) {
+          t.replaceChildren(...lines.map(([k, v], i) => { const d = document.createElement('div'); if (i === 0 && v === undefined) { const b = document.createElement('b'); b.textContent = k; d.append(b); } else { d.textContent = k + (v !== undefined ? ': ' + v : ''); } return d; }));
+          t.hidden = false;
+          const w = el.clientWidth, tw = t.offsetWidth;
+          t.style.left = Math.max(0, Math.min(w - tw, x + 12)) + 'px';
+          t.style.top = (y + 12) + 'px';
+        },
+        hide() { t.hidden = true; }
+      };
+    },
+    measure(svg, texts) {
+      const g = svg.append('g').attr('class', 'ib-lbl');
+      let m = 0;
+      texts.forEach((s) => { const t = g.append('text').text(s); m = Math.max(m, t.node().getComputedTextLength()); });
+      g.remove();
+      return m;
+    }
+  };
+
+  dash.calc('gap1x2', {
+    title: 'Modelin Bet365 karşısında log-loss farkı (MS 1X2)',
+    description: 'Model log-loss eksi Bet365 log-loss; pozitif değer modelin geride olduğunu gösterir.',
+    inputs: ['headline'],
+    fn: (headline) => headline.length ? +headline[0].ll_model - +headline[0].ll_bookmaker : null
+  });
+  dash.calc('losing', {
+    title: 'Zarar eden strateji sayısı',
+    description: 'ROI değeri sıfırın altında olan dondurulmuş strateji sayısı.',
+    inputs: ['betting'],
+    fn: (betting) => betting.filter((r) => +r.roi_pct < 0).length
+  });
+</script>
+
+<script>
+  const simple = [
+    ['nmatch', 'headline', 'n_matches', (v) => IB.fmtInt(v)],
+    ['wstart', 'headline', 'window_start', (v) => v],
+    ['wend', 'headline', 'window_end', (v) => v],
+    ['commit', 'headline', 'frozen_commit', (v) => v],
+    ['frozenat', 'headline', 'frozen_at', (v) => v],
+    ['llbase', 'headline', 'll_base', (v) => IB.fmtDec(v)],
+    ['llmodel', 'headline', 'll_model', (v) => IB.fmtDec(v)],
+    ['llbook', 'headline', 'll_bookmaker', (v) => IB.fmtDec(v)],
+    ['llblend', 'headline', 'll_model_mkt', (v) => IB.fmtDec(v)],
+    ['allroi', 'headline', 'all_outcomes_roi_pct', (v) => IB.fmtPct(v)],
+  ];
+  simple.forEach(([name, id, field, f]) => dash.draw(name, (el) => {
+    const d = dash.data(id);
+    el.textContent = d.status === 'ok' && d.data.length ? f(d.data[0][field]) : '—';
+  }));
+  dash.draw('gap', (el) => {
+    const d = dash.data('gap1x2');
+    el.textContent = d.status === 'ok' && d.data != null ? IB.fmtDec(d.data) : '—';
+  });
+  dash.draw('nstrat', (el) => {
+    const d = dash.data('losing'), b = dash.data('betting');
+    el.textContent = d.status === 'ok' && b.status === 'ok' ? (d.data === b.data.length ? String(b.data.length) : d.data + '/' + b.data.length) : '—';
+  });
+  dash.draw('swmodel', (el) => { el.style.background = dash.colors[0]; });
+  dash.draw('swmkt', (el) => { el.style.background = dash.colors[1]; });
+</script>
+
+<script>
+  // ROI forest plot
+  dash.draw('roi', (el) => {
+    const d = dash.data('betting');
+    if (d.status !== 'ok') return IB.placeholder(el, 'betting');
+    const rows = d.data;
+    el.replaceChildren();
+    const W = el.clientWidth, rowH = 34, top = 8, bottom = 30;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('role', 'img')
+      .attr('aria-label', 'Beş bahis stratejisinin ROI değerleri ve güven aralıkları; hepsi sıfırın altında');
+    const left = Math.min(IB.measure(svg, rows.map((r) => r.strategy)) + 14, W * 0.45);
+    const H = top + rows.length * rowH + bottom;
+    svg.attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+    const lo = d3.min(rows, (r) => +r.ci_lo_pct), hi = Math.max(2, d3.max(rows, (r) => +r.ci_hi_pct));
+    const x = d3.scaleLinear().domain([lo - 1, hi]).nice().range([left, W - 12]);
+    const y = (i) => top + i * rowH + rowH / 2;
+    const ax = svg.append('g').attr('transform', `translate(0,${H - bottom})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor(W / 90))).tickFormat((v) => v + '%').tickSize(-(H - bottom - top)));
+    ax.select('.domain').remove();
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', top).attr('y2', H - bottom).style('stroke', 'var(--cds-chart-reference)').style('stroke-width', 1.5).style('stroke-dasharray', '4 3');
+    const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r').attr('transform', (r, i) => `translate(0,${y(i)})`);
+    g.append('text').attr('class', 'ib-lbl').attr('x', left - 10).attr('dy', '0.35em').attr('text-anchor', 'end').text((r) => r.strategy).style('fill', 'var(--color-fg)');
+    g.append('line').attr('x1', (r) => x(+r.ci_lo_pct)).attr('x2', (r) => x(+r.ci_hi_pct)).style('stroke', 'var(--cds-chart-status-critical)').style('stroke-width', 2.5).style('stroke-linecap', 'round');
+    g.append('circle').attr('cx', (r) => x(+r.roi_pct)).attr('r', 6).style('fill', 'var(--cds-chart-status-critical)').style('stroke', 'var(--color-bg)').style('stroke-width', 2);
+    const tip = IB.tip(el);
+    g.append('rect').attr('x', 0).attr('y', -rowH / 2).attr('width', W).attr('height', rowH).style('fill', 'transparent')
+      .on('pointermove', (ev, r) => { const [mx, my] = d3.pointer(ev, el); tip.show([[r.strategy], ['ROI', IB.fmtPct(r.roi_pct, 2)], ['%95 aralık', IB.fmtPct(r.ci_lo_pct) + ' … ' + IB.fmtPct(r.ci_hi_pct)], ['Bahis', IB.fmtInt(r.bets)], ['Kâr', IB.fmtDec(r.profit_units, 1) + ' birim']], mx, my); })
+      .on('pointerleave', () => tip.hide());
+  });
+
+  dash.draw('bettable', (tb) => {
+    const d = dash.data('betting');
+    if (d.status !== 'ok') return IB.placeholder(tb, 'betting');
+    tb.replaceChildren(...d.data.map((r) => {
+      const tr = document.createElement('tr');
+      const cells = [r.strategy, IB.fmtInt(r.bets), IB.fmtPct(r.roi_pct, 2), IB.fmtPct(r.ci_lo_pct), IB.fmtPct(r.ci_hi_pct), IB.fmtDec(r.avg_odds, 2), IB.fmtDec(r.hit_pct, 1), IB.fmtDec(r.profit_units, 1), IB.fmtDec(r.kelly_final_bank, 4), IB.fmtDec(r.edge_threshold_pct, 0)];
+      cells.forEach((c, i) => { const td = document.createElement('td'); td.textContent = c; if ([2, 7].includes(i)) td.className = +[r.roi_pct, 0, 0, 0, 0, 0, 0, r.profit_units][i] < 0 ? 'ib-neg' : 'ib-pos'; tr.append(td); });
+      return tr;
+    }));
+  });
+</script>
+
+<script>
+  // cumulative curves
+  const curveOrder = (rows) => Array.from(new Set(rows.map((r) => r.strategy)));
+  dash.draw('curvelegend', (el) => {
+    const d = dash.data('curves');
+    if (d.status !== 'ok') { el.replaceChildren(); return; }
+    el.replaceChildren(...curveOrder(d.data).map((s, i) => { const sp = document.createElement('span'); const sw = document.createElement('i'); sw.className = 'ib-sw'; sw.style.background = dash.colors[i % dash.colors.length]; sp.append(sw, document.createTextNode(s)); return sp; }));
+  });
+  dash.draw('curves', (el) => {
+    const d = dash.data('curves');
+    if (d.status !== 'ok') return IB.placeholder(el, 'curves');
+    el.replaceChildren();
+    const parse = d3.utcParse('%Y-%m-%d');
+    const names = curveOrder(d.data);
+    const series = names.map((s) => ({ s, pts: d.data.filter((r) => r.strategy === s).map((r) => ({ t: parse(r.date), v: +r.cum_profit_units })) }));
+    const W = el.clientWidth, H = 300, m = { t: 10, r: 14, b: 26 };
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Beş stratejinin 2019-2026 kümülatif kâr eğrisi; hepsi sürekli düşüyor');
+    const all = series.flatMap((s) => s.pts);
+    const y = d3.scaleLinear().domain([d3.min(all, (p) => p.v), Math.max(0, d3.max(all, (p) => p.v))]).nice().range([H - m.b, m.t]);
+    const fmtY = (v) => IB.fmtInt(v);
+    m.l = IB.measure(svg, y.ticks(5).map(fmtY)) + 10;
+    const x = d3.scaleUtc().domain(d3.extent(all, (p) => p.t)).range([m.l, W - m.r]);
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(fmtY).tickSize(-(W - m.l - m.r))).call((g) => g.select('.domain').remove());
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor(W / 110))).tickFormat(d3.utcFormat('%Y')));
+    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).style('stroke', 'var(--cds-chart-reference)');
+    const line = d3.line().x((p) => x(p.t)).y((p) => y(p.v));
+    series.forEach((s, i) => svg.append('path').datum(s.pts).attr('d', line).style('fill', 'none').style('stroke', dash.colors[i % dash.colors.length]).style('stroke-width', 2));
+    const tip = IB.tip(el);
+    const guide = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--cds-chart-axis)').attr('visibility', 'hidden');
+    const bis = d3.bisector((p) => p.t).left;
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).style('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [mx, my] = d3.pointer(ev, el); const t = x.invert(mx);
+        guide.attr('x1', x(t)).attr('x2', x(t)).attr('visibility', 'visible');
+        const lines = [[d3.utcFormat('%d.%m.%Y')(t)]];
+        series.forEach((s) => { const i = Math.min(s.pts.length - 1, bis(s.pts, t)); if (s.pts.length) lines.push([s.s, IB.fmtDec(s.pts[i].v, 1)]); });
+        tip.show(lines, mx, my);
+      })
+      .on('pointerleave', () => { tip.hide(); guide.attr('visibility', 'hidden'); });
+  });
+</script>
+
+<script>
+  // season pivot
+  const seasonPivot = () => {
+    const d = dash.data('seasons');
+    if (d.status !== 'ok') return null;
+    const strategies = Array.from(new Set(d.data.map((r) => r.strategy)));
+    const seasons = Array.from(new Set(d.data.map((r) => r.season))).sort();
+    return { rows: d.data, strategies, seasons };
+  };
+  dash.draw('seasonhead', (el) => {
+    const p = seasonPivot();
+    if (!p) { el.replaceChildren(); return; }
+    const tr = document.createElement('tr');
+    const th0 = document.createElement('th'); th0.textContent = 'Strateji'; tr.append(th0);
+    p.seasons.forEach((s) => { const th = document.createElement('th'); th.textContent = s; tr.append(th); });
+    el.replaceChildren(tr);
+  });
+  dash.draw('seasonbody', (el) => {
+    const p = seasonPivot();
+    if (!p) return IB.placeholder(el, 'seasons');
+    const enc = (s) => encodeURIComponent(s);
+    el.replaceChildren(...p.strategies.map((st) => {
+      const tr = document.createElement('tr');
+      const td0 = document.createElement('td'); td0.textContent = st; tr.append(td0);
+      p.seasons.forEach((se) => {
+        const td = document.createElement('td');
+        const r = p.rows.find((x) => x.strategy === st && x.season === se);
+        if (r) {
+          const sp = document.createElement('span');
+          sp.dataset.source = 'seasons'; sp.dataset.field = 'roi_pct'; sp.dataset.where = `strategy=${enc(st)}&season=${enc(se)}`;
+          sp.textContent = IB.fmtDec(r.roi_pct, 1);
+          sp.className = +r.roi_pct < 0 ? 'ib-neg' : 'ib-pos';
+          sp.title = IB.fmtInt(r.bets) + ' bahis';
+          td.append(sp);
+        } else td.textContent = '·';
+        tr.append(td);
+      });
+      return tr;
+    }));
+  });
+</script>
+
+<script>
+  // grouped horizontal bars
+  function hbars(el, id, rows, label, series, opts) {
+    el.replaceChildren();
+    const W = el.clientWidth, bandH = opts.bandH, m = { t: 6, r: 44, b: 26 };
+    const H = m.t + rows.length * bandH + m.b;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', opts.aria);
+    m.l = Math.min(IB.measure(svg, rows.map(label)) + 12, W * 0.42);
+    const vals = rows.flatMap((r) => series.map((s) => +r[s.field]));
+    const x = d3.scaleLinear().domain([Math.min(0, d3.min(vals)), Math.max(0, d3.max(vals))]).nice().range([m.l, W - m.r]);
+    const yb = d3.scaleBand().domain(rows.map(label)).range([m.t, H - m.b]).paddingInner(0.25);
+    const ys = d3.scaleBand().domain(series.map((s) => s.field)).range([0, yb.bandwidth()]).padding(0.08);
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor((W - m.l) / 80))).tickFormat(opts.tick).tickSize(-(H - m.b - m.t))).call((g) => g.select('.domain').remove());
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--cds-chart-reference)');
+    const g = svg.selectAll('g.b').data(rows).join('g').attr('class', 'b').attr('transform', (r) => `translate(0,${yb(label(r))})`);
+    g.append('text').attr('class', 'ib-lbl').attr('x', m.l - 8).attr('y', yb.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').text(label).style('fill', 'var(--color-fg)');
+    series.forEach((s, i) => {
+      g.append('rect').attr('x', (r) => Math.min(x(0), x(+r[s.field]))).attr('y', ys(s.field)).attr('height', ys.bandwidth()).attr('width', (r) => Math.abs(x(+r[s.field]) - x(0))).attr('rx', 2).style('fill', s.color);
+      if (opts.endLabels) g.append('text').attr('class', 'ib-lbl').attr('x', (r) => x(+r[s.field]) + (+r[s.field] < 0 ? -4 : 4)).attr('text-anchor', (r) => +r[s.field] < 0 ? 'end' : 'start').attr('y', ys(s.field) + ys.bandwidth() / 2).attr('dy', '0.35em').text((r) => opts.tick(+r[s.field]));
+    });
+    const tip = IB.tip(el);
+    g.append('rect').attr('x', 0).attr('width', W).attr('height', yb.bandwidth()).style('fill', 'transparent')
+      .on('pointermove', (ev, r) => { const [mx, my] = d3.pointer(ev, el); tip.show(opts.tipLines(r), mx, my); })
+      .on('pointerleave', () => tip.hide());
+  }
+
+  dash.draw('markets', (el) => {
+    const d = dash.data('accuracy');
+    if (d.status !== 'ok') return IB.placeholder(el, 'accuracy');
+    hbars(el, 'accuracy', d.data, (r) => r.market, [
+      { field: 'skill_model_pct', color: dash.colors[0] },
+      { field: 'skill_model_mkt_pct', color: dash.colors[1] },
+    ], {
+      bandH: 30, endLabels: false, aria: '26 market için modelin ve piyasaya kalibre modelin tarihsel ortalamaya göre log-loss kazancı',
+      tick: (v) => IB.fmtDec(v, 1) + '%',
+      tipLines: (r) => [[r.market], ['Model', IB.fmtPct(r.skill_model_pct, 2)], ['Model + piyasa', IB.fmtPct(r.skill_model_mkt_pct, 2)], ['Log-loss model', IB.fmtDec(r.ll_model)], ['Log-loss tarihsel', IB.fmtDec(r.ll_base)], ['Maç', IB.fmtInt(r.n)]],
+    });
+  });
+
+  dash.draw('leagues', (el) => {
+    const d = dash.data('leagues');
+    if (d.status !== 'ok') return IB.placeholder(el, 'leagues');
+    hbars(el, 'leagues', d.data, (r) => r.league, [{ field: 'gap_vs_book', color: 'var(--cds-chart-status-critical)' }], {
+      bandH: 24, endLabels: true, aria: '22 ligde modelin Bet365 karşısında log-loss farkı; hepsi pozitif yani model geride',
+      tick: (v) => IB.fmtDec(v, 3),
+      tipLines: (r) => [[r.league + ' (' + r.div + ')'], ['Model', IB.fmtDec(r.ll_model)], ['Bet365', IB.fmtDec(r.ll_book)], ['Tarihsel', IB.fmtDec(r.ll_base)], ['Maç', IB.fmtInt(r.n)]],
+    });
+  });
+</script>
+
+<script>
+  // calibration small multiples
+  dash.draw('calib', (el) => {
+    const d = dash.data('calibration');
+    if (d.status !== 'ok') return IB.placeholder(el, 'calibration');
+    el.replaceChildren();
+    const groups = d3.groups(d.data, (r) => r.market);
+    groups.forEach(([name, rows]) => {
+      const box = document.createElement('div'); box.className = 'ib-chart'; box.style.minHeight = '0';
+      const h = document.createElement('div'); h.className = 'ib-muted'; h.textContent = name; box.append(h);
+      el.append(box);
+      const W = box.clientWidth || 190, S = Math.min(W, 220), m = { t: 6, r: 8, b: 22, l: 30 };
+      const vals = rows.flatMap((r) => [+r.pred, +r.obs]);
+      const lo = Math.max(0, Math.floor((d3.min(vals) - 0.02) * 20) / 20), hi = Math.min(1, Math.ceil((d3.max(vals) + 0.02) * 20) / 20);
+      const sc = (r0) => d3.scaleLinear().domain([lo, hi]).range(r0);
+      const x = sc([m.l, S - m.r]), y = sc([S - m.b, m.t]);
+      const svg = d3.select(box).append('svg').attr('width', S).attr('height', S).attr('viewBox', `0 0 ${S} ${S}`).attr('role', 'img').attr('aria-label', name + ' kalibrasyonu: tahmin edilen ve gerçekleşen olasılık');
+      const pf = (v) => Math.round(v * 100) + '%';
+      svg.append('g').attr('transform', `translate(0,${S - m.b})`).call(d3.axisBottom(x).ticks(3).tickFormat(pf));
+      svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(3).tickFormat(pf));
+      svg.append('line').attr('x1', x(lo)).attr('y1', y(lo)).attr('x2', x(hi)).attr('y2', y(hi)).style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '4 3');
+      svg.append('path').datum(rows).attr('d', d3.line().x((r) => x(+r.pred)).y((r) => y(+r.obs))).style('fill', 'none').style('stroke', dash.colors[0]).style('stroke-width', 1.5);
+      const tip = IB.tip(box);
+      svg.selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(+r.pred)).attr('cy', (r) => y(+r.obs)).attr('r', 4).style('fill', dash.colors[0]).style('stroke', 'var(--color-bg)').style('stroke-width', 1.5)
+        .on('pointermove', (ev, r) => { const [mx, my] = d3.pointer(ev, box); tip.show([[name + ' · dilim ' + r.bin], ['Tahmin', IB.fmtDec(100 * r.pred, 1) + '%'], ['Gerçekleşen', IB.fmtDec(100 * r.obs, 1) + '%'], ['Maç', IB.fmtInt(r.n)]], mx, my); })
+        .on('pointerleave', () => tip.hide());
+    });
+  });
+</script>

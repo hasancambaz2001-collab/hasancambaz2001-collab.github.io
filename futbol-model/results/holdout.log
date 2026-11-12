@@ -1,0 +1,41 @@
+walk-forward 2019-07-01..2026-12-31 52940 matches in 31s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 120.0, "k_xi": 0.003, "k_ridge": 50.0, "side_markets": true}
+/home/user/hasancambaz2001-collab.github.io/futbol-model/iddaa/evaluate.py:177: RuntimeWarning: All-NaN slice encountered
+  z -= np.nanmax(z, 1, keepdims=True)
+b365 1x2 {'bets': 4414, 'roi': -0.11605573176257362, 'profit_u': -512.27, 'ci_lo': -0.15253420933393746, 'ci_hi': -0.08104683960126874, 'p_val': 1.0, 'avg_odds': 2.5638604440416852, 'hit': 0.35364748527412776, 'max_dd_u': 519.2200000000001, 'book': 'b365', 'market': '1x2', 'src': 'model', 'tau': 0.1, 'omax': 3.0, 'kelly_final': 5.36161942144282e-06, 'kelly_min': 4.8069031122360765e-06}
+b365 ou25 {'bets': 21502, 'roi': -0.06353595014417264, 'profit_u': -1366.15, 'ci_lo': -0.07698180401823086, 'ci_hi': -0.05027273044367967, 'p_val': 1.0, 'avg_odds': 1.9998176913775463, 'hit': 0.48065296251511486, 'max_dd_u': 1366.5400000000072, 'book': 'b365', 'market': 'ou25', 'src': 'model', 'tau': 0.02, 'omax': 3.0, 'kelly_final': 8.79837516043296e-08, 'kelly_min': 8.741593092125756e-08}
+b365 ah {'bets': 8665, 'roi': -0.03486497403346799, 'profit_u': -302.10500000000013, 'ci_lo': -0.05387569244085403, 'ci_hi': -0.015700274091171394, 'p_val': 1.0, 'avg_odds': 1.945858049624928, 'hit': 0.4613964223889209, 'max_dd_u': 319.9050000000001, 'book': 'b365', 'market': 'ah', 'src': 'model', 'tau': 0.15, 'omax': 3.0, 'kelly_final': 0.0006405784259723811, 'kelly_min': 0.0006380223489369525}
+max 1x2 {'bets': 6221, 'roi': -0.056447516476450736, 'profit_u': -351.16, 'ci_lo': -0.08699381128435942, 'ci_hi': -0.027296535926699894, 'p_val': 1.0, 'avg_odds': 2.557420028934255, 'hit': 0.37791351872689277, 'max_dd_u': 360.27999999999963, 'book': 'max', 'market': '1x2', 'src': 'model', 'tau': 0.1, 'omax': 3.0, 'kelly_final': 8.097086485273585e-05, 'kelly_min': 7.900928132064084e-05}
+max ou25 {'bets': 33359, 'roi': -0.028252045924638036, 'profit_u': -942.4600000000003, 'ci_lo': -0.03945849695734284, 'ci_hi': -0.01764448124943794, 'p_val': 1.0, 'avg_odds': 2.045188404928205, 'hit': 0.4873647291585479, 'max_dd_u': 944.6400000000032, 'book': 'max', 'market': 'ou25', 'src': 'model', 'tau': 0.02, 'omax': 3.0, 'kelly_final': 9.202939675451182e-05, 'kelly_min': 9.086162073787317e-05}
+                    market      n  ll_model  ll_base  ll_model_mkt  skill_vs_base_%  skill_mkt_vs_base_%  brier_model  brier_base  ll_bookmaker  rps_model  rps_book  rps_base  rps_model_mkt
+0                   MS 1X2  52940    1.0199   1.0775        1.0027           5.3510               6.9474       0.6113      0.6523        1.0027     0.2098    0.2043    0.2295         0.2043
+1              Alt/Üst 0.5  52940    0.2599   0.2615        0.2574           0.6151               1.5453       0.1354      0.1357           NaN        NaN       NaN       NaN            NaN
+2              Alt/Üst 1.5  52940    0.5570   0.5607        0.5524           0.6640               1.4812       0.3717      0.3741           NaN        NaN       NaN       NaN            NaN
+3              Alt/Üst 2.5  52940    0.6833   0.6897        0.6768           0.9223               1.8697       0.4901      0.4965        0.6768        NaN       NaN       NaN            NaN
+4              Alt/Üst 3.5  52940    0.5860   0.5923        0.5802           1.0611               2.0412       0.3976      0.4029           NaN        NaN       NaN       NaN            NaN
+5              Alt/Üst 4.5  52940    0.3891   0.3944        0.3845           1.3406               2.5134       0.2304      0.2332           NaN        NaN       NaN       NaN            NaN
+6               KG Var/Yok  52940    0.6902   0.6910        0.6866           0.1156               0.6347       0.4970      0.4979           NaN        NaN       NaN       NaN            NaN
+7       Toplam gol aralığı  52940    1.1871   1.1960        1.1789           0.7447               1.4284       0.6608      0.6637           NaN        NaN       NaN       NaN            NaN
+8                 Tek/Çift  52940    0.6931   0.6934        0.6931           0.0329               0.0446       0.5000      0.5002           NaN        NaN       NaN       NaN            NaN
+9        Ev sahibi 1.5 Üst  52940    0.6518   0.6816        0.6410           4.3719               5.9562       0.4600      0.4885           NaN        NaN       NaN       NaN            NaN
+10       Deplasman 1.5 Üst  52940    0.6140   0.6388        0.6055           3.8883               5.2186       0.4242      0.4467           NaN        NaN       NaN       NaN            NaN
+11            MS + A/Ü 2.5  52940    1.6586   1.7216        1.6362           3.6575               4.9606       0.7858      0.8115           NaN        NaN       NaN       NaN            NaN
+12      Handikaplı MS (-1)  52940    0.9288   0.9811        0.9145           5.3311               6.7905       0.5468      0.5828           NaN        NaN       NaN       NaN            NaN
+13              Doğru skor  52940    2.8734   3.0265        2.8466           5.0576               5.9440       0.9276      0.9338           NaN        NaN       NaN       NaN            NaN
+14                  İY 1X2  52902    1.0496   1.0804        1.0413           2.8522               3.6206       0.6356      0.6545           NaN        NaN       NaN       NaN            NaN
+15          İY Alt/Üst 0.5  52902    0.6061   0.6097        0.6038           0.5854               0.9638       0.4161      0.4190           NaN        NaN       NaN       NaN            NaN
+16          İY Alt/Üst 1.5  52902    0.6327   0.6370        0.6297           0.6780               1.1570       0.4411      0.4450           NaN        NaN       NaN       NaN            NaN
+17                  2Y 1X2  52902    1.0614   1.0925        1.0518           2.8511               3.7280       0.6423      0.6627           NaN        NaN       NaN       NaN            NaN
+18  Daha çok gol olan yarı  52902    1.0736   1.0746        1.0731           0.0900               0.1411       0.6494      0.6499           NaN        NaN       NaN       NaN            NaN
+19                   İY/MS  52902    1.9039   1.9656        1.8858           3.1394               4.0588       0.8158      0.8391           NaN        NaN       NaN       NaN            NaN
+20          Korner A/Ü 9.5  49630    0.6854   0.6938        0.6854           1.2018               1.2018       0.4923      0.5005           NaN        NaN       NaN       NaN            NaN
+21         Korner A/Ü 10.5  49630    0.6612   0.6706        0.6612           1.4011               1.4011       0.4687      0.4778           NaN        NaN       NaN       NaN            NaN
+22              Korner 1X2  49630    0.8966   0.9294        0.8966           3.5231               3.5231       0.5412      0.5701           NaN        NaN       NaN       NaN            NaN
+23            Kart A/Ü 3.5  52902    0.6443   0.6640        0.6443           2.9535               2.9535       0.4533      0.4714           NaN        NaN       NaN       NaN            NaN
+24            Kart A/Ü 4.5  52902    0.6394   0.6593        0.6394           3.0129               3.0129       0.4483      0.4661           NaN        NaN       NaN       NaN            NaN
+25                Kart 1X2  52902    1.0547   1.0673        1.0547           1.1808               1.1808       0.6362      0.6462           NaN        NaN       NaN       NaN            NaN
+{
+ "n": 52880,
+ "ll_model": 1.0200877052869342,
+ "ll_book": 1.0026817087480886,
+ "ll_blend": 1.0025285596869942
+}
