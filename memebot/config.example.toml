@@ -1,0 +1,62 @@
+# memebot config. Copy to config.toml and edit.  Only override what you need.
+# NEVER put a private key here -> use the MEMEBOT_PRIVATE_KEY environment variable.
+
+data_dir = "data"
+sol_usd = 150.0            # only for display
+
+[filters]                  # hard red flags (any one => skip)
+max_dev_initial_buy_pct = 8.0
+snipe_window_s = 3.0
+max_sniper_supply_pct = 15.0
+max_top10_pct = 35.0
+max_dev_sold_pct = 50.0
+max_creator_launches = 3
+# soft signals: need >= min_score of these 6
+min_unique_buyers = 20
+min_buy_sell_ratio = 1.5
+min_net_inflow_sol_60s = 1.0
+min_new_buyers_60s = 8
+max_single_buy_share = 0.20
+min_mcap_momentum_60s = 1.15
+min_score = 4
+
+[entry]
+mode = "curve"             # curve | migration | both
+min_age_s = 60
+max_age_s = 900
+min_mcap_sol = 60
+max_mcap_sol = 350
+migration_wait_s = 600
+migration_min_hold_ratio = 0.8
+migration_max_age_s = 3600
+observe_window_s = 1800    # raise to ~5400 for mode = "migration"
+
+[exits]
+recover_at_multiple = 3.0  # sell enough to get the whole stake back when bag is worth 3x (net)
+stop_loss_pct = 45.0
+breakeven_arm_multiple = 2.0
+max_hold_before_recovery_s = 1800
+rug_dev_sell_pct = 50.0
+rug_single_drop_pct = 35.0
+ladder = [[10.0, 0.25], [30.0, 0.25], [100.0, 0.25]]   # [price multiple, fraction of original bag]
+trailing_drawdown_pct = 50.0
+max_hold_s = 86400
+
+[risk]
+position_size_sol = 0.25
+max_open_positions = 4
+max_total_exposure_sol = 1.0
+max_daily_loss_sol = 1.5
+max_entries_per_hour = 6
+kill_switch_file = "STOP"  # `touch data/STOP` halts new entries immediately
+
+[exec]
+fee_pct = 1.25
+priority_fee_sol = 0.0005
+slippage_pct = 15.0
+paper_extra_slippage_pct = 2.0
+paper_latency_s = 1.5
+amm_depth_ratio = 0.15
+rpc_url = "https://api.mainnet-beta.solana.com"   # use a paid RPC (Helius/Triton/QuickNode) for live
+trade_api_url = "https://pumpportal.fun/api/trade-local"
+ws_url = "wss://pumpportal.fun/api/data"
