@@ -1,0 +1,86 @@
+{
+  "validation": [
+    "2005-07-01",
+    "2019-07-01"
+  ],
+  "test": [
+    "2019-07-01",
+    "2026-12-31"
+  ],
+  "max_ratio": 1.35,
+  "pool_val": {
+    "1x2": [
+      0.02717153859062428,
+      0.9963175182530186
+    ],
+    "ou25": [
+      0.15741283183712051,
+      0.8311491743510607
+    ]
+  },
+  "hypotheses": {
+    "H1": {
+      "params": {
+        "market": "1x2",
+        "tau": 0.05,
+        "omax": 2.5
+      },
+      "validation": {
+        "bets": 2420,
+        "roi": 0.04527272727272728,
+        "ci_lo": 0.0023405272173333187,
+        "ci_hi": 0.08752150434954041,
+        "p_val": 0.0195,
+        "avg_odds": 2.148376033057851
+      },
+      "passes_gate": true
+    },
+    "H2": {
+      "params": {
+        "pmin": 0.8
+      },
+      "validation": {
+        "bets": 2271,
+        "roi": 0.030929106120651674,
+        "ci_lo": 0.014100730613425903,
+        "ci_hi": 0.04721290432509065,
+        "p_val": 0.0005,
+        "avg_odds": 1.189696169088507
+      },
+      "passes_gate": true
+    },
+    "H3": {
+      "params": {
+        "market": "ou25",
+        "tau": 0.04,
+        "omax": 2.5
+      },
+      "validation": {
+        "bets": 2323,
+        "roi": 0.047081360309944024,
+        "ci_lo": 0.006702806335388569,
+        "ci_hi": 0.08608590102707747,
+        "p_val": 0.0125,
+        "avg_odds": 2.041696082651743
+      },
+      "passes_gate": true
+    },
+    "H4": {
+      "params": {
+        "tau": 0.03,
+        "pmin": 0.6
+      },
+      "validation": {
+        "bets": 1276,
+        "roi": 0.026379310344827583,
+        "ci_lo": -0.013710579136162757,
+        "ci_hi": 0.06404429504305073,
+        "p_val": 0.107,
+        "avg_odds": 1.5425548589341693
+      },
+      "passes_gate": false
+    }
+  },
+  "bonferroni_k": 8,
+  "note": "Only hypotheses with passes_gate=true are evaluated in the test; alpha = 0.05 / bonferroni_k."
+}

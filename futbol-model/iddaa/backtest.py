@@ -61,6 +61,9 @@ def run_country(args):
         wk = targets[(targets.date >= monday) & (targets.date < monday + pd.Timedelta(days=7))]
         if not wk.empty:
             hist = d[d.date < monday]
+            if (hist.date >= monday - pd.Timedelta(days=365)).sum() < 150:
+                monday += pd.Timedelta(days=7)  # not enough history to fit
+                continue
             # warm start: fit once quickly to get team set, then remap
             teams_now = sorted(set(hist[hist.date >= monday - pd.Timedelta(days=cfg.window_days)].HomeTeam)
                                | set(hist[hist.date >= monday - pd.Timedelta(days=cfg.window_days)].AwayTeam))
