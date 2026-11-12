@@ -9,6 +9,8 @@ For every (team, match date):
 
 A player's club on a date = destination of their last transfer/loan before
 that date. Market values use only valuations published before the date.
+Only injuries that started strictly BEFORE match day count (Transfermarkt dates an
+in-match injury with the match day itself; counting those leaked the result).
 Caveat: an injury interval's end date is known only afterwards; on match day
 the absence itself is public (team news), so "injured on date" is treated as
 pre-match information.
@@ -132,7 +134,7 @@ def availability(matches: pd.DataFrame, min_date="2009-07-01") -> pd.DataFrame:
                 val[:, j] = np.where(k >= 0, vs[np.clip(k, 0, None)], 0.0)
             if p in inj_g:
                 f, e = inj_g[p]
-                injm[:, j] = ((f[None, :] <= D[:, None]) & (e[None, :] > D[:, None])).any(1)
+                injm[:, j] = ((f[None, :] < D[:, None]) & (e[None, :] > D[:, None])).any(1)
         val = np.where(on, val, 0.0)
         injm &= on
         sq = val.sum(1)
