@@ -1,0 +1,55 @@
+{
+  "hypotheses": {
+    "H5": {
+      "src": "full",
+      "market": "1x2",
+      "params": {
+        "tau": 0.1,
+        "omax": 4.0
+      },
+      "validation": {
+        "bets": 12894,
+        "roi": 0.01824647122692725,
+        "ci_lo": -0.003995492750317595,
+        "ci_hi": 0.04210674452294535,
+        "p_val": 0.0575
+      },
+      "passes_gate": false
+    },
+    "H6": {
+      "src": "full",
+      "market": "ou25",
+      "params": {
+        "tau": 0.08,
+        "omax": 2.5
+      },
+      "validation": {
+        "bets": 7691,
+        "roi": 0.007835131972435311,
+        "ci_lo": -0.013621694624680396,
+        "ci_hi": 0.029599076588558114,
+        "p_val": 0.2455
+      },
+      "passes_gate": false
+    },
+    "H7": {
+      "src": "inj",
+      "market": "1x2",
+      "params": {
+        "tau": 0.1,
+        "omax": 4.0
+      },
+      "validation": {
+        "bets": 11789,
+        "roi": 0.03342692340317245,
+        "ci_lo": 0.00797253270955999,
+        "ci_hi": 0.061935056539143316,
+        "p_val": 0.0045
+      },
+      "passes_gate": true
+    }
+  },
+  "bonferroni_k": 9,
+  "validation_seasons": "2015-2018",
+  "test_seasons": "2019-2026"
+}

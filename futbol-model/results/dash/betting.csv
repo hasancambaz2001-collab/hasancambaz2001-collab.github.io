@@ -1,0 +1,6 @@
+strategy,market,book,bets,roi_pct,ci_lo_pct,ci_hi_pct,p_value,avg_odds,hit_pct,profit_units,kelly_final_bank,edge_threshold_pct,max_odds
+MS 1X2 · Bet365,MS 1X2,Bet365,4414,-11.61,-15.25,-8.1,1.0,2.564,35.36,-512.3,0.0,10.0,3.0
+Alt/Üst 2.5 · Bet365,Alt/Üst 2.5,Bet365,21502,-6.35,-7.7,-5.03,1.0,2.0,48.07,-1366.2,0.0,2.0,3.0
+Asya Handikap · Bet365,Asya Handikap,Bet365,8665,-3.49,-5.39,-1.57,1.0,1.946,46.14,-302.1,0.0006,15.0,3.0
+MS 1X2 · En iyi oran,MS 1X2,En iyi oran,6221,-5.64,-8.7,-2.73,1.0,2.557,37.79,-351.2,0.0001,10.0,3.0
+Alt/Üst 2.5 · En iyi oran,Alt/Üst 2.5,En iyi oran,33359,-2.83,-3.95,-1.76,1.0,2.045,48.74,-942.5,0.0001,2.0,3.0

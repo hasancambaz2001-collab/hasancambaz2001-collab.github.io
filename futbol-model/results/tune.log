@@ -1,0 +1,125 @@
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 1.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 1.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8828186824920645), 'll_1x2': np.float64(1.015106423686979), 'll_ou25': np.float64(0.6858361604504035), 'll_kg': np.float64(0.6919667263196816)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 7s  cfg={"xi": 0.001, "ridge": 1.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 1.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.880058897990863), 'll_1x2': np.float64(1.0149235857675567), 'll_ou25': np.float64(0.6845735833675368), 'll_kg': np.float64(0.6907605272340631)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 7s  cfg={"xi": 0.001, "ridge": 1.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 1.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8806632161531165), 'll_1x2': np.float64(1.0161764268020912), 'll_ou25': np.float64(0.6842311795756435), 'll_kg': np.float64(0.6902346852001077)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 3.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 3.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8812375798933054), 'll_1x2': np.float64(1.015027545308683), 'll_ou25': np.float64(0.6849673941864903), 'll_kg': np.float64(0.6912187555634842)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 3.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.879268712094028), 'll_1x2': np.float64(1.0151796848890238), 'll_ou25': np.float64(0.6839025068397817), 'll_kg': np.float64(0.6902105426712494)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 3.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 3.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8803365479932483), 'll_1x2': np.float64(1.0166364448193819), 'll_ou25': np.float64(0.6836671822611007), 'll_kg': np.float64(0.6897910346132433)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 8.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 8.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8816967807255556), 'll_1x2': np.float64(1.0167013076340574), 'll_ou25': np.float64(0.6841188363941206), 'll_kg': np.float64(0.6904238930876914)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 8.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 8.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.8806338765524724), 'll_1x2': np.float64(1.0171629567393206), 'll_ou25': np.float64(0.6833154909870417), 'll_kg': np.float64(0.6896712493625371)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.001, "ridge": 8.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.001, 'ridge': 8.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8821871460706814), 'll_1x2': np.float64(1.0187653311501936), 'll_ou25': np.float64(0.6832211042350559), 'll_kg': np.float64(0.6893968471247892)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 1.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 1.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.881096355445451), 'll_1x2': np.float64(1.0131450728543074), 'll_ou25': np.float64(0.6860334425751954), 'll_kg': np.float64(0.6921603029204514)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 1.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 1.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.877551322463841), 'll_1x2': np.float64(1.0127675073907647), 'll_ou25': np.float64(0.6844486359013088), 'll_kg': np.float64(0.6907050789401346)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 7s  cfg={"xi": 0.0018, "ridge": 1.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 1.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8779326810480863), 'll_1x2': np.float64(1.0140517043657984), 'll_ou25': np.float64(0.6839679336257928), 'll_kg': np.float64(0.690050640489947)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 3.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8800204058637404), 'll_1x2': np.float64(1.0136956859720572), 'll_ou25': np.float64(0.6850160603567205), 'll_kg': np.float64(0.6912881093498217)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 3.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.877386252136636), 'll_1x2': np.float64(1.013658436011788), 'll_ou25': np.float64(0.6836871774084601), 'll_kg': np.float64(0.6900873763863427)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 3.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8782710006257504), 'll_1x2': np.float64(1.0151230911751394), 'll_ou25': np.float64(0.6833461703043078), 'll_kg': np.float64(0.6895704809527948)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 8.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 8.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8809801821005534), 'll_1x2': np.float64(1.0161145368075761), 'll_ou25': np.float64(0.6839520370506369), 'll_kg': np.float64(0.6903348968730761)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 8.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 8.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.8795027222175587), 'll_1x2': np.float64(1.016443525345739), 'll_ou25': np.float64(0.682980684059248), 'll_kg': np.float64(0.6894707997414011)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.0018, "ridge": 8.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.0018, 'ridge': 8.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8809712308883513), 'll_1x2': np.float64(1.0180537200287687), 'll_ou25': np.float64(0.6828290767047254), 'll_kg': np.float64(0.6891367953004026)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 1.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 1.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8837251042708916), 'll_1x2': np.float64(1.0129019861818471), 'll_ou25': np.float64(0.6876038260898311), 'll_kg': np.float64(0.6931962960613456)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 1.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 1.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.878150640814132), 'll_1x2': np.float64(1.0118582237952027), 'll_ou25': np.float64(0.6852734671524262), 'll_kg': np.float64(0.6912248172630934)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 1.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 1.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.877622705728228), 'll_1x2': np.float64(1.0129321859149867), 'll_ou25': np.float64(0.684404170449011), 'll_kg': np.float64(0.6902933021542569)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 3.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 3.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.8826173703777083), 'll_1x2': np.float64(1.0140191308121973), 'll_ou25': np.float64(0.6861934883812177), 'll_kg': np.float64(0.6920108046533423)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 3.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.8783214108262434), 'll_1x2': np.float64(1.0134053025577252), 'll_ou25': np.float64(0.6842575415093691), 'll_kg': np.float64(0.690418112188072)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 3.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 3.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.8784518505405368), 'll_1x2': np.float64(1.0146660325052879), 'll_ou25': np.float64(0.6836024130506613), 'll_kg': np.float64(0.6896909572819354)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 5s  cfg={"xi": 0.003, "ridge": 8.0, "w_sot": 0.0, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 8.0, 'w_sot': 0.0, 'n': 23309, 'score_ll': np.float64(2.882704614790354), 'll_1x2': np.float64(1.0165828523248053), 'll_ou25': np.float64(0.6845460834424775), 'll_kg': np.float64(0.6906632004929797)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 8.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 8.0, 'w_sot': 0.3, 'n': 23309, 'score_ll': np.float64(2.880283551087458), 'll_1x2': np.float64(1.0165977742041232), 'll_ou25': np.float64(0.6831956306630625), 'll_kg': np.float64(0.6895772580432892)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 6s  cfg={"xi": 0.003, "ridge": 8.0, "w_sot": 0.6, "window_days": 1460, "c_xi": 0.003, "c_ridge": 2.0, "k_xi": 0.003, "k_ridge": 5.0, "side_markets": false}
+{'xi': 0.003, 'ridge': 8.0, 'w_sot': 0.6, 'n': 23309, 'score_ll': np.float64(2.881383349724761), 'll_1x2': np.float64(1.0181383992065636), 'll_ou25': np.float64(0.6828518988054031), 'll_kg': np.float64(0.6891185920823577)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 18s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.0015, "c_ridge": 1.0, "k_xi": 0.0015, "k_ridge": 1.0, "side_markets": true}
+{'xi': 0.0015, 'ridge': 1.0, 'll_corners': np.float64(2.650025656062648), 'n_c': np.int64(16548), 'll_cards': np.float64(2.127604622622609), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 17s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.0015, "c_ridge": 3.0, "k_xi": 0.0015, "k_ridge": 3.0, "side_markets": true}
+{'xi': 0.0015, 'ridge': 3.0, 'll_corners': np.float64(2.6472305859259375), 'n_c': np.int64(16548), 'll_cards': np.float64(2.1241828125691), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 16s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.0015, "c_ridge": 8.0, "k_xi": 0.0015, "k_ridge": 8.0, "side_markets": true}
+{'xi': 0.0015, 'ridge': 8.0, 'll_corners': np.float64(2.6439191407619345), 'n_c': np.int64(16548), 'll_cards': np.float64(2.1206247282034343), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 19s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 1.0, "k_xi": 0.003, "k_ridge": 1.0, "side_markets": true}
+{'xi': 0.003, 'ridge': 1.0, 'll_corners': np.float64(2.6530676569017286), 'n_c': np.int64(16548), 'll_cards': np.float64(2.127881225699351), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 18s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 3.0, "k_xi": 0.003, "k_ridge": 3.0, "side_markets": true}
+{'xi': 0.003, 'ridge': 3.0, 'll_corners': np.float64(2.6498061191662945), 'n_c': np.int64(16548), 'll_cards': np.float64(2.1237963228180154), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 16s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.003, "c_ridge": 8.0, "k_xi": 0.003, "k_ridge": 8.0, "side_markets": true}
+{'xi': 0.003, 'ridge': 8.0, 'll_corners': np.float64(2.645765799291033), 'n_c': np.int64(16548), 'll_cards': np.float64(2.119272467809169), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 18s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.006, "c_ridge": 1.0, "k_xi": 0.006, "k_ridge": 1.0, "side_markets": true}
+{'xi': 0.006, 'ridge': 1.0, 'll_corners': np.float64(2.664618656587866), 'n_c': np.int64(16548), 'll_cards': np.float64(2.134482019514467), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 16s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.006, "c_ridge": 3.0, "k_xi": 0.006, "k_ridge": 3.0, "side_markets": true}
+{'xi': 0.006, 'ridge': 3.0, 'll_corners': np.float64(2.6596812476722116), 'n_c': np.int64(16548), 'll_cards': np.float64(2.128217618104382), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 15s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.006, "c_ridge": 8.0, "k_xi": 0.006, "k_ridge": 8.0, "side_markets": true}
+{'xi': 0.006, 'ridge': 8.0, 'll_corners': np.float64(2.653259244237655), 'n_c': np.int64(16548), 'll_cards': np.float64(2.1207672716027295), 'n_k': np.int64(18203)}
+walk-forward 2016-07-01..2019-07-01 23309 matches in 16s  cfg={"xi": 0.0018, "ridge": 3.0, "w_sot": 0.3, "window_days": 1460, "c_xi": 0.0015, "c_ridge": 8.0, "k_xi": 0.003, "k_ridge": 8.0, "side_markets": true}
+pool weights {'1x2': [-0.027418004479205577, 1.0487875866958922], 'ou25': [0.043488553222839246, 0.975691279298049]}
+/home/user/hasancambaz2001-collab.github.io/futbol-model/iddaa/evaluate.py:177: RuntimeWarning: All-NaN slice encountered
+  z -= np.nanmax(z, 1, keepdims=True)
+1x2 {'bets': 2260, 'roi': -0.032146017699115036, 'profit_u': -72.64999999999998, 'ci_lo': -0.08294137168141592, 'ci_hi': 0.0206780973451327, 'p_val': 0.8875, 'avg_odds': 2.5851991150442473, 'hit': 0.381858407079646, 'max_dd_u': 102.7999999999999, 'market': '1x2', 'src': 'model', 'tau': 0.1, 'omax': 3.0}
+ou25 {'bets': 8790, 'roi': -0.06603299203640502, 'profit_u': -580.4300000000001, 'ci_lo': -0.08558151308304891, 'ci_hi': -0.04594152445961324, 'p_val': 1.0, 'avg_odds': 1.980523321956769, 'hit': 0.4840728100113766, 'max_dd_u': 586.6199999999995, 'market': 'ou25', 'src': 'model', 'tau': 0.02, 'omax': 3.0}
+ah {'bets': 3515, 'roi': -0.03798150782361309, 'profit_u': -133.50500000000002, 'ci_lo': -0.06549992887624467, 'ci_hi': -0.00840633001422481, 'p_val': 0.993, 'avg_odds': 1.9555192034139401, 'hit': 0.4568990042674253, 'max_dd_u': 166.04000000000016, 'market': 'ah', 'src': 'model', 'tau': 0.15, 'omax': 3.0}
+{
+  "config": {
+    "xi": 0.0018,
+    "ridge": 3.0,
+    "w_sot": 0.3,
+    "window_days": 1460,
+    "c_xi": 0.0015,
+    "c_ridge": 8.0,
+    "k_xi": 0.003,
+    "k_ridge": 8.0,
+    "side_markets": true
+  },
+  "pool_b365": {
+    "1x2": [
+      -0.027418004479205577,
+      1.0487875866958922
+    ],
+    "ou25": [
+      0.043488553222839246,
+      0.975691279298049
+    ]
+  },
+  "rules": {
+    "1x2": {
+      "src": "model",
+      "tau": 0.1,
+      "omax": 3.0
+    },
+    "ou25": {
+      "src": "model",
+      "tau": 0.02,
+      "omax": 3.0
+    },
+    "ah": {
+      "src": "model",
+      "tau": 0.15,
+      "omax": 3.0
+    }
+  },
+  "min_team_obs": 10,
+  "validation_window": [
+    "2016-07-01",
+    "2019-07-01"
+  ],
+  "note": "Tuned on validation only. Holdout (2019-07-01 onward) not used."
+}

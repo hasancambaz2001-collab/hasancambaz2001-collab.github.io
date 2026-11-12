@@ -1,0 +1,47 @@
+{
+  "config": {
+    "xi": 0.0018,
+    "ridge": 3.0,
+    "w_sot": 0.3,
+    "window_days": 1460,
+    "c_xi": 0.003,
+    "c_ridge": 120.0,
+    "k_xi": 0.003,
+    "k_ridge": 50.0,
+    "side_markets": true
+  },
+  "pool_b365": {
+    "1x2": [
+      -0.027418004479205577,
+      1.0487875866958922
+    ],
+    "ou25": [
+      0.043488553222839246,
+      0.975691279298049
+    ]
+  },
+  "rules": {
+    "1x2": {
+      "src": "model",
+      "tau": 0.1,
+      "omax": 3.0
+    },
+    "ou25": {
+      "src": "model",
+      "tau": 0.02,
+      "omax": 3.0
+    },
+    "ah": {
+      "src": "model",
+      "tau": 0.15,
+      "omax": 3.0
+    }
+  },
+  "min_team_obs": 10,
+  "validation_window": [
+    "2016-07-01",
+    "2019-07-01"
+  ],
+  "note": "Tuned on validation only. Holdout (2019-07-01 onward) not used.",
+  "decision": "No betting rule reached positive ROI on validation (best: 1X2 -3.2%, AH -3.8%, O/U -6.6% at Bet365). Pre-registered recommendation: do NOT bet these markets at Bet365 prices. Rules above are still run on the holdout for transparency. Market pool weights on the model are ~0, so for pricing derived markets use market-implied rates (model+piyasa)."
+}

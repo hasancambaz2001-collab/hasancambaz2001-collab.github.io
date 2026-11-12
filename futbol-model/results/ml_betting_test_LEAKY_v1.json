@@ -1,0 +1,31 @@
+{
+  "alpha_bonferroni": 0.005555555555555556,
+  "H5": {
+    "status": "validation'da elendi",
+    "info_only_tau0.02": {
+      "bets": 37263,
+      "roi": 0.01514907549043287,
+      "ci_lo": 0.0020691497805876455,
+      "ci_hi": 0.02806858166329946,
+      "p_val": 0.013
+    }
+  },
+  "H6": {
+    "status": "validation'da elendi",
+    "info_only_tau0.02": {
+      "bets": 28087,
+      "roi": 0.0120461423434329,
+      "ci_lo": 0.0005861322124598915,
+      "ci_hi": 0.02293615035525767,
+      "p_val": 0.0195
+    }
+  },
+  "H7": {
+    "bets": 15767,
+    "roi": 0.05622058730259403,
+    "ci_lo": 0.03436625876653214,
+    "ci_hi": 0.07917234560702507,
+    "p_val": 0.0,
+    "significant_after_bonferroni": true
+  }
+}

@@ -1,0 +1,59 @@
+{
+ "columns": [
+  "dc_card_a",
+  "dc_card_h",
+  "dc_corner_a",
+  "dc_corner_h",
+  "dc_la",
+  "dc_lh",
+  "div_code",
+  "inj_n_away",
+  "inj_n_home",
+  "inj_top1_away",
+  "inj_top1_home",
+  "inj_top5_away",
+  "inj_top5_home",
+  "inj_value_share_away",
+  "inj_value_share_home",
+  "mk_ah_line",
+  "mk_overround",
+  "mk_p1",
+  "mk_p2",
+  "mk_pover",
+  "mk_px",
+  "squad_logv_a",
+  "squad_logv_h"
+ ],
+ "div_codes": {
+  "B1": 0,
+  "D1": 1,
+  "D2": 2,
+  "E0": 3,
+  "E1": 4,
+  "E2": 5,
+  "E3": 6,
+  "EC": 7,
+  "F1": 8,
+  "F2": 9,
+  "G1": 10,
+  "I1": 11,
+  "I2": 12,
+  "N1": 13,
+  "P1": 14,
+  "SC0": 15,
+  "SC1": 16,
+  "SC2": 17,
+  "SC3": 18,
+  "SP1": 19,
+  "SP2": 20,
+  "T1": 21
+ },
+ "trained_on": [
+  "2010-07-30",
+  "2026-09-03"
+ ],
+ "rule": {
+  "tau": 0.1,
+  "omax": 4.0
+ }
+}
