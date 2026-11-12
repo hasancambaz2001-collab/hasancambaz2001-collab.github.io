@@ -1,0 +1,606 @@
+team,club_id,tm_name,n,sim
+Le Havre,738,Le Havre AC,26,1.0
+Leverkusen,15,Bayer 04 Leverkusen,26,1.0
+Lazio,398,SS Lazio,26,1.0
+Lille,1082,LOSC Lille,26,0.8
+Lorient,1158,FC Lorient,26,1.0
+St Etienne,618,AS Saint-Étienne,26,0.8
+Lyon,1041,Olympique Lyon,26,1.0
+Mainz,39,1.FSV Mainz 05,26,0.8
+Man United,985,Manchester United,26,1.0
+Lens,826,RC Lens,26,1.0
+Liverpool,31,Liverpool FC,26,1.0
+Standard,3057,Standard Liège,26,0.8
+Chelsea,631,Chelsea FC,26,1.0
+Heerenveen,306,SC Heerenveen,26,1.0
+Hannover,42,Hannover 96,26,1.0
+Hertha,44,Hertha BSC,26,0.8
+Club Brugge,2282,Club Brugge KV,26,1.0
+Gent,157,KAA Gent,26,0.8
+Inter,46,Inter Milan,26,0.8
+Juventus,506,Juventus FC,26,1.0
+Bochum,80,VfL Bochum,26,1.0
+Genk,1184,KRC Genk,26,1.0
+Bayern Munich,27,Bayern Munich,26,1.0
+Bologna,1025,Bologna FC 1909,26,0.8
+Stuttgart,79,VfB Stuttgart,26,1.0
+Cagliari,1390,Cagliari Calcio,26,1.0
+Sampdoria,1038,UC Sampdoria,26,0.8
+Roma,12,AS Roma,26,1.0
+Freiburg,60,SC Freiburg,26,1.0
+Feyenoord,234,Feyenoord Rotterdam,26,0.8
+Paris SG,583,Paris Saint-Germain,26,0.8
+PSV Eindhoven,383,PSV Eindhoven,26,1.0
+Ajax,610,Ajax Amsterdam,26,0.8
+Anderlecht,58,RSC Anderlecht,26,1.0
+Werder Bremen,86,SV Werder Bremen,26,1.0
+Tottenham,148,Tottenham Hotspur,26,0.8
+Utrecht,200,FC Utrecht,26,1.0
+Udinese,410,Udinese Calcio,26,1.0
+Atalanta,800,Atalanta BC,26,0.8
+Aston Villa,405,Aston Villa,26,1.0
+Nantes,995,FC Nantes,26,1.0
+Nurnberg,4,1.FC Nuremberg,26,0.7411764705882354
+FC Koln,3,1.FC Köln,26,1.0
+Nice,417,OGC Nice,26,1.0
+Rennes,273,Stade Rennais FC,26,0.6923076923076924
+Hamburg,41,Hamburger SV,26,0.8
+Greuther Furth,65,SpVgg Greuther Fürth,26,0.8
+Milan,5,AC Milan,26,1.0
+Marseille,244,Olympique Marseille,26,1.0
+Monaco,162,AS Monaco,26,1.0
+Montpellier,969,Montpellier HSC,26,0.8
+Middlesbrough,641,Middlesbrough FC,26,1.0
+Everton,29,Everton FC,26,1.0
+Newcastle,762,Newcastle United,26,1.0
+Ein Frankfurt,24,Eintracht Frankfurt,26,1.0
+Torino,416,Torino FC,26,1.0
+Arsenal,11,Arsenal FC,26,1.0
+Auxerre,290,AJ Auxerre,26,1.0
+AZ Alkmaar,1090,AZ Alkmaar,26,1.0
+Wolfsburg,82,VfL Wolfsburg,26,1.0
+Dortmund,16,Borussia Dortmund,26,1.0
+Schalke 04,33,FC Schalke 04,26,1.0
+Empoli,749,FC Empoli,26,1.0
+Besiktas,114,Besiktas JK,25,0.8
+Betis,150,Real Betis Balompié,25,0.8
+Man City,281,Manchester City,25,1.0
+Fulham,931,Fulham FC,25,1.0
+Sociedad,681,Real Sociedad,25,1.0
+Celta,940,Celta de Vigo,25,1.0
+Blackburn,164,Blackburn Rovers,25,0.8
+Celtic,371,Celtic FC,25,1.0
+Genoa,252,Genoa CFC,25,0.8
+Galatasaray,141,Galatasaray,25,1.0
+Charleroi,172,Royal Charleroi SC,25,0.8
+Sp Braga,1075,SC Braga,25,0.8
+Sunderland,289,Sunderland AFC,25,1.0
+Caen,1162,SM Caen,25,0.8
+Ath Bilbao,621,Athletic Bilbao,25,1.0
+Trabzonspor,449,Trabzonspor,25,1.0
+Barcelona,131,FC Barcelona,25,1.0
+Troyes,1095,ESTAC Troyes,25,0.8
+Twente,317,Twente Enschede FC,25,0.8
+Toulouse,415,FC Toulouse,25,1.0
+Fiorentina,430,ACF Fiorentina,25,0.8
+Fenerbahce,36,Fenerbahce,25,1.0
+Villarreal,1050,Villarreal CF,25,1.0
+West Ham,379,West Ham United,25,1.0
+Benfica,294,SL Benfica,25,1.0
+Bolton,355,Bolton Wanderers,25,0.8
+Sp Gijon,2448,Sporting Gijón,25,0.8
+Brescia,19,Brescia Calcio (- 2025),25,0.8
+Levante,3368,Levante UD,25,1.0
+Valladolid,366,Real Valladolid CF,25,1.0
+Valencia,1049,Valencia CF,25,1.0
+Osasuna,331,CA Osasuna,25,0.8
+Aberdeen,370,Aberdeen FC,25,1.0
+Guingamp,855,EA Guingamp,25,0.8
+Groningen,202,FC Groningen,25,1.0
+Sevilla,368,Sevilla FC,25,1.0
+Espanol,714,RCD Espanyol Barcelona,25,0.8
+Real Madrid,418,Real Madrid,25,1.0
+Porto,720,FC Porto,25,1.0
+Metz,347,FC Metz,25,1.0
+Motherwell,987,Motherwell FC,25,1.0
+Zaragoza,142,Real Zaragoza,25,1.0
+Ath Madrid,13,Atlético de Madrid,25,1.0
+Ajaccio,1147,AC Ajaccio,25,1.0
+Getafe,3709,Getafe CF,24,1.0
+Elche,1531,Elche CF,24,1.0
+Derby,22,Derby County,24,0.8000000000000002
+Parma,130,Parma Calcio 1913,24,0.8000000000000002
+Kilmarnock,2553,Kilmarnock FC,24,1.0
+Vitesse,499,Vitesse Arnhem,24,0.8000000000000002
+Mallorca,237,RCD Mallorca,24,1.0
+MGladbach,18,Borussia Mönchengladbach,24,0.8000000000000002
+Leicester,1003,Leicester City,24,1.0
+Southampton,180,Southampton FC,24,1.0
+Birmingham,337,Birmingham City,24,1.0
+Malaga,1084,Málaga CF,24,1.0
+Bordeaux,40,FC Girondins Bordeaux,24,0.8000000000000002
+Ipswich,677,Ipswich Town,24,1.0
+Napoli,6195,SSC Napoli,24,0.8000000000000002
+Guimaraes,2420,Vitória Guimarães SC,24,0.8000000000000002
+Wolves,543,Wolverhampton Wanderers,23,0.8
+Charlton,358,Charlton Athletic,23,1.0
+Clermont,3524,Clermont Foot 63,23,0.8
+Hearts,43,Heart of Midlothian FC,23,0.8
+Sochaux,750,FC Sochaux-Montbéliard,23,0.8
+Las Palmas,472,UD Las Palmas,23,1.0
+Leeds,399,Leeds United,23,1.0
+Almeria,3302,UD Almería,23,1.0
+West Brom,984,West Bromwich Albion,23,0.8
+Nancy,1159,AS Nancy-Lorraine,23,0.8
+Vallecano,367,Rayo Vallecano,22,0.8
+Angers,1420,Angers SCO,22,1.0
+Watford,1010,Watford FC,22,1.0
+Verona,276,Hellas Verona,22,0.8
+Wigan,1071,Wigan Athletic,22,1.0
+Bari,332,SSC Bari,22,0.8
+Palermo,458,Palermo FC,22,1.0
+Reims,1421,Stade Reims,22,1.0
+QPR,1039,Queens Park Rangers,22,1.0
+Maritimo,1301,CS Marítimo,22,0.8
+Crystal Palace,873,Crystal Palace,22,1.0
+Coventry,990,Coventry City,22,1.0
+Reading,1032,Reading FC,22,1.0
+Hibernian,903,Hibernian FC,22,1.0
+St Truiden,475,Sint-Truidense VV,22,0.8
+St Pauli,35,FC St. Pauli,22,1.0
+Brest,3911,Stade Brestois 29,22,0.8
+Cardiff,603,Cardiff City,22,1.0
+Tenerife,648,CD Tenerife,22,1.0
+Stoke,512,Stoke City,22,1.0
+Kaiserslautern,2,1.FC Kaiserslautern,22,1.0
+Burnley,1132,Burnley FC,22,1.0
+Karlsruhe,48,Karlsruher SC,22,0.8526315789473684
+Nijmegen,467,NEC Nijmegen,21,0.8
+Bastia,595,SC Bastia,21,1.0
+Eibar,1533,SD Eibar,21,0.8
+La Coruna,897,Deportivo de La Coruña,21,0.8
+Hull,3008,Hull City,21,1.0
+Bielefeld,10,Arminia Bielefeld,21,0.8
+Willem II,403,Willem II Tilburg,21,0.8
+Rangers,124,Rangers FC,21,1.0
+Chievo,862,Chievo Verona,21,0.8
+Portsmouth,1020,Portsmouth FC,21,1.0
+Alaves,1108,Deportivo Alavés,21,0.8
+Norwich,1123,Norwich City,21,1.0
+Sheffield United,350,Sheffield United,20,1.0
+Preston,466,Preston North End,20,0.8
+Pacos Ferreira,2995,FC Paços de Ferreira,20,1.0
+Strasbourg,667,RC Strasbourg Alsace,20,0.8
+Kayserispor,3205,Kayserispor,20,1.0
+Lecce,1005,US Lecce,20,1.0
+Konyaspor,2293,Konyaspor,20,1.0
+Augsburg,167,FC Augsburg,20,1.0
+Ascoli,408,Ascoli Calcio,20,1.0
+Barnsley,349,Barnsley FC,20,1.0
+Union Berlin,89,1.FC Union Berlin,20,1.0
+Albacete,1532,Albacete Balompié,20,0.8
+Genclerbirligi,820,Genclerbirligi Ankara,20,0.8
+Heracles,1304,Heracles Almelo,20,0.8
+Cercle Brugge,520,Cercle Brugge,20,1.0
+Mechelen,354,KV Mechelen,20,1.0
+Antalyaspor,589,Antalyaspor,19,1.0
+Blackpool,1181,Blackpool FC,19,1.0
+Lokeren,498,KSC Lokeren (-2020),19,0.8
+Hoffenheim,533,TSG 1899 Hoffenheim,19,1.0
+Valenciennes,1423,Valenciennes FC,19,1.0
+Amiens,1416,Amiens SC,19,1.0
+Rio Ave,2425,Rio Ave FC,19,1.0
+Dijon,2969,Dijon FCO,19,0.8
+Numancia,2296,CD Numancia,19,1.0
+Bristol City,698,Bristol City,19,1.0
+Chateauroux,1175,LB Châteauroux,19,0.8
+Boavista,2503,Boavista FC,19,1.0
+Waregem,3508,Zulte Waregem,19,0.8
+Cordoba,993,Córdoba CF,19,1.0
+NAC Breda,132,NAC Breda,19,1.0
+Sheffield Weds,1035,Sheffield Wednesday,19,0.8
+Modena,1385,Modena FC,19,1.0
+Laval,1080,Stade Lavallois,18,0.8
+Swansea,2288,Swansea City,18,1.0
+Sivasspor,2381,Sivasspor,18,1.0
+Cittadella,4084,AS Cittadella,18,1.0
+Girona,12321,Girona FC,18,1.0
+Niort,1161,Chamois Niortais FC (- 2025),18,0.8
+Millwall,1028,Millwall FC,18,1.0
+Plymouth,2262,Plymouth Argyle,18,0.8
+Sassuolo,6574,US Sassuolo,18,1.0
+Santander,630,Racing Santander,18,0.8
+Rizespor,126,Caykur Rizespor,18,0.8
+Crotone,4083,FC Crotone,18,1.0
+Nacional,982,CD Nacional,18,1.0
+Grenoble,1290,Grenoble Foot 38,18,0.8
+Westerlo,968,KVC Westerlo,18,0.8
+PAOK,1091,PAOK Thessaloniki,18,0.8
+Vicenza,2655,LR Vicenza,18,0.8
+Paderborn,127,SC Paderborn 07,18,1.0
+Panathinaikos,265,Panathinaikos FC,18,1.0
+Atromitos,3060,Atromitos Athens,17,0.8
+Olympiakos,683,Olympiacos Piraeus,17,0.5785714285714286
+Frosinone,8970,Frosinone Calcio,17,1.0
+Fortuna Dusseldorf,38,Fortuna Düsseldorf,17,1.0
+Waalwijk,235,RKC Waalwijk,17,0.8
+Reggina,1386,Reggina 1914,17,0.8
+Munich 1860,72,TSV 1860 Munich,17,0.8
+Nottm Forest,703,Nottingham Forest,17,1.0
+Brighton,1237,Brighton & Hove Albion,17,0.8
+Den Haag,1268,ADO Den Haag,17,0.8
+Salernitana,380,US Salernitana 1919,17,0.8
+Kortrijk,601,KV Kortrijk,17,1.0
+St Mirren,465,St. Mirren FC,17,1.0
+Buyuksehyr,6890,Basaksehir FK,17,1.0
+Setubal,1085,Vitória Setúbal FC,17,0.8
+St Johnstone,2578,St. Johnstone FC,17,1.0
+Doncaster,2454,Doncaster Rovers,17,0.8
+Pescara,2921,Delfino Pescara 1936,17,0.8
+Granada,16795,Granada CF,16,1.0
+Nimes,1160,Nîmes Olympique,16,1.0
+AEK,2441,AEK Athens,16,0.5
+Duisburg,52,MSV Duisburg,16,0.8
+Peterboro,1072,Peterborough United,16,0.8
+Erzgebirge Aue,94,FC Erzgebirge Aue,16,1.0
+Gil Vicente,2424,Gil Vicente FC,16,1.0
+Gaziantepspor,524,Gaziantepspor (1969-2020),16,0.8
+Crewe,1042,Crewe Alexandra,16,0.8
+Asteras Tripolis,6676,Asteras Aktor,16,0.8
+Bursaspor,20,Bursaspor,16,1.0
+Huesca,5358,SD Huesca,16,0.8
+Livorno,1210,US Livorno 1915,16,0.8
+Kasimpasa,10484,Kasimpasa,16,1.0
+Leganes,1244,CD Leganés,16,1.0
+Ankaragucu,868,MKE Ankaragücü,16,0.8
+Spezia,3522,Spezia Calcio,16,1.0
+Moreirense,979,Moreirense FC,15,1.0
+Zwolle,1269,PEC Zwolle,15,0.8
+Cesena,1429,Cesena FC,15,1.0
+Cadiz,2687,Cádiz CF,15,1.0
+Braunschweig,23,Eintracht Braunschweig,15,0.8
+Ternana,1103,Ternana Calcio,15,1.0
+Belenenses,68608,CF Os Belenenses,15,0.8
+Colchester,1060,Colchester United,15,1.0
+Rotherham,1194,Rotherham United,15,1.0
+Le Mans,1164,Le Mans FC,15,1.0
+Bradford,1027,Bradford City,15,1.0
+Siena,1387,Siena FC,14,1.0
+Bournemouth,989,AFC Bournemouth,14,1.0
+Luton,1031,Luton Town,14,1.0
+Gillingham,2814,Gillingham FC,14,1.0
+Cottbus,25,FC Energie Cottbus,14,0.8
+Huddersfield,1110,Huddersfield Town,14,1.0
+Shrewsbury,3054,Shrewsbury Town,14,1.0
+Port Vale,1211,Port Vale FC,14,1.0
+Panionios,169,Panionios Athens,14,0.8
+Xanthi,128,AO Xanthi,14,0.8
+Oviedo,2497,Real Oviedo,14,1.0
+Recreativo,2867,Recreativo Huelva,14,0.8
+Venezia,607,Venezia FC,14,1.0
+Hansa Rostock,30,FC Hansa Rostock,14,1.0
+Northampton,1302,Northampton Town,13,1.0
+Walsall,899,Walsall FC,13,1.0
+Academica,2990,Académica Coimbra,13,0.8
+Perugia,839,AC Perugia Calcio,13,1.0
+Stevenage,3684,Stevenage FC,13,1.0
+Aris,605,Aris Thessaloniki,13,0.8
+Alcorcon,11596,AD Alcorcón,13,0.8
+Milton Keynes Dons,991,Milton Keynes Dons,13,1.0
+Excelsior,798,Excelsior Rotterdam,13,0.8
+Levadeiakos,2672,APO Levadiakos,13,0.7200000000000001
+Brentford,1148,Brentford FC,13,1.0
+Accrington,3688,Accrington Stanley,13,0.8
+Antwerp,1096,Royal Antwerp FC,13,0.8
+Swindon,352,Swindon Town,13,1.0
+Burton,2963,Burton Albion,13,0.8
+Crawley Town,3537,Crawley Town,13,1.0
+Catania,1627,Catania FC,13,1.0
+Sedan,1081,CS Sedan-Ardennes,13,0.8
+Exeter,6699,Exeter City,12,1.0
+Aachen,8,Alemannia Aachen,12,0.8000000000000002
+Wycombe,2805,Wycombe Wanderers,12,0.8000000000000002
+AFC Wimbledon,3884,AFC Wimbledon,12,1.0
+Fleetwood Town,11177,Fleetwood Town,12,1.0
+Estoril,1465,GD Estoril Praia,12,0.8000000000000002
+Oxford,988,Oxford United,12,1.0
+RB Leipzig,23826,RB Leipzig,12,1.0
+Cheltenham,3371,Cheltenham Town,12,1.0
+Mirandes,13222,CD Mirandés,12,1.0
+Mansfield,3820,Mansfield Town,12,1.0
+Murcia,171,Real Murcia CF,12,1.0
+Morecambe,3697,Morecambe FC,12,1.0
+Ross County,2759,Ross County FC,12,1.0
+Darmstadt,105,SV Darmstadt 98,12,1.0
+Heidenheim,2036,1.FC Heidenheim 1846,12,1.0
+Inverness C,2451,Inverness Caledonian Thistle FC,12,0.8000000000000002
+Gimnastic,5648,Gimnàstic de Tarragona,12,0.8000000000000002
+Cambridge,986,Cambridge United,12,1.0
+Carlisle,1220,Carlisle United,12,1.0
+Lierse,204,Lierse SK (-2018),12,0.8000000000000002
+Livingston,1241,Livingston FC,12,1.0
+Larisa,4603,AE Larisa,12,0.8000000000000002
+Xerez,134,Xerez CD,11,1.0
+Leyton Orient,1150,Leyton Orient,11,1.0
+Lugo,11000,CD Lugo,11,1.0
+Ingolstadt,4795,FC Ingolstadt 04,11,1.0
+Denizlispor,833,Denizlispor,11,1.0
+Panetolikos,6418,Panetolikos GFS,11,0.8
+Piacenza,1408,Piacenza Calcio 1919,11,0.8
+Oostende,2861,KV Oostende (-2024),11,0.8
+Sandhausen,254,SV Sandhausen,11,1.0
+Scunthorpe,2964,Scunthorpe United,11,1.0
+Istres,2580,Istres Football Club,11,1.0
+Bristol Rvs,2455,Bristol Rovers,11,0.8
+Tours,3161,Tours FC (- 2025),11,0.8
+Dresden,129,SG Dynamo Dresden,11,0.8
+Samsunspor,152,Samsunspor,10,1.0
+For Sittard,385,Fortuna Sittard,10,0.8
+Oldham,1078,Oldham Athletic,10,1.0
+Dundee United,511,Dundee FC,10,1.0
+Giannina,2671,PAS Giannina,10,0.8
+Notts County,1045,Notts County,10,1.0
+Pisa,4172,Pisa Sporting Club,10,1.0
+Paris FC,10004,Paris FC,10,1.0
+Tranmere,1074,Tranmere Rovers,10,0.8
+Alanyaspor,11282,Alanyaspor,10,1.0
+Avellino,2331,US Avellino 1912,10,0.8
+Dundee,1519,Dundee United FC,10,1.0
+Roda JC,192,Roda JC Kerkrade,10,0.8
+Leiria,2639,UD Leiria,10,1.0
+Hamilton,2999,Hamilton Academical FC,10,0.8
+Graafschap,642,De Graafschap Doetinchem,10,0.8
+Cremonese,2239,US Cremonese,10,1.0
+Creteil,2067,US Créteil-Lusitanos,10,0.8
+Cosenza,4031,Cosenza Calcio,10,1.0
+Oud-Heverlee Leuven,2727,Oud-Heverlee Leuven,10,1.0
+Rochdale,1088,Rochdale AFC,10,1.0
+Lincoln,1198,Lincoln City,10,1.0
+Regensburg,109,SSV Jahn Regensburg,9,0.8
+Holstein Kiel,269,Holstein Kiel,9,1.0
+Mouscron,1433,Excelsior Mouscron (-2009),9,0.8
+Sparta Rotterdam,468,Sparta Rotterdam,9,1.0
+Eupen,1245,KAS Eupen,9,1.0
+VVV Venlo,1426,VVV-Venlo,9,1.0
+Ponferradina,4032,SD Ponferradina,9,0.8
+Arouca,8024,FC Arouca,9,1.0
+Albinoleffe,4541,UC AlbinoLeffe,9,0.8
+Waasland-Beveren,28643,SK Beveren,9,0.8
+Salamanca,1087,UD Salamanca (- 2013),9,0.8
+Santa Clara,2423,CD Santa Clara,9,1.0
+Goztep,1467,Göztepe,9,0.8307692307692308
+Como,1047,Como 1907,9,0.8
+Triestina,4271,US Triestina,9,1.0
+Hercules,7971,Hércules CF,8,1.0
+Southend,2793,Southend United,8,1.0
+Beira Mar,1436,SC Beira-Mar,8,1.0
+Portimonense,7378,Portimonense SAD,8,1.0
+Tondela,7179,CD Tondela,8,1.0
+Ahlen,50,Rot Weiss Ahlen,8,0.8
+Frankfurt FSV,293,FSV Frankfurt,8,1.0
+Ferrol,1176,Racing Ferrol,8,0.8
+Gueugnon,1397,FC Gueugnon,8,1.0
+Oberhausen,57,Rot-Weiß Oberhausen,8,0.8
+Osnabruck,81,VfL Osnabrück,8,1.0
+Go Ahead Eagles,1435,Go Ahead Eagles,8,1.0
+Iraklis,47,POT Iraklis Thessaloniki,8,0.8
+Cartagena,7077,FC Cartagena,8,1.0
+Novara,6692,Novara FC,7,1.0
+Spal,2722,SPAL,7,1.0
+Castellon,2502,CD Castellón,7,1.0
+Benevento,4171,Benevento Calcio,7,1.0
+Beveren,1073,KSK Beveren (-2010),7,0.8
+Monza,2919,AC Monza,7,1.0
+Famalicao,3329,FC Famalicão,7,1.0
+Partick,2760,Partick Thistle FC,7,0.8
+Treviso,2251,Treviso FBC 1993,7,0.8
+Padova,3037,Calcio Padova,7,1.0
+Ergotelis,5220,GS Ergotelis,7,0.8
+Virtus Entella,20519,Virtus Entella,7,1.0
+Akhisar Belediyespor,19771,Akhisarspor,7,0.8
+Karabukspor,1506,Kardemir Karabükspor,7,0.8
+Dunfermline,1270,Dunfermline Athletic FC,7,1.0
+Eskisehirspor,825,Eskisehirspor,7,1.0
+Chesterfield,1219,Chesterfield FC,7,1.0
+Rodez,11273,Rodez AF,7,0.8
+Forest Green,3455,Forest Green Rovers,7,0.8
+OFI,653,OFI Crete FC,7,0.5
+Istanbulspor,924,Istanbulspor,7,1.0
+Mantova,2581,Mantova 1911,7,0.8
+Messina,1104,ACR Messina,7,0.8
+Gaziantep,2832,Gaziantep FK,7,1.0
+Bury,2413,Bury FC,6,1.0
+Boulogne,7042,US Boulogne,6,1.0
+Carpi,4102,AC Carpi,6,1.0
+Naval,4814,Associação Naval 1893,6,0.8000000000000002
+Louvieroise,2180,RAA La Louviere (- 2009),6,0.5142857142857142
+Lamia,3999,PAS Lamia 1964,6,0.8000000000000002
+Yeovil,972,Yeovil Town,6,1.0
+Platanias,21957,AO Platanias,6,0.8000000000000002
+Ajaccio GFCO,3558,GFC Ajaccio,6,0.8608695652173913
+Kerkyra,5219,AO Kerkyraikos,6,0.8000000000000002
+Veria,2079,Veria 1960,6,0.8000000000000002
+Poli Ejido,606,Polideportivo Ejido (- 2012),6,0.8000000000000002
+Ancona,1388,Ancona Calcio,6,1.0
+Barcelona B,2464,FC Barcelona Atlètic,6,0.8000000000000002
+Arles,11300,Athlétic Club Arlésien,6,0.8000000000000002
+Panthrakikos,7185,Panthrakikos Komotini,6,0.8000000000000002
+Pau FC,3166,Pau FC,6,1.0
+Evian Thonon Gaillard,14171,Thonon Évian Grand Genève FC,6,0.8000000000000002
+Falkirk,1191,Falkirk FC,6,1.0
+Est Amadora,2431,CF Estrela Amadora,6,0.8000000000000002
+Burgos,1536,Burgos CF,6,1.0
+Grosseto,4333,US Grosseto 1912,6,0.8000000000000002
+Juve Stabia,5587,SS Juve Stabia,6,1.0
+Unterhaching,66,SpVgg Unterhaching,6,0.8000000000000002
+Volendam,724,FC Volendam,5,1.0
+Karagumruk,6646,Fatih Karagümrük,5,0.8
+St. Gilloise,3948,Union Saint-Gilloise,5,0.8
+Manisaspor,1267,Manisaspor,5,1.0
+Malatyaspor,1264,Malatyaspor,5,1.0
+Kocaelispor,120,Kocaelispor,5,1.0
+Magdeburg,187,1.FC Magdeburg,5,1.0
+Ankaraspor,2944,Sincan Belediyesi Ankaraspor,5,0.8
+Yeni Malatyaspor,19789,Yeni Malatyaspor,5,1.0
+Villarreal B,11972,Villarreal CF B,5,1.0
+Volos NFC,60949,Volos NPS,5,0.8
+Apollon,441,Apollon Smyrnis,5,0.8
+Aves,3336,Desportivo Aves (- 2020),5,0.8
+Hartlepool,2577,Hartlepool United,5,1.0
+Cambuur,133,SC Cambuur Leeuwarden,5,0.8
+Catanzaro,4097,US Catanzaro,5,1.0
+Hatayspor,7775,Hatayspor,5,1.0
+Burghausen,110,SV Wacker Burghausen,5,0.8
+Roosendaal,1227,RBC Roosendaal,5,0.8
+Farense,4294,SC Farense,5,1.0
+Chaves,3325,GD Chaves,5,0.8
+Red Star,1154,Red Star FC,5,1.0
+Trapani,4331,FC Trapani 1905,5,0.8
+Orleans,10868,US Orléans,5,1.0
+Sabadell,11422,CE Sabadell FC,5,0.8
+Roeselare,2977,KSV Roeselare (-2020),5,0.8
+Pro Vercelli,26789,FC Pro Vercelli 1892,5,0.8
+Diyarbakirspor,845,Diyarbakirspor,5,1.0
+Varese,4361,Varese Calcio,5,1.0
+Dunkerque,9202,USL Dunkerque,5,0.8
+Latina,22045,Latina Calcio 1932,4,0.8
+Casa Pia,3268,Casa Pia AC,4,1.0
+Sudtirol,4554,FC Südtirol,4,1.0
+Annecy,30204,FC Annecy,4,1.0
+Ad. Demirspor,3840,Adana Demirspor,4,0.8
+Adanaspor,6,Adanaspor,4,1.0
+Mersin Idman Yurdu,3216,Mersin Talimyurdu SK,4,0.8
+Saarbrucken,1,1.FC Saarbrücken,4,1.0
+Rimini,4111,Rimini FC,4,1.0
+Reggiana,5621,AC Reggiana 1919,4,0.8
+Olhanense,4750,SC Olhanense,4,1.0
+FC Emmen,1283,FC Emmen,4,1.0
+FC Brussels,3898,RWDM Brussels FC (-2014),4,0.8
+Dender,9010,FCV Dender EH,4,0.8
+Sevilla B,8519,Sevilla Atlético,4,0.8
+Panserraikos,3385,Panserraikos,4,1.0
+Erciyesspor,6894,Kayseri Erciyesspor,4,0.8
+Elazigspor,2292,Elazigspor,4,1.0
+Quevilly Rouen,7124,Quevilly - Rouen Métropole,4,0.8
+Wehen,108,SV Wehen Wiesbaden,4,0.8
+Virtus Lanciano,4718,SS Virtus Lanciano,4,1.0
+Koblenz,996,TuS Koblenz,4,0.8
+Alverca,2521,FC Alverca,4,1.0
+Vizela,6912,FC Vizela,3,1.0
+Andorra,10718,FC Andorra,3,1.0
+Wrexham,1112,Wrexham AFC,3,1.0
+Wasquehal,2257,Wasquehal Football,3,1.0
+Badajoz,2923,CD Badajoz,3,1.0
+Arezzo,4255,SS Arezzo,3,1.0
+Vannes,1377,Vannes OC,3,0.8000000000000002
+Terrassa,1881,Terrassa FC,3,1.0
+Offenbach,107,Kickers Offenbach,3,0.8000000000000002
+Elversberg,64,SV 07 Elversberg,3,1.0
+Ein Trier,104,SV Eintracht Trier 05,3,1.0
+Pordenone,21331,Nuovo Pordenone 2024 FC,3,0.8000000000000002
+Penafiel,3327,FC Penafiel,3,1.0
+Fuenlabrada,16486,CF Fuenlabrada,3,1.0
+Real Madrid B,6767,Real Madrid Castilla,3,0.8000000000000002
+Reus Deportiu,13225,CF Reus Deportiu (-2020),3,0.8000000000000002
+Ciudad de Murcia,4053,Ciudad Murcia (- 2007),3,0.8000000000000002
+Aalen,83,VfR Aalen,3,0.8000000000000002
+Bourg Peronnas,2972,Football Bourg-en-Bresse Péronnas 01,3,0.8000000000000002
+Beerschot VA,41274,Beerschot VA,3,1.0
+Beauvais,3135,AS Beauvais Oise,3,0.8000000000000002
+Lleida,3239,UE Lleida (- 2011),3,0.8000000000000002
+Ionikos,553,Ionikos Nikeas,3,0.8000000000000002
+Mannheim,85,SV Waldhof Mannheim,3,0.8000000000000002
+Martigues,1165,FC Martigues,3,1.0
+Jaen,666,Real Jaén CF,3,1.0
+Kalamaria,3392,Apollon Kalamarias,3,0.8000000000000002
+Leixoes,3345,Leixões SC,3,1.0
+Feirense,3349,CD Feirense,3,1.0
+Malaga B,5649,Atlético Malagueño,3,0.5294117647058824
+Extremadura UD,29095,Extremadura UD (- 2022),2,0.8
+Eyupspor,7160,Eyüpspor,2,1.0
+Essen,56,Rot-Weiss Essen,2,0.8
+Chambly,35012,FC Chambly Oise,2,0.8
+Pistoiese,1307,FC Pistoiese,2,1.0
+Guadalajara,16576,CD Guadalajara,2,1.0
+Giresunspor,11688,Giresunspor,2,1.0
+Carrarese,4159,Carrarese Calcio 1908,2,0.8
+Stockport,1098,Stockport County,2,0.8
+Yozgatspor,740,Yozgatspor Tic. AS,2,0.8
+Aalst,1111,SC Eendracht Aalst (-2024),2,0.8
+Ibiza,13241,UD Ibiza,2,1.0
+Libourne,2968,FC Libourne,2,1.0
+Lubeck,78,VfB Lübeck,2,1.0
+Den Bosch,404,FC Den Bosch,2,1.0
+Sakaryaspor,2463,Sakaryaspor,2,1.0
+Foggia,704,Calcio Foggia 1920,2,0.8
+Ravenna,1105,Ravenna FC,2,1.0
+Erzurum BB,39722,Erzurumspor FK,2,0.8
+Orduspor,2323,Orduspor,2,1.0
+Eldense,12567,CD Eldense,2,1.0
+Preußen Münster,91,Preußen Münster,2,1.0
+Ulm,69,SSV Ulm 1846,2,0.54
+Egaleo,2984,AO Egaleo,2,0.8
+Valence,1424,Olympique de Valence,2,1.0
+Varzim,4297,Varzim SC,2,1.0
+Amorebieta,16575,SD Amorebieta,2,0.8
+Wurzburger Kickers,1557,Würzburger Kickers,2,1.0
+Almere City,723,Almere City FC,2,1.0
+Altay,2375,Altay SK,2,1.0
+AVS,110302,Avs Futebol,2,0.5
+A. Sebatspor,1511,Akcaabat Sebatspor,2,0.8
+Sociedad B,9899,Real Sociedad B,2,1.0
+Mouscron-Peruwelz,29228,Royal Excel Mouscron (-2022),2,0.8
+Seraing,2715,RFC Seraing,2,0.8
+CZ Jena,113,FC Carl Zeiss Jena,2,0.8
+Salgueiros,2434,SC Salgueiros,2,1.0
+Pontevedra,5650,Pontevedra CF,1,1.0
+Dordrecht,1455,FC Dordrecht,1,1.0
+Chemnitz,21,Chemnitzer FC,1,0.8
+Rayo Majadahonda,13702,CF Rayo Majadahonda,1,1.0
+Erfurt,111,Rot-Weiß Erfurt,1,0.8
+Erzurumspor,1766,Erzurumspor,1,1.0
+Portogruaro,15374,Portogruaro Calcio,1,1.0
+Trofense,3348,CD Trofense,1,1.0
+Kifisia,30120,AE Kifisias,1,0.8
+Alessandria,2721,Forza e Coraggio Alessandria,1,0.8
+Alcoyano,11259,CD Alcoyano,1,1.0
+Akratitos,1119,Akratitos Ano Liosion,1,0.8
+Algeciras,3705,Algeciras CF,1,1.0
+Ath Bilbao B,6688,Bilbao Athletic,1,0.8
+Athens Kallithea,3062,Athens Kallithea,1,1.0
+Balikesirspor,20698,Balikesirspor,1,1.0
+Pendikspor,3209,Pendikspor,1,1.0
+Babelsberg,90,SV Babelsberg 03,1,0.8
+Umraniyespor,24245,Ümraniyespor,1,1.0
+UCAM Murcia,34148,UCAM Murcia CF,1,1.0
+Tubize,3772,Royal Union Tubize-Braine,1,0.8
+Uniao Madeira,976,CF União Madeira (-2021),1,0.8
+RAAL La Louviere,3901,RAAL La Louvière,1,1.0
+Real Union,12405,Real Unión Club,1,1.0
+Hacettepespor,10483,Hacettepe Spor,1,0.8666666666666666
+Gallipoli,10348,Gallipoli Calcio,1,1.0
+Gubbio,4326,AS Gubbio 1910,1,0.8
+Concarneau,21688,US Concarneau,1,1.0
+Rouen,1564,FC Rouen 1899,1,1.0
+Cultural Leonesa,4542,Cultural Leonesa,1,1.0
+FeralpiSalo,9439,Feralpisalò,1,1.0
+Schweinfurt,103,1.FC Schweinfurt 05,1,1.0
+Sete,3520,Sporting Club Sétois,1,0.54
+Siirt Jet-PA,1291,Siirtspor,1,0.8
+Bucaspor,2750,Buca Gelistirme Spor,1,0.8
+CA Bastia,28559,CA Bastia (- 2017),1,0.8
+Lecco,5514,Calcio Lecco 1912,1,0.8
+Nocerina,4114,Nocerina Calcio,1,1.0
+Molenbeek,2973,RWD Molenbeek (- 2002),1,0.8
+Heusden Zolder,1417,Beringen Heusden-Zolder SK (-2006),1,0.8
+Logrones,24420,UD Logroñés,1,1.0
+Lorca,34559,Lorca FC (- 2022),1,0.8
+Lommel,718,KFC Lommel SK (- 2003),1,0.8
+Cannes,895,AS Cannes,1,1.0
+Campomaiorense,59,SC Campomaiorense (-2013),1,0.8
+Ceuta,8568,AD Ceuta FC,1,0.8
+Besancon,2967,Racing Besançon,1,0.8
+Beziers,10867,AS Béziers,1,1.0
+Bodrumspor,44006,Bodrum FK,1,0.8
+Telstar,1434,SC Telstar,1,1.0
+Stuttgarter K,71,Stuttgarter Kickers,1,0.8

@@ -115,3 +115,68 @@ Protokol aynı. Parametreler 2005–2019'da seçildi ve `4a7a72d` commit'inde do
 | H4 H1 × H2 | +2.6% | – | – | – | – | Ayarlamada elendi |
 
 Yorum: Üç strateji de kör testte pozitif kaldı, ancak hiçbiri Bonferroni sonrası anlamlı değil. H1'in bahis sayısı ayarlama dönemindeki 2.420'den 96'ya düştü. Bu, en iyi oranların konsensüsten sapmasının 2019 sonrası nadirleştiğine işaret ediyor; piyasa verimlileşmiş görünüyor. "En iyi oran" birden çok bahis sitesinde hesap gerektirir ve kazanan hesaplar limitlenir (Kaunitz ve ark. 2017'nin kendi deneyimi). Bu kâr gerçek dünyada büyük olasılıkla daha düşük olur.
+
+## 8. 3. tur: yapboz sistemi (özellik deposu + faktör laboratuvarı + sakatlık)
+
+### Yeni veri parçaları
+- **Sakatlık / kadro (Transfermarkt, salimt/football-datasets):** 168 bin sakatlık, 1.1 milyon transfer, 900 bin piyasa değeri. Her maç günü için takımın kadrosu (transferler), oyuncu değerleri (yalnızca o tarihe kadar yayınlananlar) ve sakat oyuncular hesaplanır: sakat sayısı, sakat değer payı, en değerli 5 ve en değerli 1 oyuncu durumu. Kapsam %95.
+- **Hakem (yalnızca Premier League):** Hakemin geçmiş kart ortalaması ve kırmızı kart oranı.
+- **Özellik deposu (`iddaa/features.py`):** 13 grupta 90 maç öncesi girdi: piyasa, model, form, şut, korner geçmişi, kart geçmişi, H2H, seriler, takvim, puan durumu, Elo, hakem, sakatlık. Hepsi yalnızca maç tarihinden önceki veriyle hesaplanır; elle yapılan kontrollerle doğrulandı.
+
+### Faktör laboratuvarı (`factor_lab.py`): hangi parça neyi iyileştiriyor?
+Taban = piyasa + model. Her parça tabana eklenip walk-forward LightGBM ile örneklem dışı kayıp ölçüldü. Keşif dönemi 2015–18, teyit dönemi 2019–26; güven aralıkları gün blok bootstrap ile.
+
+| Hedef | Teyitte pozitif parçalar | Hepsi birden |
+|---|---|---|
+| Toplam kart | takvim/sezon fazı (+0.67%), puan durumu (+0.73%), form (+0.42%), kart geçmişi, şut, H2H, korner geçmişi, hakem, seriler | **+1.25%** (iki dönemde de) |
+| Toplam korner | şut (+0.15%), korner geçmişi (+0.08%) | +0.27% |
+| Kırmızı kart | hiçbiri kalıcı değil (keşifte pozitif, teyitte negatif = aşırı uyum) | etkisiz |
+| Gol / 2.5 Üst / KG / MS | ≤ %0.1 düzeyinde; piyasa zaten fiyatlıyor | +0.1–0.2% |
+
+İnsan-okunur kurallar (1.780 test, Benjamini-Hochberg düzeltmesi, ardından teyit dönemi):
+- *"Ev sahibi bu rakibe karşı son 3 iç saha maçında yenilmedi"*: ev sahibi %49.6 kazanıyor (genel ortalama %43). Piyasa zaten %49.5 bekliyor, **avantaj 0**.
+- *"Ev sahibi 8+ maçtır yenilmiyor"*, *"3+ maçtır kazanıyor"*: piyasa beklentisinden farkı yok.
+- Teyit edilenler: kısa dinlenme, sezon sonu ve hafta içi maçlarında kırmızı kart beklenenden %14–18 az; sezon sonunda kart %5 az; hafta içi korner %2.5 az.
+
+### Bahis testleri (ön-kayıtlı, kör)
+| Hipotez | Ayarlama 2015–18 | Kör test 2019–26 |
+|---|---|---|
+| H5 LightGBM, tüm parçalar, MS | +1.8%, GA sıfırı kapsıyor | elendi |
+| H6 LightGBM, tüm parçalar, Alt/Üst 2.5 | +0.8% | elendi |
+| **H7 LightGBM, piyasa + model + sakatlık, MS, en iyi oran** | +3.3% (11.789 bahis, GA > 0) | **+5.2% (11.253 bahis, GA [+2.5, +8.0], Bonferroni k=9 sonrası anlamlı)** |
+
+**Sızıntı düzeltmesi:** İlk koşuda sakatlık tarihi maç günüyle aynı olan kayıtlar da sayılıyordu. Transfermarkt maç içi sakatlıkları maç gününe yazıyor; bu kayıtların oranı %6.9. Hata düzeltildi, bütün protokol baştan koşuldu: `8d40a08`. Sızıntılı ilk sonuç `results/ml_betting_test_LEAKY_v1.json` dosyasında saklanıyor.
+
+**Sağlamlık kontrolleri (`robustness_h7.py`, keşif amaçlı, ön-kayıtlı değil):**
+| Kontrol | Bahis | ROI |
+|---|---|---|
+| Bet365 fiyatıyla | 4.441 | +1.7% (anlamsız) |
+| Bet365'ten en fazla %10 yüksek "en iyi" oranlarla | 10.810 | +4.5% (anlamlı) |
+| Sakatlıksız aynı model, en iyi oran | 10.042 | +3.0% |
+| Sakatlıksız aynı model, Bet365 | 3.658 | −4.8% |
+| Yalnızca ≥3 gün önce başlamış sakatlıklar | 11.195 | +5.7% |
+| Sezon bazında | 7 tam sezonun 7'si pozitif | |
+| Lig bazında | 22 ligin 17'si pozitif | |
+| Seçim dağılımı | %53 beraberlik (ort. oran 3.44) | |
+
+**Yorum:** Sakatlık bilgisi piyasanın tam fiyatlamadığı gerçek bir sinyal: aynı model sakatlık eklenince yaklaşık 6 puan iyileşiyor. Ancak kâr, ~17 site arasında en iyi oranı yakalamaya dayanıyor. Tek bir sitede, hatta Bet365'te bile anlamlı değil. İddaa'nın marjı daha yüksek olduğundan **iddaa'da bu kâr büyük olasılıkla yok olur.** Football-data'nın "en iyi oran"ı aynı anda alınabilir mi ve kazanan hesaplar limitlenir mi, bunlar ancak canlı ölçülebilir.
+
+## 9. Canlı katman (`live/`)
+- `sources.py`: API-Football (fikstür, sakatlık, kadro, oran) ve The Odds API (birçok site, Pinnacle dahil).
+- `h7.py`: Canlı H7 özellikleri. Piyasa girdisi medyan fiyat; sakat oyuncular Transfermarkt kadrosuyla isim eşleşir ve piyasa değerleriyle ağırlıklandırılır. Model: `models/h7_lgbm.txt`.
+- `run_today.py`: Günün maçları için bütün marketlerin adil oranını üretir, H1/H7 sinyallerini çıkarır, kupon önerir ve her sinyali `results/paper_ledger.csv` defterine yazar.
+- `coupon.py`: Yalnızca `config/live_strategies.json` içinde `approved: true` olan stratejiler kupona girer. Aynı maçtan iki seçim aynı kupona konmaz. İki kupon sunulur: en yüksek EV ve en yüksek tutma olasılığı.
+- `settle.py`: Defteri sonuçlandırır. Strateji bazında ROI ve kapanış oranına karşı CLV hesaplar.
+
+**Durum:** H7 *aday* olarak kayıtlı (`approved: false`). Onay kuralı: kağıt defterde 300+ sinyalde pozitif CLV ve kör testle tutarlı ROI.
+
+**Gerekenler:** `v3.football.api-sports.io` ve `api.the-odds-api.com` ağ izni ile anahtarları. Bu oturumda ikisi de engelli olduğu için canlı katman yalnızca çevrimdışı test edildi.
+
+```bash
+python3 build_features.py            # özellik deposu
+python3 factor_lab.py                # hangi parça neyi etkiliyor
+python3 betting_ml.py --predict --tune ; git commit ; python3 betting_ml.py --test
+python3 train_h7_final.py            # canlı model
+python3 -m live.run_today --date 2026-11-14 --leagues E0 SP1 I1 D1 F1 T1
+python3 -m live.settle
+```

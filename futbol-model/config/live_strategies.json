@@ -1,4 +1,16 @@
 {
   "_note": "Bir strateji ancak kör testte Bonferroni sonrası anlamlı olursa VE kağıt defterde 300+ sinyalde pozitif CLV gösterirse approved=true yapılır.",
-  "H1": {"approved": false, "tau": 0.05, "max_odds": 2.5, "status": "izleme: kör testte +19.1% (96 bahis), anlamlı değil"}
+  "H1": {
+    "approved": false,
+    "tau": 0.05,
+    "max_odds": 2.5,
+    "status": "izleme: kör testte +19.1% (96 bahis), anlamlı değil"
+  },
+  "H7": {
+    "approved": false,
+    "tau": 0.1,
+    "max_odds": 4.0,
+    "book": "en iyi oran (çoklu site)",
+    "status": "ADAY: ön-kayıtlı kör testte 11.253 bahiste +5.2% (GA +2.5..+8.0, Bonferroni sonrası anlamlı). Bet365 fiyatıyla +1.7% (anlamsız). Kağıt defterde 300+ sinyalde pozitif CLV görülünce onaylanacak."
+  }
 }

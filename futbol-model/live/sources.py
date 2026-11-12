@@ -90,3 +90,14 @@ def best_prices(event: dict) -> dict:
                 if bk["key"] == "pinnacle":
                     rec["pinnacle"] = o["price"]
     return out
+
+
+def median_prices(event: dict) -> dict:
+    """Median price per outcome across bookmakers (closest to the Bet365-like
+    prices the H7 model was trained on)."""
+    acc: dict = {}
+    for bk in event.get("bookmakers", []):
+        for mk in bk.get("markets", []):
+            for o in mk.get("outcomes", []):
+                acc.setdefault((mk["key"], o["name"], o.get("point")), []).append(o["price"])
+    return {k: float(sorted(v)[len(v) // 2]) for k, v in acc.items()}

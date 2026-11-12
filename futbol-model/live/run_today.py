@@ -24,7 +24,8 @@ from iddaa.injuries import _sim
 from iddaa.model import fit_counts, half_shares
 from iddaa.odds import power, shin
 from live.coupon import Leg, build_coupons, load_strategies, log_legs
-from live.sources import ODDS_SPORTS, OddsAPI, best_prices
+from live.h7 import H7
+from live.sources import AF_LEAGUES, ODDS_SPORTS, APIFootball, OddsAPI, best_prices, median_prices
 
 
 def match_team(name, candidates):
@@ -39,6 +40,10 @@ def scan(date: str, leagues: list[str]):
     df = load()
     ref = pd.Timestamp(date)
     oapi = OddsAPI()
+    afapi = APIFootball()
+    h7 = H7()
+    h7_rule = strategies.get("H7", {"tau": 0.10, "max_odds": 4.0})
+    season = ref.year if ref.month >= 7 else ref.year - 1
     legs, sheets = [], []
     for dv in leagues:
         d = df[df.country == COUNTRY[dv]]
@@ -50,7 +55,12 @@ def scan(date: str, leagues: list[str]):
         for pre, hc, ac, xi, rg in (("c", "HomeCorners", "AwayCorners", cfg.c_xi, cfg.c_ridge),
                                     ("k", "HomeCards", "AwayCards", cfg.k_xi, cfg.k_ridge)):
             side[pre] = fit_counts(d.dropna(subset=[hc, ac]), hc, ac, ref, xi, rg, cfg.window_days, nb=True)
-        for ev in oapi.odds(ODDS_SPORTS[dv]):
+        try:
+            af_fx = afapi.fixtures(date, AF_LEAGUES[dv], season)
+        except RuntimeError as e:
+            print(f"API-Football erişilemedi ({dv}): {e}")
+            af_fx = []
+        for ev in oapi.odds(ODDS_SPORTS[dv], markets="h2h,totals,spreads"):
             if not ev["commence_time"].startswith(date):
                 continue
             h, a = match_team(ev["home_team"], teams), match_team(ev["away_team"], teams)
@@ -79,6 +89,29 @@ def scan(date: str, leagues: list[str]):
             mid = ev["id"]
             name = f"{h} - {a}"
             sheets.append({"match": name, "src": src, **{k: float(v[0]) for k, v in p.items() if not k.startswith("_")}})
+            # H7: market + model + injuries (LightGBM), best price
+            med = median_prices(ev)
+            m1x2 = [med.get(("h2h", ev["home_team"], None)), med.get(("h2h", "Draw", None)), med.get(("h2h", ev["away_team"], None))]
+            mou = [med.get(("totals", "Over", 2.5)), med.get(("totals", "Under", 2.5))]
+            if all(m1x2):
+                inj_h, inj_a = [], []
+                fx = next((f for f in af_fx if _sim(f["teams"]["home"]["name"], h) >= 0.5 and _sim(f["teams"]["away"]["name"], a) >= 0.5), None)
+                if fx is not None:
+                    for it in afapi.injuries(fx["fixture"]["id"]):
+                        (inj_h if it["team"]["id"] == fx["teams"]["home"]["id"] else inj_a).append(it["player"]["name"])
+                ah = next((k[2] for k in med if k[0] == "spreads" and k[1] == ev["home_team"]), None)
+                dc = {"dc_lh": lh, "dc_la": la, "dc_corner_h": row["clh"][0], "dc_corner_a": row["cla"][0],
+                      "dc_card_h": row["klh"][0], "dc_card_a": row["kla"][0]}
+                ph7, feat = h7.predict(dv, h, a, date, m1x2, mou if all(mou) else [np.nan, np.nan], ah, dc, inj_h, inj_a)
+                for k, lab, nm in ((0, "1", ev["home_team"]), (1, "X", "Draw"), (2, "2", ev["away_team"])):
+                    rec = bp.get(("h2h", nm, None))
+                    if not rec or rec["best"] > h7_rule.get("max_odds", 4.0):
+                        continue
+                    leg = Leg(mid, name, ev["commence_time"], "MS", lab, float(ph7[k]), rec["best"], rec["best_book"],
+                              "H7", bool(h7_rule.get("approved")), rec["pinnacle"],
+                              note=f"sakat ev/dep: {len(inj_h)}/{len(inj_a)}" + ("" if fx else " (fikstür eşleşmedi)"))
+                    if leg.ev > h7_rule.get("tau", 0.10):
+                        legs.append(leg)
             # H1 consensus gap: best price vs Pinnacle fair
             if all(o1x2):
                 fair = shin(np.array([o1x2]))[0]
