@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blackjack Danışman</title>
+<style>
+:root {
+  --bg: #f4f5f2; --panel: #ffffff; --ink: #1b1f1d; --muted: #66706b; --line: #dfe3df;
+  --accent: #0f6b4f; --accent-ink: #ffffff; --good: #137a3a; --bad: #b3261e; --warn: #a15c00;
+  --chip: #eef1ee; --bar: #0f6b4f; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1311; --panel: #161d1a; --ink: #e8ece9; --muted: #95a19b; --line: #26302c;
+    --accent: #2fbf8a; --accent-ink: #06130d; --good: #4cd17f; --bad: #ff6b5e; --warn: #f0b04a;
+    --chip: #1f2925; --bar: #2fbf8a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1311; --panel: #161d1a; --ink: #e8ece9; --muted: #95a19b; --line: #26302c;
+  --accent: #2fbf8a; --accent-ink: #06130d; --good: #4cd17f; --bad: #ff6b5e; --warn: #f0b04a;
+  --chip: #1f2925; --bar: #2fbf8a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+header { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+header h1 { font-size: 18px; margin: 0; }
+header .rules { color: var(--muted); font-size: 13px; }
+main { display: grid; grid-template-columns: 300px 1fr 340px; gap: 14px; padding: 14px 16px; max-width: 1400px; margin: 0 auto; }
+@media (max-width: 1100px) { main { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 720px) { main { grid-template-columns: 1fr; } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi { background: var(--chip); border-radius: 8px; padding: 8px 10px; }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.kpi .v { font: 600 22px/1.2 var(--mono); }
+.big { grid-column: 1 / -1; }
+.pos { color: var(--good); } .neg { color: var(--bad); } .warn { color: var(--warn); }
+.betbox { margin-top: 12px; padding: 12px; border-radius: 8px; border: 1px dashed var(--line); }
+.betbox .v { font: 700 26px/1.2 var(--mono); }
+.comp { display: grid; grid-template-columns: 26px 1fr 86px; gap: 4px 8px; align-items: center; font: 12px var(--mono); margin-top: 6px; }
+.comp .track { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; position: relative; }
+.comp .fill { height: 100%; background: var(--bar); }
+.comp .norm { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); opacity: .5; }
+.targets { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+button { font: inherit; color: inherit; background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button kbd { font: 11px var(--mono); opacity: .7; margin-left: 4px; }
+.cards { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+.cards button { padding: 14px 0; font: 700 18px var(--mono); }
+.row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.table-view { margin-top: 14px; display: grid; gap: 10px; }
+.seat { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 44px; }
+.seat .who { width: 92px; font-size: 13px; color: var(--muted); }
+.card { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 46px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); font: 700 16px var(--mono); box-shadow: 0 1px 0 var(--line); }
+.card.small { width: 24px; height: 32px; font-size: 12px; }
+.hand { display: inline-flex; gap: 4px; padding: 4px; border-radius: 8px; border: 2px solid transparent; align-items: center; }
+.hand.active { border-color: var(--accent); }
+.hand .tot { font: 600 13px var(--mono); color: var(--muted); margin-left: 4px; }
+.decision { text-align: center; padding: 18px 8px; border-radius: 10px; background: var(--chip); margin-bottom: 10px; }
+.decision .act { font: 800 30px/1.1 system-ui, sans-serif; letter-spacing: .02em; }
+.decision .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); }
+td.n, th.n { text-align: right; font-family: var(--mono); }
+tr.best td { font-weight: 700; color: var(--accent); }
+.tabs { display: flex; gap: 6px; margin: 0 16px; max-width: 1400px; flex-wrap: wrap; }
+section.wide { max-width: 1400px; margin: 0 auto 30px; padding: 0 16px; }
+.strat { overflow-x: auto; }
+.strat table { font: 12px var(--mono); width: auto; }
+.strat td, .strat th { text-align: center; padding: 3px 6px; border: 1px solid var(--line); }
+.c-H { background: #e9ecef22; } .c-S { background: #e0b84a44; } .c-D, .c-Ds { background: #2fbf8a55; } .c-P { background: #5e8bff55; } .c-R, .c-Rs { background: #ff6b5e44; }
+.settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 16px; }
+.settings label { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); gap: 4px; }
+select, input { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+.note { font-size: 13px; color: var(--muted); }
+.tcbars { display: grid; grid-template-columns: 40px 1fr 140px; gap: 3px 8px; font: 12px var(--mono); align-items: center; }
+.tcbars .z { position: relative; height: 12px; background: var(--chip); border-radius: 3px; }
+.tcbars .b { position: absolute; top: 0; bottom: 0; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Blackjack Danışman</h1>
+  <span class="rules" id="rulesLine"></span>
+</header>
+
+<main>
+  <!-- LEFT: count & bet -->
+  <div class="panel">
+    <h2>Sayım (Hi-Lo)</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Running count</div><div class="v" id="rc">0</div></div>
+      <div class="kpi"><div class="l">True count</div><div class="v" id="tc">0.0</div></div>
+      <div class="kpi"><div class="l">Kalan deste</div><div class="v" id="decks">8.0</div></div>
+      <div class="kpi"><div class="l">Görülen kart</div><div class="v" id="seen">0</div></div>
+      <div class="kpi big"><div class="l">Tahmini avantajın (sonraki el)</div><div class="v" id="edge">–</div></div>
+    </div>
+    <div class="betbox">
+      <div class="l note">Önerilen bahis (½ Kelly)</div>
+      <div class="v" id="bet">–</div>
+      <div class="note" id="betNote"></div>
+    </div>
+    <h2 style="margin-top:14px">Kalan deste kompozisyonu</h2>
+    <div class="comp" id="comp"></div>
+    <div class="note" style="margin-top:6px">Çizgi: taze destedeki oran. Bar çizginin sağındaysa o karttan fazla kaldı.</div>
+  </div>
+
+  <!-- CENTER: input -->
+  <div class="panel">
+    <h2>Kart girişi</h2>
+    <div class="targets" id="targets">
+      <button data-t="me">Benim elim <kbd>P</kbd></button>
+      <button data-t="dealer">Krupiye <kbd>D</kbd></button>
+      <button data-t="others">Diğer oyuncular <kbd>O</kbd></button>
+    </div>
+    <div class="cards" id="cardBtns"></div>
+    <div class="row">
+      <button id="bSplit">Böl (Split) <kbd>X</kbd></button>
+      <button id="bNext">Sonraki el <kbd>E</kbd></button>
+      <button id="bUndo">Geri al <kbd>⌫</kbd></button>
+      <button id="bNew" class="on">Yeni el (round) <kbd>N</kbd></button>
+      <button id="bShuffle">Karıştırıldı (yeni deste) <kbd>S</kbd></button>
+    </div>
+    <div class="note" style="margin-top:8px">Klavye: <b>A</b>/<b>1</b> = As, <b>2–9</b>, <b>0 / T / J / Q / K</b> = 10'luk. Otomatik akış: sen → krupiye açık kart → sen → diğerleri. Hedefi elle seçince otomatik akış kapanır.</div>
+    <div class="table-view">
+      <div class="seat"><span class="who">Krupiye</span><span id="vDealer"></span></div>
+      <div class="seat"><span class="who">Sen</span><span id="vMe"></span></div>
+      <div class="seat"><span class="who">Diğerleri</span><span id="vOthers"></span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: decision -->
+  <div class="panel">
+    <h2>Karar</h2>
+    <div class="decision" id="decision"><div class="act">—</div><div class="sub">Elini ve krupiyenin açık kartını gir</div></div>
+    <div id="insurance"></div>
+    <table id="evTable"><thead><tr><th>Hamle</th><th class="n">EV / birim</th></tr></thead><tbody></tbody></table>
+    <div class="note" id="decNote" style="margin-top:8px"></div>
+  </div>
+</main>
+
+<div class="tabs" id="tabs">
+  <button data-tab="tStrat" class="on">Temel strateji tablosu</button>
+  <button data-tab="tRes">Test sonuçları (simülasyon)</button>
+  <button data-tab="tSet">Masa kuralları & kasa</button>
+</div>
+<section class="wide">
+  <div class="panel" id="tStrat"><div class="strat" id="stratOut">Hesaplanıyor…</div></div>
+  <div class="panel hidden" id="tRes"><div id="resOut"></div></div>
+  <div class="panel hidden" id="tSet">
+    <div class="settings">
+      <label>Deste sayısı <select id="sDecks"><option>1</option><option>2</option><option>4</option><option>6</option><option selected>8</option></select></label>
+      <label>Soft 17 <select id="sH17"><option value="0" selected>Krupiye durur (S17)</option><option value="1">Krupiye çeker (H17)</option></select></label>
+      <label>Hole card <select id="sPeek"><option value="1" selected>Krupiye BJ kontrol eder (peek)</option><option value="0">ENHC: kontrol yok, double/split de kaybedilir</option><option value="2">ENHC: kontrol yok, sadece ana bahis kaybedilir</option></select></label>
+      <label>Double after split <select id="sDas"><option value="1" selected>Var</option><option value="0">Yok</option></select></label>
+      <label>Double <select id="sDbl"><option value="1" selected>Her iki kartta</option><option value="0">Sadece 9–11</option></select></label>
+      <label>Split <select id="sSplit"><option value="2" selected>Bir kez</option><option value="4">3 kez (4 el)</option></select></label>
+      <label>Teslim (surrender) <select id="sSur"><option value="0" selected>Yok</option><option value="1">Var (late)</option></select></label>
+      <label>Blackjack öder <select id="sBj"><option value="1.5" selected>3:2</option><option value="1.2">6:5</option></select></label>
+      <label>Kasa (bankroll) <input id="sBank" type="number" min="0" step="100" value="10000"></label>
+      <label>Masa minimum bahis <input id="sMin" type="number" min="0" step="1" value="10"></label>
+      <label>Masa maksimum bahis <input id="sMax" type="number" min="0" step="1" value="1000"></label>
+      <label>Kelly oranı <select id="sKelly"><option value="0.25">¼ Kelly (temkinli)</option><option value="0.5" selected>½ Kelly</option><option value="1">Tam Kelly (agresif)</option></select></label>
+    </div>
+    <p class="note">Kuralları oynadığın masanın bilgi (i) panelinden birebir kontrol et. Tüm EV hesapları bu ayarlara göre yapılır. Ayarlar tarayıcıda saklanır.</p>
+  </div>
+</section>
+
+<script src="engine.js"></script>
+<script src="calibration.js" onerror="void 0"></script>
+<script src="results.js" onerror="void 0"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const LBL = r => r === 1 ? 'A' : r === 10 ? '10' : String(r);
+const ACT = { stand: 'DUR', hit: 'KART AL', double: 'İKİYE KATLA', split: 'BÖL', surrender: 'TESLİM OL' };
+const ACT_EN = { stand: 'Stand', hit: 'Hit', double: 'Double', split: 'Split', surrender: 'Surrender' };
+
+// ---------------------------------------------------------------- settings
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('bj_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('bj_' + k, JSON.stringify(v)); } catch (e) {} },
+};
+const S = Object.assign({ decks: 8, h17: 0, peek: 1, das: 1, dbl: 1, split: 2, sur: 0, bj: 1.5, bank: 10000, min: 10, max: 1000, kelly: 0.5 }, store.get('settings', {}));
+const ids = { decks: 'sDecks', h17: 'sH17', peek: 'sPeek', das: 'sDas', dbl: 'sDbl', split: 'sSplit', sur: 'sSur', bj: 'sBj', bank: 'sBank', min: 'sMin', max: 'sMax', kelly: 'sKelly' };
+for (const k in ids) { $(ids[k]).value = S[k]; $(ids[k]).addEventListener('change', e => { S[k] = Number(e.target.value); store.set('settings', S); if (['decks'].includes(k)) shuffle(); stratCache = null; render(); renderStrat(); }); }
+
+function rules() {
+  return BJ.rulesWith({ decks: S.decks, h17: !!S.h17, peek: S.peek === 1, enhcLoseAll: S.peek === 0, das: !!S.das, doubleAny: !!S.dbl, maxHands: S.split, surrender: !!S.sur, bjPays: S.bj });
+}
+// Approximate rule effects (percent of initial bet) relative to the calibrated 8D S17 DAS peek game
+function ruleOffset(R) {
+  let o = 0;
+  o += { 1: 0.48, 2: 0.21, 4: 0.07, 6: 0.03, 8: 0 }[R.decks] || 0;
+  if (R.h17) o -= 0.22;
+  if (R.bjPays < 1.5) o -= 1.39;
+  if (!R.peek) o -= R.enhcLoseAll ? 0.11 : 0.02;
+  if (!R.das) o -= 0.14;
+  if (!R.doubleAny) o -= 0.18;
+  if (R.surrender) o += 0.07;
+  if (R.maxHands > 2) o += 0.05;
+  return o / 100;
+}
+
+// ---------------------------------------------------------------- state
+let past = [];   // cards from earlier rounds of this shoe
+let round, target, autoFlow, undo;
+function newRound() {
+  if (round) past = past.concat(round.me.flat(), round.dealer, round.others);
+  round = { me: [[]], active: 0, dealer: [], others: [] };
+  undo = []; autoFlow = true; target = 'me';
+  render();
+}
+function shuffle() { past = []; round = null; newRound(); }
+
+function allSeen() { return past.concat(round.me.flat(), round.dealer, round.others); }
+function shoeNow() {
+  const s = BJ.newShoe(S.decks);
+  for (const c of allSeen()) BJ.removeCard(s, c);
+  return s;
+}
+
+function autoTarget() {
+  if (!autoFlow) return;
+  const m = round.me[0].length, d = round.dealer.length;
+  if (m === 0) target = 'me';
+  else if (m === 1 && d === 0) target = 'dealer';
+  else if (m === 1 && d >= 1) target = 'me';
+  else target = 'others';
+}
+
+function addCard(r) {
+  if (allSeen().filter(c => c === r).length >= (r === 10 ? 16 : 4) * S.decks) return;
+  if (target === 'me') { round.me[round.active].push(r); undo.push(['me', round.active]); }
+  else if (target === 'dealer') { round.dealer.push(r); undo.push(['dealer']); }
+  else { round.others.push(r); undo.push(['others']); }
+  autoTarget();
+  render();
+}
+function doUndo() {
+  const u = undo.pop(); if (!u) return;
+  if (u[0] === 'me') round.me[u[1]].pop();
+  else if (u[0] === 'dealer') round.dealer.pop();
+  else if (u[0] === 'others') round.others.pop();
+  else if (u[0] === 'split') { const h2 = round.me.splice(u[1] + 1, 1)[0]; round.me[u[1]] = round.me[u[1]].concat(h2); round.active = u[1]; }
+  render();
+}
+function doSplit() {
+  const h = round.me[round.active];
+  if (h.length !== 2 || h[0] !== h[1] || round.me.length >= rules().maxHands) return;
+  round.me.splice(round.active + 1, 0, [h[1]]);
+  round.me[round.active] = [h[0]];
+  undo.push(['split', round.active]);
+  autoFlow = false; target = 'me';
+  render();
+}
+function nextHand() { if (round.active < round.me.length - 1) round.active++; target = 'me'; autoFlow = false; render(); }
+function setTarget(t) { target = t; autoFlow = false; render(); }
+
+// ---------------------------------------------------------------- render
+function cardEl(r, small) { return `<span class="card${small ? ' small' : ''}">${LBL(r)}</span>`; }
+function handTotal(cards) { const h = cards.reduce((a, b) => a + b, 0), a = cards.includes(1); const t = BJ.effTotal(h, a); return (a && h + 10 <= 21 && t !== 21 ? 'soft ' : '') + t; }
+function pct(x, d = 2) { return (x >= 0 ? '+' : '') + (100 * x).toFixed(d) + '%'; }
+
+function render() {
+  const R = rules();
+  $('rulesLine').textContent = `${R.decks} deste · ${R.h17 ? 'H17' : 'S17'} · ${R.peek ? 'peek' : 'ENHC'} · ${R.das ? 'DAS' : 'no DAS'} · split ${R.maxHands - 1}x · ${R.surrender ? 'surrender' : 'teslim yok'} · BJ ${R.bjPays === 1.5 ? '3:2' : '6:5'}`;
+  document.querySelectorAll('#targets button').forEach(b => b.classList.toggle('on', b.dataset.t === target));
+
+  // count
+  const seen = allSeen();
+  const rc = seen.reduce((a, c) => a + BJ.hiLo(c), 0);
+  const left = 52 * S.decks - seen.length;
+  const decksLeft = left / 52;
+  const tc = rc / Math.max(decksLeft, 0.25);
+  $('rc').textContent = (rc > 0 ? '+' : '') + rc;
+  $('tc').textContent = (tc > 0 ? '+' : '') + tc.toFixed(1);
+  $('tc').className = 'v ' + (tc >= 1 ? 'pos' : tc <= -1 ? 'neg' : '');
+  $('decks').textContent = decksLeft.toFixed(1);
+  $('seen').textContent = seen.length;
+  const cal = window.BJ_CAL || BJ.CAL;
+  const edge = BJ.advantage(Math.floor(tc), cal) + ruleOffset(R);
+  $('edge').textContent = pct(edge);
+  $('edge').className = 'v ' + (edge > 0 ? 'pos' : 'neg');
+
+  // bet (Kelly)
+  const kellyFrac = S.kelly * Math.max(edge, 0) / (cal.variance || 1.32);
+  let bet = kellyFrac * S.bank;
+  if (edge <= 0) {
+    $('bet').textContent = 'Min / otur';
+    $('bet').className = 'v neg';
+    $('betNote').textContent = `Avantaj kasada. Ya masa minimumunu (${S.min}) oyna ya da bu eli pas geç (wonging). Sayımı sürdür.`;
+  } else {
+    bet = Math.min(Math.max(bet, S.min), S.max);
+    bet = Math.floor(bet / S.min) * S.min || S.min;
+    $('bet').textContent = bet.toLocaleString('tr-TR');
+    $('bet').className = 'v pos';
+    $('betNote').textContent = `Avantaj sende: ${pct(edge)}. Kelly payı kasanın %${(100 * kellyFrac).toFixed(2)}'si.`;
+  }
+
+  // composition
+  const s = shoeNow();
+  let comp = '';
+  for (const r of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+    const fresh = (r === 10 ? 16 : 4) / 52;
+    const share = s[0] ? s[r] / s[0] : 0;
+    const w = Math.min(100, share / (r === 10 ? 0.45 : 0.12) * 100);
+    const n = fresh / (r === 10 ? 0.45 : 0.12) * 100;
+    comp += `<span>${LBL(r)}</span><div class="track"><div class="fill" style="width:${w}%"></div><div class="norm" style="left:${n}%"></div></div><span>${s[r]} · ${(100 * share).toFixed(1)}%</span>`;
+  }
+  $('comp').innerHTML = comp;
+
+  // table view
+  $('vDealer').innerHTML = round.dealer.map((c, i) => cardEl(c)).join('') + (round.dealer.length ? `<span class="tot" style="margin-left:6px;color:var(--muted)">${round.dealer.length > 1 ? handTotal(round.dealer) : 'açık kart'}</span>` : '');
+  $('vMe').innerHTML = round.me.map((h, i) => `<span class="hand${i === round.active && round.me.length > 1 ? ' active' : ''}">${h.map(c => cardEl(c)).join('')}${h.length ? `<span class="tot">${handTotal(h)}</span>` : ''}</span>`).join('');
+  $('vOthers').innerHTML = round.others.map(c => cardEl(c, true)).join('') || '<span class="note">—</span>';
+
+  renderDecision(R, s);
+}
+
+function renderDecision(R, s) {
+  const hand = round.me[round.active];
+  const up = round.dealer[0];
+  const tb = $('evTable').querySelector('tbody');
+  $('insurance').innerHTML = '';
+  if (!hand || hand.length < 2 || !up) {
+    $('decision').innerHTML = '<div class="act">—</div><div class="sub">Elini (2 kart) ve krupiyenin açık kartını gir</div>';
+    tb.innerHTML = ''; $('decNote').textContent = '';
+    if (up === 1) insuranceBox(s);
+    return;
+  }
+  const t0 = performance.now();
+  const a = BJ.analyze(hand, up, s, R, { afterSplit: round.me.length > 1, nHands: round.me.length });
+  const ms = performance.now() - t0;
+  if (a.blackjack) {
+    $('decision').innerHTML = `<div class="act pos">BLACKJACK</div><div class="sub">EV ${pct(a.ev.stand)}${up === 1 ? ' · even money yerine sigorta kararına bak' : ''}</div>`;
+  } else if (a.total > 21) {
+    $('decision').innerHTML = '<div class="act neg">BUST</div><div class="sub">Sonraki el için <b>E</b>, yeni round için <b>N</b></div>';
+  } else {
+    const best = a.best;
+    const tag = basicTag(hand, up, R, round.me.length > 1);
+    const dev = tag && tag !== best;
+    $('decision').innerHTML = `<div class="act">${ACT[best]}</div><div class="sub">${ACT_EN[best]} · EV ${pct(a.ev[best])}${dev ? ` · <b class="warn">temel stratejiden sapma (${ACT[tag]})</b>` : ''}</div>`;
+  }
+  const rows = Object.entries(a.ev).sort((x, y) => y[1] - x[1]);
+  tb.innerHTML = rows.map(([k, v]) => `<tr class="${k === a.best ? 'best' : ''}"><td>${ACT[k]} <span class="note">${ACT_EN[k]}</span></td><td class="n ${v >= 0 ? 'pos' : 'neg'}">${pct(v, 2)}</td></tr>`).join('');
+  const d = a.dealer;
+  $('decNote').innerHTML = `Krupiye bust olasılığı: <b>${(100 * d.p[5]).toFixed(1)}%</b>` + (up === 1 || up === 10 ? ` · krupiye BJ olasılığı ${(100 * d.bj).toFixed(1)}%${R.peek ? ' (peek: karar BJ yoksa geçerli)' : ''}` : '') + ` · hesap ${ms.toFixed(0)} ms, kalan desteye göre birebir.`;
+  if (up === 1 && hand.length === 2 && round.me.length === 1) insuranceBox(s);
+}
+
+function insuranceBox(s) {
+  const p = s[10] / s[0], ev = 3 * p - 1;
+  $('insurance').innerHTML = `<div class="decision" style="padding:10px"><div class="sub">Sigorta (insurance / even money)</div><div class="act ${ev > 0 ? 'pos' : 'neg'}" style="font-size:20px">${ev > 0 ? 'SİGORTA AL' : 'SİGORTA ALMA'}</div><div class="sub">Kalan 10'luk oranı ${(100 * p).toFixed(1)}% · EV ${pct(ev)} (başa baş: 33.3%)</div></div>`;
+}
+
+// basic strategy action for comparison
+let stratCache = null;
+function strat() { if (!stratCache) stratCache = BJ.generateStrategy(rules()); return stratCache; }
+function basicTag(hand, up, R, afterSplit) {
+  if (hand.length < 2) return null;
+  const st = strat();
+  const h = hand.reduce((a, b) => a + b, 0), ace = hand.includes(1);
+  const t = BJ.effTotal(h, ace), soft = ace && h + 10 <= 21;
+  if (t >= 21) return 'stand';
+  if (hand.length === 2 && hand[0] === hand[1] && round.me.length < R.maxHands && st.pair[up][hand[0]]) return 'split';
+  const c = soft ? st.soft[up][t] : st.hard[up][Math.max(t, 4)];
+  const two = hand.length === 2 && (!afterSplit || R.das);
+  const map = { S: 'stand', H: 'hit', D: two ? 'double' : 'hit', Ds: two ? 'double' : 'stand', R: two && R.surrender ? 'surrender' : 'hit', Rs: two && R.surrender ? 'surrender' : 'stand' };
+  return map[c] || 'hit';
+}
+
+function renderStrat() {
+  if ($('tStrat').classList.contains('hidden')) return;
+  setTimeout(() => {
+    const st = strat(), ups = BJ.UPS;
+    const head = '<tr><th></th>' + ups.map(u => `<th>${LBL(u)}</th>`).join('') + '</tr>';
+    const row = (label, fn) => `<tr><th>${label}</th>` + ups.map(u => { const c = fn(u); return `<td class="c-${c}">${c}</td>`; }).join('') + '</tr>';
+    let h = '<table><tr><th colspan="11">SERT (hard)</th></tr>' + head;
+    for (let t = 8; t <= 17; t++) h += row(t <= 8 ? '≤8' : t >= 17 ? '17+' : t, u => st.hard[u][t]);
+    h += '<tr><th colspan="11">YUMUŞAK (soft)</th></tr>' + head;
+    for (let t = 13; t <= 20; t++) h += row('A,' + (t - 11), u => st.soft[u][t]);
+    h += '<tr><th colspan="11">ÇİFT (pair)</th></tr>' + head;
+    for (const r of [1, 10, 9, 8, 7, 6, 5, 4, 3, 2]) h += row(LBL(r) + ',' + LBL(r), u => st.pair[u][r] ? 'P' : '·');
+    h += '</table><p class="note">S = dur, H = kart al, D = double (yoksa kart al), Ds = double (yoksa dur), P = böl, R/Rs = teslim (yoksa kart al / dur). Tablo, seçili masa kurallarına göre tam desteden motor tarafından hesaplanır. Canlı karar paneli bundan daha iyidir: kalan desteye göre hesaplar ve sayım sapmalarını kendiliğinden içerir.</p>';
+    $('stratOut').innerHTML = h;
+  }, 0);
+}
+
+function renderResults() {
+  const D = window.BJ_RESULTS;
+  if (!D) { $('resOut').innerHTML = '<p class="note">results.js bulunamadı. <code>node sim.js</code> çalıştır.</p>'; return; }
+  const f = (x, d = 3) => (x >= 0 ? '+' : '') + x.toFixed(d);
+  let h = `<p class="note">${(D.roundsPerScenario / 1e6).toFixed(0)} milyon round / senaryo · ${new Date(D.generated).toLocaleString('tr-TR')}</p>`;
+  h += '<div style="overflow-x:auto"><table><thead><tr><th>Senaryo</th><th class="n">Avantaj (bahis başına)</th><th class="n">±95% GA</th><th class="n">Ort. bahis</th><th class="n">Oynanan el %</th><th class="n">Birim / 100 el</th><th class="n">N0 (el)</th></tr></thead><tbody>';
+  for (const r of D.results) {
+    h += `<tr><td>${r.name}${r.martingale ? `<div class="note">Seans: %${(100 * r.martingale.bustRate).toFixed(1)} batış · ort. sonuç ${f(r.martingale.avgProfitPerSession, 2)} birim/seans</div>` : ''}</td><td class="n ${r.edgePct > 0 ? 'pos' : 'neg'}">${f(r.edgePct)}%</td><td class="n">${r.edgeCI95.toFixed(3)}</td><td class="n">${r.avgBet.toFixed(2)}</td><td class="n">${(100 * r.playFreq).toFixed(1)}</td><td class="n">${f(r.unitsPer100Observed, 2)}</td><td class="n">${r.n0 ? Math.round(r.n0).toLocaleString('tr-TR') : '∞'}</td></tr>`;
+  }
+  h += '</tbody></table></div>';
+  const b = D.results.find(r => r.id === 'bs_evo');
+  if (b && b.byTC) {
+    h += '<h2 style="margin-top:16px">True count başına beklenen değer (düz bahis, 8 deste)</h2><div class="tcbars">';
+    const max = Math.max(...Object.values(b.byTC).map(x => Math.abs(x.evPct)), 1);
+    for (const [k, x] of Object.entries(b.byTC).sort((a, c) => a[0] - c[0]).filter(([k]) => Math.abs(k) <= 6)) {
+      const w = Math.abs(x.evPct) / max * 50;
+      const st = x.evPct >= 0 ? `left:50%;width:${w}%;background:var(--good)` : `right:50%;width:${w}%;background:var(--bad)`;
+      h += `<span>${k > 0 ? '+' : ''}${k}</span><div class="z"><div class="b" style="${st}"></div></div><span>${f(x.evPct, 2)}% · ${(100 * x.freq).toFixed(1)}%</span>`;
+    }
+    h += '</div><p class="note">Sağ sütun: o TC\'deki EV · ellerin yüzde kaçı bu TC\'de oynanıyor.</p>';
+  }
+  $('resOut').innerHTML = h;
+}
+
+// ---------------------------------------------------------------- events
+const cb = $('cardBtns');
+for (const r of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+  const b = document.createElement('button'); b.textContent = LBL(r); b.onclick = () => addCard(r); cb.appendChild(b);
+}
+document.querySelectorAll('#targets button').forEach(b => b.onclick = () => setTarget(b.dataset.t));
+$('bSplit').onclick = doSplit; $('bNext').onclick = nextHand; $('bUndo').onclick = doUndo; $('bNew').onclick = newRound;
+$('bShuffle').onclick = () => { if (confirm('Deste karıştırıldı mı? Sayım sıfırlanacak.')) shuffle(); };
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  ['tStrat', 'tRes', 'tSet'].forEach(id => $(id).classList.toggle('hidden', id !== b.dataset.tab));
+  if (b.dataset.tab === 'tStrat') renderStrat();
+  if (b.dataset.tab === 'tRes') renderResults();
+});
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  const map = { a: 1, '1': 1, '0': 10, t: 10, j: 10, q: 10, k: 10 };
+  let r = map[k] || (/^[2-9]$/.test(k) ? Number(k) : 0);
+  if (r) { addCard(r); e.preventDefault(); return; }
+  if (k === 'p') setTarget('me'); else if (k === 'd') setTarget('dealer'); else if (k === 'o') setTarget('others');
+  else if (k === 'x') doSplit(); else if (k === 'e') nextHand(); else if (k === 'n') newRound();
+  else if (k === 'backspace') { doUndo(); e.preventDefault(); }
+  else if (k === 's') $('bShuffle').click();
+});
+
+shuffle();
+renderStrat();
+})();
+</script>
+</body>
+</html>
