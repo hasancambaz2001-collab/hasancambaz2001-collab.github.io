@@ -1,0 +1,4 @@
+{
+  "_note": "Bir strateji ancak kör testte Bonferroni sonrası anlamlı olursa VE kağıt defterde 300+ sinyalde pozitif CLV gösterirse approved=true yapılır.",
+  "H1": {"approved": false, "tau": 0.05, "max_odds": 2.5, "status": "izleme: kör testte +19.1% (96 bahis), anlamlı değil"}
+}
